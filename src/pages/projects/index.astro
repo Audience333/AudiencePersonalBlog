@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listPublishedProjects } from '../../lib/db';
+
+const projects = listPublishedProjects();
+---
+
+<BaseLayout title="作品" description="浏览我做过的项目与作品。">
+  <div class="container">
+    <header class="page-head"><p class="eyebrow">PORTFOLIO</p><h1>作品</h1><p>从想法到实践，这里记录每个项目的目标、过程与收获。</p></header>
+    {projects.length ? <div class="project-grid">
+      {projects.map((project, index) => <a class={`project-card${project.cover_image ? ' has-cover' : ''}`} href={`/projects/${project.slug}/`}>
+        <span class="card-index">PROJECT / {String(index + 1).padStart(2, '0')}</span>
+        {project.cover_image && <img class="project-cover" src={project.cover_image} alt="" />}
+        <h3>{project.title}</h3><p>{project.description}</p>
+        <div class="card-bottom"><span>{project.year} · {(JSON.parse(project.tools_json) as string[]).join(' / ')}</span><span class="card-arrow" aria-hidden="true">↗</span></div>
+      </a>)}
+    </div> : <p class="empty-note">作品正在整理中，欢迎稍后再来。</p>}
+  </div>
+</BaseLayout>

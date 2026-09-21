@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getViewer } from '../../lib/auth';
+import { listAllPosts, listAllProjects, listPendingComments } from '../../lib/db';
+
+const viewer = getViewer(Astro.cookies);
+if (!viewer) return Astro.redirect('/login/?error=required');
+if (viewer.role !== 'admin') return new Response('Forbidden', { status: 403 });
+Astro.response.headers.set('Cache-Control', 'no-store');
+const posts = listAllPosts();
+const projects = listAllProjects();
+const comments = listPendingComments();
+---
+
+<BaseLayout title="管理后台" description="管理作品、文章与评论。">
+  <div class="container dashboard">
+    <header class="dashboard-head">
+      <div><p class="eyebrow">CONTROL PANEL</p><h1>内容后台</h1><p class="muted">你好，{viewer.username}。保存并发布后，作品与文章会直接更新网站。</p></div>
+      <div class="dashboard-actions"><a class="button-link" href="/admin/project-editor/">上传作品 <span aria-hidden="true">↗</span></a><a class="text-link" href="/admin/editor/">写新文章 →</a></div>
+    </header>
+
+    <section class="dashboard-section" aria-labelledby="projects-title">
+      <div class="section-heading"><h2 id="projects-title">作品</h2><span class="muted">{projects.length} 个</span></div>
+      <div class="dashboard-list">
+        {projects.map((project) => <div class="dashboard-row">
+          <div><strong>{project.title}</strong><p>{project.status === 'published' ? '已发布' : '草稿'} · {project.year} · /projects/{project.slug}/</p></div>
+          <div class="row-actions"><a class="text-link" href={`/admin/project-editor/?id=${project.id}`}>编辑 →</a>{project.status === 'published' && <a class="text-link" href={`/projects/${project.slug}/`}>查看 ↗</a>}</div>
+        </div>)}
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="posts-title">
+      <div class="section-heading"><h2 id="posts-title">文章</h2><span class="muted">{posts.length} 篇</span></div>
+      <div class="dashboard-list">
+        {posts.map((post) => <div class="dashboard-row">
+          <div><strong>{post.title}</strong><p>{post.status === 'published' ? '已发布' : '草稿'} · {post.published_at} · /blog/{post.slug}/</p></div>
+          <div class="row-actions"><a class="text-link" href={`/admin/editor/?id=${post.id}`}>编辑 →</a>{post.status === 'published' && <a class="text-link" href={`/blog/${post.slug}/`}>查看 ↗</a>}</div>
+        </div>)}
+      </div>
+    </section>
+
+    <section class="dashboard-section" id="comments" aria-labelledby="comments-title">
+      <div class="section-heading"><h2 id="comments-title">待审核评论</h2><span class="muted">{comments.length} 条</span></div>
+      {comments.length ? <div class="dashboard-list">
+        {comments.map((comment) => <div class="dashboard-row">
+          <div><strong>{comment.username}</strong><p>评论于《{comment.post_title}》</p><p>{comment.body}</p></div>
+          <div class="row-actions">
+            <form action="/api/admin/comments" method="post"><input type="hidden" name="id" value={comment.id} /><input type="hidden" name="status" value="approved" /><button class="small-button" type="submit">通过</button></form>
+            <form action="/api/admin/comments" method="post"><input type="hidden" name="id" value={comment.id} /><input type="hidden" name="status" value="rejected" /><button class="small-button secondary-button" type="submit">拒绝</button></form>
+          </div>
+        </div>)}
+      </div> : <p class="empty-note">目前没有待审核评论。</p>}
+    </section>
+  </div>
+</BaseLayout>

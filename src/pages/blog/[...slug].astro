@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getViewer } from '../../lib/auth';
+import { countLikes, findPostBySlug, hasLiked, listApprovedComments } from '../../lib/db';
+import { renderMarkdown } from '../../lib/markdown';
+
+const post = findPostBySlug(Astro.params.slug || '');
+if (!post || post.status !== 'published') return new Response('文章不存在', { status: 404 });
+Astro.response.headers.set('Cache-Control', 'no-store');
+const viewer = getViewer(Astro.cookies);
+const html = await renderMarkdown(post.body_markdown);
+const tags = JSON.parse(post.tags_json) as string[];
+const comments = listApprovedComments(post.id);
+const likes = countLikes(post.id);
+const liked = viewer ? hasLiked(post.id, viewer.id) : false;
+const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+const commentMessage: Record<string, string> = { pending: '评论已提交，审核通过后会公开。', invalid: '评论需为 2–1000 字。', limited: '评论太频繁，请稍后再试。' };
+const message = commentMessage[Astro.url.searchParams.get('comment') || ''];
+---
+
+<BaseLayout title={post.title} description={post.description}>
+  <article class="container">
+    <header class="article-header">
+      <a class="back-link" href="/blog/">← 返回文章列表</a>
+      <h1>{post.title}</h1>
+      <p class="article-meta"><time datetime={post.published_at}>{formatDate(post.published_at)}</time></p>
+      <ul class="pill-list">{tags.map((tag) => <li class="pill">{tag}</li>)}</ul>
+    </header>
+    <div class="prose" set:html={html} />
+    <div class="post-actions" id="reactions">
+      {viewer ? <form action="/api/likes" method="post"><input type="hidden" name="slug" value={post.slug} /><button class="small-button secondary-button" type="submit">{liked ? '⚡ 已点赞' : '⚡ 点赞'} · {likes}</button></form> : <a class="text-link" href="/login/">登录后点赞 · {likes}</a>}
+      <span class="muted">{comments.length} 条评论</span>
+    </div>
+    <section class="comment-section" id="comments" aria-labelledby="comment-title">
+      <h2 id="comment-title">讨论</h2>
+      {message && <p class={message.includes('已提交') ? 'form-success' : 'form-error'} role="status">{message}</p>}
+      {comments.length ? <ol class="comment-list">{comments.map((comment) => <li class="comment"><div class="comment-header"><strong>{comment.username}</strong><span>{new Date(comment.created_at).toLocaleDateString('zh-CN')}</span></div><p>{comment.body}</p></li>)}</ol> : <p class="muted">还没有公开评论，来留下第一条想法吧。</p>}
+      {viewer ? <form class="comment-form" action="/api/comments" method="post"><input type="hidden" name="slug" value={post.slug} /><label class="field">以 {viewer.username} 的身份评论<textarea name="body" rows="5" minlength="2" maxlength="1000" required placeholder="写下你的想法…"></textarea></label><button class="primary-button" type="submit">提交评论</button><p class="form-note">评论将在管理员审核后显示。</p></form> : <p><a class="text-link" href="/login/">登录</a>或<a class="text-link" href="/register/">注册</a>后可以评论和点赞。</p>}
+    </section>
+  </article>
+</BaseLayout>

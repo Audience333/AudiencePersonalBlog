@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getViewer } from '../lib/auth';
+
+const viewer = getViewer(Astro.cookies);
+if (viewer) return Astro.redirect(viewer.role === 'admin' ? '/admin/' : '/blog/');
+const messages: Record<string, string> = {
+  invalid: '账号或密码不正确。',
+  limited: '尝试次数过多，请 15 分钟后再试。',
+  required: '请先登录，再进行评论或点赞。',
+};
+const message = messages[Astro.url.searchParams.get('error') || ''];
+---
+
+<BaseLayout title="登录" description="登录观众的博客账号。">
+  <div class="container auth-wrap">
+    <div class="auth-card">
+      <p class="eyebrow">ACCOUNT ACCESS</p>
+      <h1>欢迎回来</h1>
+      <p>登录后可以评论和点赞；管理员还可以进入文章后台。</p>
+      {message && <p class="form-error" role="alert">{message}</p>}
+      <form action="/api/auth/login" method="post">
+        <label class="field">用户名<input name="username" autocomplete="username" required maxlength="24" /></label>
+        <label class="field">密码<input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="primary-button" type="submit">登录</button>
+      </form>
+      <p class="form-note">还没有账号？<a class="text-link" href="/register/">注册访客账号 →</a></p>
+    </div>
+  </div>
+</BaseLayout>

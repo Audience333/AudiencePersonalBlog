@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getViewer } from '../lib/auth';
+
+const viewer = getViewer(Astro.cookies);
+if (viewer) return Astro.redirect('/blog/');
+const messages: Record<string, string> = {
+  taken: '这个用户名已被使用。',
+  invalid: '用户名或密码不符合要求。',
+  confirm: '两次输入的密码不一致。',
+  limited: '注册尝试过于频繁，请稍后再试。',
+};
+const message = messages[Astro.url.searchParams.get('error') || ''];
+---
+
+<BaseLayout title="注册" description="注册账号后参与观众的博客讨论。">
+  <div class="container auth-wrap">
+    <div class="auth-card">
+      <p class="eyebrow">JOIN THE CONVERSATION</p>
+      <h1>创建账号</h1>
+      <p>注册后可以为文章点赞、提交评论。评论会在管理员审核后公开。</p>
+      {message && <p class="form-error" role="alert">{message}</p>}
+      <form action="/api/auth/register" method="post">
+        <label class="field">用户名<input name="username" autocomplete="username" minlength="3" maxlength="24" required /><small>3–24 位，可使用中文、字母、数字、下划线和连字符。</small></label>
+        <label class="field">密码<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required /><small>至少 12 位。本站暂未提供密码找回，请妥善保存。</small></label>
+        <label class="field">确认密码<input name="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required /></label>
+        <button class="primary-button" type="submit">注册并登录</button>
+      </form>
+      <p class="form-note">已有账号？<a class="text-link" href="/login/">前往登录 →</a></p>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,6 @@
+# 将 example.com 换成已备案并指向服务器的域名。
+# Node.js 服务建议只监听本机 127.0.0.1:4321。
+example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:4321
+}

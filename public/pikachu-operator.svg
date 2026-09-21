@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 520" fill="none">
+  <defs>
+    <linearGradient id="face" x1="112" y1="118" x2="394" y2="414" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE96A"/>
+      <stop offset="1" stop-color="#F5BB28"/>
+    </linearGradient>
+  </defs>
+  <path d="M413 198 523 132l-39 89 52 13-117 101 31-80-74 6 37-63Z" fill="#FFD43B" stroke="#222426" stroke-width="10" stroke-linejoin="bevel"/>
+  <path d="M92 178 58 47l106 103-72 28Z" fill="#FFD43B" stroke="#222426" stroke-width="11" stroke-linejoin="bevel"/>
+  <path d="m68 65-10-25 71 74-29 17L68 65Z" fill="#242628"/>
+  <path d="m325 155 102-117 7 143-109 12Z" fill="#FFD43B" stroke="#222426" stroke-width="11" stroke-linejoin="bevel"/>
+  <path d="m397 72 30-34 6 75-30 9-6-50Z" fill="#242628"/>
+  <path d="M99 274c0-103 72-171 166-171 107 0 178 71 178 171 0 99-80 171-178 171-94 0-166-67-166-171Z" fill="url(#face)" stroke="#222426" stroke-width="12"/>
+  <path d="M115 260c24-88 92-132 165-132 79 0 138 44 160 111" stroke="#FFF6A9" stroke-width="10" stroke-linecap="square" opacity=".72"/>
+  <path d="M131 358c34 52 79 77 137 77 59 0 105-25 137-71" stroke="#C98E18" stroke-width="7" opacity=".7"/>
+  <polygon points="166,238 190,230 207,245 207,280 190,293 166,284" fill="#242628"/>
+  <polygon points="320,245 339,230 364,238 364,284 339,293 320,280" fill="#242628"/>
+  <rect x="181" y="242" width="8" height="15" fill="#FFF"/>
+  <rect x="335" y="242" width="8" height="15" fill="#FFF"/>
+  <path d="m252 306 14-10 14 10-14 15-14-15Z" fill="#242628"/>
+  <path d="M266 321v17m0 0c-9 11-21 14-33 5m33-5c9 11 21 14 33 5" stroke="#242628" stroke-width="7" stroke-linecap="square"/>
+  <path d="m111 317 26-18 27 18-10 28h-33l-10-28Zm315 0 26-18 27 18-10 28h-33l-10-28Z" fill="#E95A54"/>
+  <path d="M78 399h111M69 415h82M379 405h100M393 421h75" stroke="#F7F7F2" stroke-width="5" opacity=".82"/>
+  <path d="M46 369h57v42H46zM57 380h35M74 369v42M455 91h47v47h-47zM466 102h25M478 91v47" stroke="#FFD43B" stroke-width="4"/>
+  <path d="m39 272 12-28 12 28 28 12-28 12-12 28-12-28-28-12 28-12Z" fill="#F7F7F2"/>
+</svg>

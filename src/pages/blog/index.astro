@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listPublishedPosts } from '../../lib/db';
+
+const posts = listPublishedPosts();
+const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+---
+
+<BaseLayout title="文章" description="阅读我的文章、随笔和学习记录。">
+  <div class="container">
+    <header class="page-head"><p class="eyebrow">JOURNAL</p><h1>文章</h1><p>记录新想法、学习笔记和做项目时的思考。</p></header>
+    {posts.length ? <div class="article-list">
+      {posts.map((post) => <a class="article-item" href={`/blog/${post.slug}/`}>
+        <time class="article-date" datetime={post.published_at}>{formatDate(post.published_at)}</time>
+        <div><h3>{post.title}</h3><p>{post.description}</p><ul class="pill-list">{(JSON.parse(post.tags_json) as string[]).map((tag) => <li class="pill">{tag}</li>)}</ul></div>
+        <span class="article-arrow" aria-hidden="true">↗</span>
+      </a>)}
+    </div> : <p class="empty-note">文章正在准备中，欢迎稍后再来。</p>}
+  </div>
+</BaseLayout>

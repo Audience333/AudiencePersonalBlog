@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { findProjectBySlug } from '../../lib/db';
+import { renderMarkdown } from '../../lib/markdown';
+
+const project = findProjectBySlug(Astro.params.slug || '');
+if (!project || project.status !== 'published') return new Response('作品不存在', { status: 404 });
+const content = await renderMarkdown(project.body_markdown);
+const tools = JSON.parse(project.tools_json) as string[];
+---
+
+<BaseLayout title={project.title} description={project.description}>
+  <article class="container">
+    <header class="article-header project-header">
+      <a class="back-link" href="/projects/">← 返回作品列表</a>
+      <h1>{project.title}</h1>
+      <p class="article-meta">{project.year} · {tools.join(' / ')}</p>
+      <p class="muted">{project.description}</p>
+    </header>
+    {project.cover_image && <img class="project-detail-cover" src={project.cover_image} alt={`${project.title} 的封面图`} />}
+    <div class="prose" set:html={content}></div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,78 @@
+---
+import '../styles/global.css';
+import { getViewer } from '../lib/auth';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = '一个记录作品、想法与学习过程的个人网站。' } = Astro.props;
+const pageTitle = title === '首页' ? '观众 · 作品与博客' : `${title} · 观众`;
+const pathname = Astro.url.pathname;
+const viewer = getViewer(Astro.cookies);
+---
+
+<!doctype html>
+<html lang="zh-CN" data-theme="ark">
+  <head>
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem('blog-theme');
+        if (theme === 'paper' || theme === 'ark') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <div class="site-shell">
+      <header class="site-header container">
+        <a class="brand" href="/" aria-label="返回首页"><span class="brand-mark">//</span><span>观众</span><small>PERSONAL ARCHIVE</small></a>
+        <nav class="site-nav" aria-label="主导航">
+          <a href="/" aria-current={pathname === '/' ? 'page' : undefined}><span>01</span>首页</a>
+          <a href="/projects/" aria-current={pathname.startsWith('/projects/') ? 'page' : undefined}><span>02</span>作品</a>
+          <a href="/blog/" aria-current={pathname.startsWith('/blog/') ? 'page' : undefined}><span>03</span>文章</a>
+          <a href="/about/" aria-current={pathname.startsWith('/about/') ? 'page' : undefined}><span>04</span>关于</a>
+        </nav>
+        <div class="header-tools">
+          <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换博客主题">◐ <span>主题</span></button>
+          {viewer ? <>
+            {viewer.role === 'admin' && <a class="account-link" href="/admin/">后台</a>}
+            <span class="account-name">{viewer.username}</span>
+            <form action="/api/auth/logout" method="post"><button class="logout-link" type="submit">退出</button></form>
+          </> : <a class="account-link" href="/login/">登录</a>}
+        </div>
+      </header>
+
+      <main id="main-content"><slot /></main>
+
+      <footer class="site-footer container">
+        <span>慢慢写，认真做。</span>
+        <span>© {new Date().getFullYear()} 观众</span>
+      </footer>
+    </div>
+    <script is:inline>
+      const toggle = document.querySelector('[data-theme-toggle]');
+      if (toggle) {
+        const update = () => {
+          const ark = document.documentElement.dataset.theme === 'ark';
+          toggle.setAttribute('aria-label', ark ? '切换到阅读主题' : '切换到档案主题');
+          toggle.querySelector('span').textContent = ark ? '阅读' : '档案';
+        };
+        update();
+        toggle.addEventListener('click', () => {
+          const next = document.documentElement.dataset.theme === 'ark' ? 'paper' : 'ark';
+          document.documentElement.dataset.theme = next;
+          try { localStorage.setItem('blog-theme', next); } catch {}
+          update();
+        });
+      }
+    </script>
+  </body>
+</html>
