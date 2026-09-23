@@ -2,15 +2,22 @@
 import '../styles/global.css';
 import { getViewer } from '../lib/auth';
 import { siteConfig } from '../config/site';
+import { absoluteUrl, serializeJsonLd } from '../lib/seo';
 
 interface Props {
   title: string;
   description?: string;
   robots?: string;
+  canonicalPath?: string;
+  image?: string;
+  pageType?: 'website' | 'article';
+  jsonLd?: Record<string, unknown>;
 }
 
-const { title, description = siteConfig.description, robots } = Astro.props;
+const { title, description = siteConfig.description, robots, canonicalPath, image = siteConfig.defaultOgImage, pageType = 'website', jsonLd } = Astro.props;
 const pageTitle = title === '首页' ? siteConfig.name : `${title} · ${siteConfig.author}`;
+const canonical = absoluteUrl(canonicalPath || Astro.url.pathname, Astro.url);
+const imageUrl = absoluteUrl(image, Astro.url);
 const pathname = Astro.url.pathname;
 const viewer = getViewer(Astro.cookies);
 ---
@@ -28,6 +35,9 @@ const viewer = getViewer(Astro.cookies);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     {robots && <meta name="robots" content={robots} />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content={pageType} /><meta property="og:title" content={pageTitle} /><meta property="og:description" content={description} /><meta property="og:url" content={canonical} /><meta property="og:image" content={imageUrl} />
+    {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{pageTitle}</title>
