@@ -1,14 +1,15 @@
 ---
 import '../styles/global.css';
 import { getViewer } from '../lib/auth';
+import { siteConfig } from '../config/site';
 
 interface Props {
   title: string;
   description?: string;
 }
 
-const { title, description = '一个记录作品、想法与学习过程的个人网站。' } = Astro.props;
-const pageTitle = title === '首页' ? '观众 · 作品与博客' : `${title} · 观众`;
+const { title, description = siteConfig.description } = Astro.props;
+const pageTitle = title === '首页' ? siteConfig.name : `${title} · ${siteConfig.author}`;
 const pathname = Astro.url.pathname;
 const viewer = getViewer(Astro.cookies);
 ---
@@ -33,7 +34,7 @@ const viewer = getViewer(Astro.cookies);
     <a class="skip-link" href="#main-content">跳到正文</a>
     <div class="site-shell">
       <header class="site-header container">
-        <a class="brand" href="/" aria-label="返回首页"><span class="brand-mark">//</span><span>观众</span><small>PERSONAL ARCHIVE</small></a>
+        <a class="brand" href="/" aria-label="返回首页"><span class="brand-mark">//</span><span>{siteConfig.author}</span><small>PERSONAL ARCHIVE</small></a>
         <nav class="site-nav" aria-label="主导航">
           <a href="/" aria-current={pathname === '/' ? 'page' : undefined}><span>01</span>首页</a>
           <a href="/projects/" aria-current={pathname.startsWith('/projects/') ? 'page' : undefined}><span>02</span>作品</a>
@@ -53,8 +54,8 @@ const viewer = getViewer(Astro.cookies);
       <main id="main-content"><slot /></main>
 
       <footer class="site-footer container">
-        <span>慢慢写，认真做。</span>
-        <span>© {new Date().getFullYear()} 观众</span>
+        <span>{siteConfig.footer}</span>
+        <span>© {new Date().getFullYear()} {siteConfig.author}</span>
       </footer>
     </div>
     <script is:inline>

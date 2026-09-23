@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "check": "astro check",
+    "test:unit": "node --test tests/*.test.mjs",
     "test:integration": "node ./tests/integration.mjs",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",

@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { runMigrations } from './migrations.ts';
 
 export type Role = 'admin' | 'reader';
 export type PostStatus = 'draft' | 'published';
@@ -24,6 +25,10 @@ export interface PostRow {
   tags_json: string;
   status: PostStatus;
   published_at: string;
+  scheduled_at: number | null;
+  archived: 0 | 1;
+  comments_enabled: 0 | 1;
+  cover_image: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -55,9 +60,8 @@ export interface ProjectRow {
 
 let connection: ReturnType<typeof Database> | undefined;
 
-export function getDb() {
-  if (connection) return connection;
-  const dbPath = resolve(process.env.BLOG_DB_PATH || './data/blog.sqlite');
+export function openBlogDatabase(path: string): Database.Database {
+  const dbPath = resolve(path);
   mkdirSync(dirname(dbPath), { recursive: true });
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
@@ -86,6 +90,10 @@ export function getDb() {
       tags_json TEXT NOT NULL DEFAULT '[]',
       status TEXT NOT NULL CHECK(status IN ('draft', 'published')),
       published_at TEXT NOT NULL,
+      scheduled_at INTEGER,
+      archived INTEGER NOT NULL DEFAULT 0 CHECK(archived IN (0, 1)),
+      comments_enabled INTEGER NOT NULL DEFAULT 1 CHECK(comments_enabled IN (0, 1)),
+      cover_image TEXT,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
@@ -127,6 +135,7 @@ export function getDb() {
     CREATE INDEX IF NOT EXISTS idx_comments_post_status ON comments(post_id, status, created_at);
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
   `);
+  runMigrations(db);
 
   const seeded = db.prepare("SELECT value FROM settings WHERE key = 'seeded'").get();
   if (!seeded) {
@@ -151,8 +160,14 @@ export function getDb() {
     );
     db.prepare("INSERT INTO settings (key, value) VALUES ('projects_seeded', '1')").run();
   }
-  connection = db;
   return db;
+}
+
+export function getDb() {
+  if (connection) return connection;
+  const dbPath = resolve(process.env.BLOG_DB_PATH || './data/blog.sqlite');
+  connection = openBlogDatabase(dbPath);
+  return connection;
 }
 
 export function findUserByName(username: string): UserRow | undefined {
@@ -189,15 +204,30 @@ export function findPostById(id: number): PostRow | undefined {
   return getDb().prepare('SELECT * FROM posts WHERE id = ?').get(id) as PostRow | undefined;
 }
 
-export function savePost(input: Omit<PostRow, 'id' | 'created_at' | 'updated_at'>, id?: number): number {
+type PostWriteInput = Pick<PostRow,
+  'slug' | 'title' | 'description' | 'body_markdown' | 'tags_json' | 'status' | 'published_at'
+> & Partial<Pick<PostRow, 'scheduled_at' | 'archived' | 'comments_enabled' | 'cover_image'>>;
+
+export function savePost(input: PostWriteInput, id?: number): number {
   const now = Date.now();
+  const scheduledAt = input.scheduled_at ?? null;
+  const archived = input.archived ?? 0;
+  const commentsEnabled = input.comments_enabled ?? 1;
+  const coverImage = input.cover_image ?? null;
   if (id) {
-    getDb().prepare('UPDATE posts SET slug = ?, title = ?, description = ?, body_markdown = ?, tags_json = ?, status = ?, published_at = ?, updated_at = ? WHERE id = ?')
-      .run(input.slug, input.title, input.description, input.body_markdown, input.tags_json, input.status, input.published_at, now, id);
+    getDb().prepare(`UPDATE posts SET slug = ?, title = ?, description = ?, body_markdown = ?, tags_json = ?,
+      status = ?, published_at = ?, scheduled_at = ?, archived = ?, comments_enabled = ?, cover_image = ?, updated_at = ?
+      WHERE id = ?`)
+      .run(input.slug, input.title, input.description, input.body_markdown, input.tags_json, input.status,
+        input.published_at, scheduledAt, archived, commentsEnabled, coverImage, now, id);
     return id;
   }
-  const result = getDb().prepare(`INSERT INTO posts (slug, title, description, body_markdown, tags_json, status, published_at, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(input.slug, input.title, input.description, input.body_markdown, input.tags_json, input.status, input.published_at, now, now);
+  const result = getDb().prepare(`INSERT INTO posts
+    (slug, title, description, body_markdown, tags_json, status, published_at, scheduled_at, archived, comments_enabled, cover_image, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      input.slug, input.title, input.description, input.body_markdown, input.tags_json, input.status,
+      input.published_at, scheduledAt, archived, commentsEnabled, coverImage, now, now,
+    );
   return Number(result.lastInsertRowid);
 }
 
