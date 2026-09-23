@@ -1,0 +1,23 @@
+---
+interface Props {
+  page: number;
+  totalPages: number;
+  basePath: string;
+  query?: Record<string, string>;
+}
+
+const { page, totalPages, basePath, query = {} } = Astro.props;
+const hrefFor = (target: number) => {
+  const params = new URLSearchParams(query);
+  if (target > 1) params.set('page', String(target));
+  else params.delete('page');
+  const search = params.toString();
+  return search ? `${basePath}?${search}` : basePath;
+};
+---
+
+{totalPages > 1 && <nav class="pagination" aria-label="文章分页">
+  {page > 1 ? <a href={hrefFor(page - 1)}>← 上一页</a> : <span aria-disabled="true">← 上一页</span>}
+  <span>第 <strong>{page}</strong> / {totalPages} 页</span>
+  {page < totalPages ? <a href={hrefFor(page + 1)}>下一页 →</a> : <span aria-disabled="true">下一页 →</span>}
+</nav>}

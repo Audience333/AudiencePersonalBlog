@@ -68,3 +68,22 @@ test('uses safe interaction defaults when runtime settings have not been configu
   db.close();
   for (const suffix of ['', '-wal', '-shm']) rmSync(path + suffix, { force: true });
 });
+
+test('treats search wildcards literally and clamps excessive page numbers', () => {
+  const path = temporaryDatabase('search-posts');
+  const db = openBlogDatabase(path);
+  db.prepare('DELETE FROM posts').run();
+  createPost(db, { slug: 'literal-wildcards', status: 'published', tags_json: '["技术"]' });
+  db.prepare("UPDATE posts SET title = '100%_真实' WHERE slug = 'literal-wildcards'").run();
+  createPost(db, { slug: 'second', status: 'published', tags_json: '["技术"]', published_at: '2026-09-21' });
+  createPost(db, { slug: 'third', status: 'published', tags_json: '["随笔"]', published_at: '2026-09-20' });
+  createPost(db, { slug: 'fourth', status: 'published', published_at: '2026-09-19' });
+  createPost(db, { slug: 'fifth', status: 'published', published_at: '2026-09-18' });
+
+  assert.deepEqual(listPublicPosts({ q: '100%_真实' }, Date.now(), db).items.map(({ slug }) => slug), ['literal-wildcards']);
+  assert.deepEqual(listPublicPosts({ q: '   ', tag: '技术' }, Date.now(), db).items.map(({ slug }) => slug), ['second', 'literal-wildcards']);
+  assert.equal(listPublicPosts({ page: 9999, pageSize: 2 }, Date.now(), db).page, 3);
+
+  db.close();
+  for (const suffix of ['', '-wal', '-shm']) rmSync(path + suffix, { force: true });
+});

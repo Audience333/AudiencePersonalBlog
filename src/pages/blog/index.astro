@@ -1,20 +1,35 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { listPublishedPosts } from '../../lib/db';
+import Pagination from '../../components/Pagination.astro';
+import { listPublicPosts, listPublicTags, parsePostTags } from '../../lib/posts';
 
-const posts = listPublishedPosts();
+const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 100);
+const tag = (Astro.url.searchParams.get('tag') || '').trim().slice(0, 20);
+const page = Number(Astro.url.searchParams.get('page') || 1);
+const result = listPublicPosts({ q, tag, page });
+const tags = listPublicTags();
+const posts = result.items;
 const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
 ---
 
 <BaseLayout title="文章" description="阅读我的文章、随笔和学习记录。">
   <div class="container">
     <header class="page-head"><p class="eyebrow">JOURNAL</p><h1>文章</h1><p>记录新想法、学习笔记和做项目时的思考。</p></header>
+    <form class="blog-search" action="/blog/" method="get">
+      <label for="blog-search-input">搜索文章</label>
+      <input id="blog-search-input" name="q" value={q} maxlength="100" placeholder="标题、简介或正文关键词" />
+      {tag && <input type="hidden" name="tag" value={tag} />}
+      <button class="small-button" type="submit">搜索</button>
+    </form>
+    {tags.length > 0 && <nav class="tag-index" aria-label="文章标签"><a href="/blog/" class:list={{ active: !tag }}>全部 <span>{result.totalItems}</span></a>{tags.map((item) => <a href={`/blog/?tag=${encodeURIComponent(item.tag)}`} class:list={{ active: tag === item.tag }}>{item.tag} <span>{item.count}</span></a>)}</nav>}
+    {(q || tag) && <p class="filter-summary">当前筛选：{q && <span>“{q}”</span>}{q && tag && '，'}{tag && <span>标签「{tag}」</span>}，共 {result.totalItems} 篇。</p>}
     {posts.length ? <div class="article-list">
       {posts.map((post) => <a class="article-item" href={`/blog/${post.slug}/`}>
         <time class="article-date" datetime={post.published_at}>{formatDate(post.published_at)}</time>
-        <div><h3>{post.title}</h3><p>{post.description}</p><ul class="pill-list">{(JSON.parse(post.tags_json) as string[]).map((tag) => <li class="pill">{tag}</li>)}</ul></div>
+        <div><h3>{post.title}</h3><p>{post.description}</p><ul class="pill-list">{parsePostTags(post.tags_json).map((postTag) => <li class="pill">{postTag}</li>)}</ul></div>
         <span class="article-arrow" aria-hidden="true">↗</span>
       </a>)}
-    </div> : <p class="empty-note">文章正在准备中，欢迎稍后再来。</p>}
+    </div> : <p class="empty-note">没有找到符合条件的文章。</p>}
+    <Pagination page={result.page} totalPages={result.totalPages} basePath="/blog/" query={{ ...(q ? { q } : {}), ...(tag ? { tag } : {}) }} />
   </div>
 </BaseLayout>

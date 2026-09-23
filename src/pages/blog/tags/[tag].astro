@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { listPublicPosts, parsePostTags } from '../../../lib/posts';
+
+let tag = '';
+try { tag = decodeURIComponent(Astro.params.tag || ''); } catch { return new Response('标签不存在', { status: 404 }); }
+if (!tag || tag.length > 20) return new Response('标签不存在', { status: 404 });
+const result = listPublicPosts({ tag, page: Number(Astro.url.searchParams.get('page') || 1) });
+const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+---
+
+<BaseLayout title={`标签：${tag}`} description={`浏览标签“${tag}”下的文章。`}>
+  <div class="container">
+    <header class="page-head"><p class="eyebrow">TAG ARCHIVE</p><h1>{tag}</h1><p>共 {result.totalItems} 篇文章。</p></header>
+    {result.items.length ? <div class="article-list">{result.items.map((post) => <a class="article-item" href={`/blog/${post.slug}/`}><time class="article-date" datetime={post.published_at}>{formatDate(post.published_at)}</time><div><h3>{post.title}</h3><p>{post.description}</p><ul class="pill-list">{parsePostTags(post.tags_json).map((postTag) => <li class="pill">{postTag}</li>)}</ul></div><span class="article-arrow" aria-hidden="true">↗</span></a>)}</div> : <p class="empty-note">这个标签下还没有公开文章。</p>}
+    <Pagination page={result.page} totalPages={result.totalPages} basePath={`/blog/tags/${encodeURIComponent(tag)}/`} />
+  </div>
+</BaseLayout>
