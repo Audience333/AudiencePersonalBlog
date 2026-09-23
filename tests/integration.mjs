@@ -81,6 +81,27 @@ try {
   const adminCookie = cookieFrom(adminLogin);
   assert.equal((await get('/admin/', adminCookie)).status, 200);
 
+  const settingsUpdate = await post('/api/admin/settings', {
+    registration_open: 'off', default_comments_enabled: 'on', blocked_comment_keywords: 'blocked phrase',
+  }, adminCookie);
+  assert.equal(settingsUpdate.status, 200);
+  assert.equal((await post('/api/auth/register', {
+    username: 'closed_reader', password: 'reader-test-password-123', confirm: 'reader-test-password-123',
+  })).headers.get('location'), '/register/?error=closed');
+
+  const closedCommentsPost = await post('/api/admin/posts', {
+    slug: 'closed-comments', title: '关闭评论', description: '用于验证评论关闭的文章。',
+    body: '正文内容。', published_at: '2026-09-18', tags: '测试', status: 'published', comments_enabled: 'off',
+  }, adminCookie);
+  assert.equal(closedCommentsPost.status, 200);
+  const closedComment = await post('/api/comments', { slug: 'closed-comments', body: 'hello' }, readerCookie);
+  assert.equal(closedComment.status, 303);
+  assert.match(closedComment.headers.get('location'), /comment=closed/);
+
+  const blockedComment = await post('/api/comments', { slug: 'welcome', body: 'blocked phrase' }, readerCookie);
+  assert.equal(blockedComment.status, 303);
+  assert.equal(getDb().prepare("SELECT status FROM comments WHERE body = 'blocked phrase'").get().status, 'rejected');
+
   const imageData = new FormData();
   const tinyPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlX1JQAAAAASUVORK5CYII=', 'base64');
   imageData.set('image', new Blob([tinyPng], { type: 'image/png' }), 'cover.png');

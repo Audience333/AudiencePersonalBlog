@@ -15,7 +15,7 @@ const comments = listApprovedComments(post.id);
 const likes = countLikes(post.id);
 const liked = viewer ? hasLiked(post.id, viewer.id) : false;
 const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
-const commentMessage: Record<string, string> = { pending: '评论已提交，审核通过后会公开。', invalid: '评论需为 2–1000 字。', limited: '评论太频繁，请稍后再试。' };
+const commentMessage: Record<string, string> = { pending: '评论已提交，审核通过后会公开。', invalid: '评论需为 2–1000 字。', limited: '评论太频繁，请稍后再试。', closed: '这篇文章暂不接受评论。', blocked: '评论未能通过发布规则。' };
 const message = commentMessage[Astro.url.searchParams.get('comment') || ''];
 ---
 
@@ -36,7 +36,7 @@ const message = commentMessage[Astro.url.searchParams.get('comment') || ''];
       <h2 id="comment-title">讨论</h2>
       {message && <p class={message.includes('已提交') ? 'form-success' : 'form-error'} role="status">{message}</p>}
       {comments.length ? <ol class="comment-list">{comments.map((comment) => <li class="comment"><div class="comment-header"><strong>{comment.username}</strong><span>{new Date(comment.created_at).toLocaleDateString('zh-CN')}</span></div><p>{comment.body}</p></li>)}</ol> : <p class="muted">还没有公开评论，来留下第一条想法吧。</p>}
-      {viewer ? <form class="comment-form" action="/api/comments" method="post"><input type="hidden" name="slug" value={post.slug} /><label class="field">以 {viewer.username} 的身份评论<textarea name="body" rows="5" minlength="2" maxlength="1000" required placeholder="写下你的想法…"></textarea></label><button class="primary-button" type="submit">提交评论</button><p class="form-note">评论将在管理员审核后显示。</p></form> : <p><a class="text-link" href="/login/">登录</a>或<a class="text-link" href="/register/">注册</a>后可以评论和点赞。</p>}
+      {post.comments_enabled !== 1 ? <p class="muted">这篇文章暂不接受新评论。</p> : viewer ? <form class="comment-form" action="/api/comments" method="post"><input type="hidden" name="slug" value={post.slug} /><label class="field">以 {viewer.username} 的身份评论<textarea name="body" rows="5" minlength="2" maxlength="1000" required placeholder="写下你的想法…"></textarea></label><button class="primary-button" type="submit">提交评论</button><p class="form-note">评论将在管理员审核后显示。</p></form> : <p><a class="text-link" href="/login/">登录</a>或<a class="text-link" href="/register/">注册</a>后可以评论和点赞。</p>}
     </section>
   </article>
 </BaseLayout>

@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getViewer } from '../../lib/auth';
+import { getRuntimeSettings } from '../../lib/settings';
+
+const viewer = getViewer(Astro.cookies);
+if (!viewer) return Astro.redirect('/login/?error=required');
+if (viewer.role !== 'admin') return new Response('Forbidden', { status: 403 });
+Astro.response.headers.set('Cache-Control', 'no-store');
+const settings = getRuntimeSettings();
+---
+
+<BaseLayout title="网站设置" description="控制访客注册和评论策略。">
+  <div class="container dashboard">
+    <header class="dashboard-head"><div><a class="back-link" href="/admin/">← 返回后台</a><h1>网站设置</h1><p class="muted">这些设置即时作用于访客注册和新的评论。</p></div></header>
+    <form id="runtime-settings" class="editor-grid">
+      <label class="field editor-wide checkbox-field"><input name="registration_open" type="checkbox" checked={settings.registrationOpen} /> 允许访客注册账号</label>
+      <label class="field editor-wide checkbox-field"><input name="default_comments_enabled" type="checkbox" checked={settings.defaultCommentsEnabled} /> 新文章默认允许评论</label>
+      <label class="field editor-wide">屏蔽评论关键词<textarea name="blocked_comment_keywords" rows="8" maxlength="4100" placeholder="每行一个关键词">{settings.blockedCommentKeywords.join('\n')}</textarea><small>最多 100 个关键词，每个不超过 40 个字符；命中后评论会被保存为拒绝状态，不会公开。</small></label>
+      <div class="editor-actions editor-wide"><button class="primary-button" type="submit">保存设置</button><span id="save-status" role="status" aria-live="polite"></span></div>
+    </form>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#runtime-settings');
+  const status = document.querySelector<HTMLElement>('#save-status');
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!status) return;
+    status.textContent = '正在保存…';
+    const body = new URLSearchParams();
+    new FormData(form).forEach((value, key) => body.set(key, String(value)));
+    try {
+      const response = await fetch('/api/admin/settings', { method: 'POST', body });
+      const result = await response.json();
+      status.textContent = response.ok ? '设置已保存。' : (result.error || '保存失败。');
+    } catch {
+      status.textContent = '网络错误，设置尚未保存。';
+    }
+  });
+</script>

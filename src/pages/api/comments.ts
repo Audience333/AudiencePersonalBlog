@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { getViewer } from '../../lib/auth';
-import { addComment, consumeRateLimit, findPostBySlug } from '../../lib/db';
+import { addComment, consumeRateLimit } from '../../lib/db';
 import { isSameOrigin, readForm, seeOther } from '../../lib/forms';
+import { findPublicPostBySlug } from '../../lib/posts';
+import { getRuntimeSettings } from '../../lib/settings';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   if (!isSameOrigin(request)) return new Response('Forbidden', { status: 403 });
@@ -10,10 +12,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const form = await readForm(request, 8_000);
     const slug = form.get('slug') || '';
-    const post = findPostBySlug(slug);
-    if (!post || post.status !== 'published') return new Response('Not found', { status: 404 });
+    const post = findPublicPostBySlug(slug);
+    if (!post) return new Response('Not found', { status: 404 });
+    if (post.comments_enabled !== 1) return seeOther(`/blog/${post.slug}/?comment=closed#comments`);
     const body = (form.get('body') || '').trim();
     if (body.length < 2 || body.length > 1000) return seeOther(`/blog/${post.slug}/?comment=invalid#comments`);
+    const normalizedBody = body.normalize('NFKC').toLocaleLowerCase('zh-CN');
+    const isBlocked = getRuntimeSettings().blockedCommentKeywords
+      .some((keyword) => normalizedBody.includes(keyword.normalize('NFKC').toLocaleLowerCase('zh-CN')));
+    if (isBlocked) {
+      addComment(post.id, viewer.id, body, 'rejected');
+      return seeOther(`/blog/${post.slug}/?comment=blocked#comments`);
+    }
     if (!consumeRateLimit(`comment:${viewer.id}`, 5, 10 * 60 * 1000)) return seeOther(`/blog/${post.slug}/?comment=limited#comments`);
     addComment(post.id, viewer.id, body);
     return seeOther(`/blog/${post.slug}/?comment=pending#comments`);

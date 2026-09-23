@@ -276,9 +276,9 @@ export function listPendingComments(): (CommentRow & { post_title: string })[] {
     WHERE comments.status = 'pending' ORDER BY comments.created_at ASC`).all() as (CommentRow & { post_title: string })[];
 }
 
-export function addComment(postId: number, userId: number, body: string) {
-  getDb().prepare("INSERT INTO comments (post_id, user_id, body, status, created_at) VALUES (?, ?, ?, 'pending', ?)")
-    .run(postId, userId, body, Date.now());
+export function addComment(postId: number, userId: number, body: string, status: CommentStatus = 'pending') {
+  getDb().prepare('INSERT INTO comments (post_id, user_id, body, status, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(postId, userId, body, status, Date.now());
 }
 
 export function setCommentStatus(id: number, status: CommentStatus) {
