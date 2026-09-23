@@ -81,6 +81,12 @@ try {
   const adminCookie = cookieFrom(adminLogin);
   assert.equal((await get('/admin/', adminCookie)).status, 200);
 
+  assert.equal((await post('/api/admin/preview', { body: '# 预览' })).status, 401);
+  assert.equal((await post('/api/admin/preview', { body: '# 预览' }, adminCookie, 'https://other.example')).status, 403);
+  const preview = await post('/api/admin/preview', { body: '# 预览\n\n<script>alert(1)</script>' }, adminCookie);
+  assert.equal(preview.status, 200);
+  assert.match((await preview.json()).html, /<h1>预览<\/h1>/);
+
   const settingsUpdate = await post('/api/admin/settings', {
     registration_open: 'off', default_comments_enabled: 'on', blocked_comment_keywords: 'blocked phrase',
   }, adminCookie);
@@ -154,6 +160,9 @@ try {
   assert.equal(draftResult.ok, true);
   assert.equal((await get('/blog/test-post/')).status, 404);
   const postId = Number(new URL(draftResult.location, base).searchParams.get('id'));
+  assert.equal((await get(`/admin/preview/?id=${postId}`)).status, 302);
+  const adminDraftPreview = await (await get(`/admin/preview/?id=${postId}`, adminCookie)).text();
+  assert.match(adminDraftPreview, /测试文章/);
   const publish = await post('/api/admin/posts', {
     id: String(postId), slug: 'test-post', title: '测试文章', description: '用于完整流程测试的文章',
     body: '# 标题\n\n<script>alert(1)</script>正文', published_at: '2026-09-17', tags: '测试, 技术', status: 'published',

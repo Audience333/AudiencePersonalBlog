@@ -6,9 +6,10 @@ import { siteConfig } from '../config/site';
 interface Props {
   title: string;
   description?: string;
+  robots?: string;
 }
 
-const { title, description = siteConfig.description } = Astro.props;
+const { title, description = siteConfig.description, robots } = Astro.props;
 const pageTitle = title === '首页' ? siteConfig.name : `${title} · ${siteConfig.author}`;
 const pathname = Astro.url.pathname;
 const viewer = getViewer(Astro.cookies);
@@ -26,6 +27,7 @@ const viewer = getViewer(Astro.cookies);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{pageTitle}</title>

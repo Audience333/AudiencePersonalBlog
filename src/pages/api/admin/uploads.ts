@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getViewer } from '../../../lib/auth';
 import { isSameOrigin } from '../../../lib/forms';
-import { MAX_PROJECT_IMAGE_BYTES, saveProjectCover } from '../../../lib/uploads';
+import { MAX_PROJECT_IMAGE_BYTES, saveContentImage } from '../../../lib/uploads';
 
 function json(data: unknown, status = 200): Response {
   return Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const form = await request.formData();
     const image = form.get('image');
     if (!image || typeof image === 'string') return json({ error: '请选择一张图片。' }, 422);
-    const url = await saveProjectCover(image);
+    const url = await saveContentImage(image);
     return json({ ok: true, url });
   } catch {
     return json({ error: '仅支持不超过 4 MB 的 PNG、JPG、WebP 或 GIF 图片。' }, 422);

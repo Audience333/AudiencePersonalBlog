@@ -191,6 +191,7 @@ h3 { font-size: 1.25rem; }
 .editor-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
 .editor-wide { grid-column: 1 / -1; }
 .editor-actions { display: flex; align-items: center; gap: 14px; }
+.editor-preview { margin-top: 18px; padding: 20px; border: 1px solid var(--line); background: var(--white); }.editor-preview .section-heading { margin-bottom: 16px; }.editor-preview .section-heading h2 { font-size: 1.25rem; }
 
 /* 档案主题：以信息面板、警示色和斜切边角组织页面。 */
 html[data-theme="ark"] {

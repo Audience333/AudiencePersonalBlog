@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getViewer } from '../../lib/auth';
+import { findPostById } from '../../lib/db';
+import { renderMarkdownDocument } from '../../lib/reading';
+
+const viewer = getViewer(Astro.cookies);
+if (!viewer) return Astro.redirect('/login/?error=required');
+if (viewer.role !== 'admin') return new Response('Forbidden', { status: 403 });
+const id = Number(Astro.url.searchParams.get('id') || 0);
+const post = id ? findPostById(id) : undefined;
+if (!post) return Astro.redirect('/admin/');
+Astro.response.headers.set('Cache-Control', 'no-store');
+const document = await renderMarkdownDocument(post.body_markdown);
+---
+
+<BaseLayout title={`预览：${post.title}`} description={post.description} robots="noindex, nofollow">
+  <article class="container"><header class="article-header"><a class="back-link" href={`/admin/editor/?id=${post.id}`}>← 返回编辑</a><h1>{post.title}</h1><p class="article-meta">管理员草稿预览，不会被公开收录。</p></header><div class="prose" set:html={document.html} /></article>
+</BaseLayout>

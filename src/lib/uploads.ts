@@ -34,10 +34,14 @@ export async function saveProjectCover(file: File): Promise<string> {
   return `/api/uploads/${filename}`;
 }
 
+export const saveContentImage = saveProjectCover;
+
 export function coverFilename(url: string): string | undefined {
   const match = url.match(/^\/api\/uploads\/([a-f0-9-]{36}\.(?:jpg|png|webp|gif))$/);
   return match?.[1];
 }
+
+export const contentImageFilename = coverFilename;
 
 export function readProjectCover(filename: string): { bytes: Buffer; type: string } | undefined {
   if (!/^[a-f0-9-]{36}\.(?:jpg|png|webp|gif)$/.test(filename)) return undefined;
