@@ -1,0 +1,6 @@
+---
+import type { Heading } from '../lib/reading';
+interface Props { headings: Heading[]; }
+const { headings } = Astro.props;
+---
+<nav class="article-toc" aria-label="文章目录"><strong>目录</strong><ol>{headings.map((heading) => <li class:list={{ nested: heading.depth === 3 }}><a href={`#${heading.id}`}>{heading.text}</a></li>)}</ol></nav>

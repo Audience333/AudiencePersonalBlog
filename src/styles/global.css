@@ -144,6 +144,11 @@ h3 { font-size: 1.25rem; }
 .prose pre { overflow-x: auto; padding: 20px; background: var(--panel); color: var(--panel-ink); font-size: .88rem; }
 .prose :not(pre) > code { background: var(--accent-soft); padding: .12em .35em; font-size: .88em; }
 .prose ul, .prose ol { padding-left: 1.4em; }
+.article-toc { max-width: 800px; margin: 26px 0; padding: 16px 20px; border-left: 3px solid var(--accent); background: var(--white); }
+.article-toc ol { margin: 10px 0 0; padding-left: 1.2rem; }.article-toc li { margin: 4px 0; }.article-toc li.nested { margin-left: 16px; }.article-toc a:hover { color: var(--accent); }
+.reading-progress { position: fixed; z-index: 5; top: 0; left: 0; width: 100%; height: 3px; appearance: none; border: 0; }.reading-progress::-webkit-progress-bar { background: transparent; }.reading-progress::-webkit-progress-value { background: var(--accent); }
+.prose pre { position: relative; }.code-copy { position: absolute; top: 8px; right: 8px; border: 1px solid currentColor; padding: 3px 7px; background: transparent; color: inherit; font-size: .72rem; cursor: pointer; }
+.article-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 800px; margin-top: 45px; padding-top: 24px; border-top: 1px solid var(--line); font-size: .88rem; font-weight: 800; }.article-navigation a:last-child { text-align: right; }.article-navigation a:hover { color: var(--accent); }
 .about-box { max-width: 800px; padding: clamp(28px, 5vw, 52px); border: 1px solid var(--ink); background: var(--white); clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 0 100%); }
 .about-box p:last-child { margin-bottom: 0; }
 
