@@ -1,15 +1,16 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getViewer } from '../../lib/auth';
-import { countLikes, findPostBySlug, hasLiked, listApprovedComments } from '../../lib/db';
+import { countLikes, hasLiked, listApprovedComments } from '../../lib/db';
 import { renderMarkdown } from '../../lib/markdown';
+import { findPublicPostBySlug, parsePostTags } from '../../lib/posts';
 
-const post = findPostBySlug(Astro.params.slug || '');
-if (!post || post.status !== 'published') return new Response('文章不存在', { status: 404 });
+const post = findPublicPostBySlug(Astro.params.slug || '');
+if (!post) return new Response('文章不存在', { status: 404 });
 Astro.response.headers.set('Cache-Control', 'no-store');
 const viewer = getViewer(Astro.cookies);
 const html = await renderMarkdown(post.body_markdown);
-const tags = JSON.parse(post.tags_json) as string[];
+const tags = parsePostTags(post.tags_json);
 const comments = listApprovedComments(post.id);
 const likes = countLikes(post.id);
 const liked = viewer ? hasLiked(post.id, viewer.id) : false;

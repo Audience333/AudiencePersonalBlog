@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { listFeaturedProjects, listPublishedPosts } from '../lib/db';
+import { listFeaturedProjects } from '../lib/db';
+import { listPublicPosts } from '../lib/posts';
 
-const posts = listPublishedPosts().slice(0, 3);
+const posts = listPublicPosts({ pageSize: 3 }).items;
 const projects = listFeaturedProjects().slice(0, 2);
 const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
 ---
