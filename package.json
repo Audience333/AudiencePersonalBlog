@@ -12,7 +12,8 @@
     "test:unit": "node --test tests/*.test.mjs",
     "test:integration": "node ./tests/integration.mjs",
     "preview": "astro preview",
-    "start": "node ./dist/server/entry.mjs",
+    "start": "node ./scripts/start.mjs",
+    "backup": "node ./scripts/backup.mjs",
     "admin:create": "node ./scripts/create-admin.mjs",
     "astro": "astro"
   },

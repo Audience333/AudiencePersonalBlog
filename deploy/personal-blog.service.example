@@ -1,0 +1,19 @@
+[Unit]
+Description=Personal Blog
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/personal-blog
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=4321
+Environment=PUBLIC_SITE_ORIGIN=https://example.com
+Environment=BLOG_DB_PATH=/srv/personal-blog/data/blog.sqlite
+Environment=BLOG_UPLOAD_DIR=/srv/personal-blog/data/uploads
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -66,7 +66,10 @@ function cookieFrom(response) {
 try {
   await ready();
   assert.equal((await get('/admin/')).status, 302);
-  const home = await (await get('/')).text();
+  const homeResponse = await get('/');
+  assert.equal(homeResponse.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(homeResponse.headers.get('x-frame-options'), 'DENY');
+  const home = await homeResponse.text();
   assert.match(home, /archive-hero-v1\.png/);
   assert.match(home, /data-theme="ark"/);
   assert.equal((await get('/projects/personal-website/')).status, 200);
