@@ -192,6 +192,9 @@ h3 { font-size: 1.25rem; }
 .editor-wide { grid-column: 1 / -1; }
 .editor-actions { display: flex; align-items: center; gap: 14px; }
 .editor-preview { margin-top: 18px; padding: 20px; border: 1px solid var(--line); background: var(--white); }.editor-preview .section-heading { margin-bottom: 16px; }.editor-preview .section-heading h2 { font-size: 1.25rem; }
+.editor-tabs { display: none; gap: 8px; margin-top: 18px; }
+.editor-tabs button { border: 1px solid var(--line); padding: 8px 14px; background: var(--white); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.editor-tabs button[aria-selected="true"] { background: var(--ink); color: var(--white); }
 
 /* 档案主题：以信息面板、警示色和斜切边角组织页面。 */
 html[data-theme="ark"] {
@@ -259,6 +262,7 @@ html[data-theme="ark"] .dashboard-row:hover { background: #f3f4f0; }
   .dashboard-row { align-items: start; flex-direction: column; }
   .editor-grid { grid-template-columns: 1fr; }
   .editor-wide { grid-column: 1; }
+  .editor-tabs { display: flex; }
 }
 
 /* Rhine archive skill theme: warm document arrays, restrained metadata, and quiet depth. */

@@ -29,7 +29,7 @@ const message = commentMessage[Astro.url.searchParams.get('comment') || ''];
       <a class="back-link" href="/blog/">← 返回文章列表</a>
       <h1>{post.title}</h1>
       <p class="article-meta"><time datetime={post.published_at}>{formatDate(post.published_at)}</time> · 约 {document.readingMinutes} 分钟阅读</p>
-      <ul class="pill-list">{tags.map((tag) => <li class="pill">{tag}</li>)}</ul>
+      <ul class="pill-list">{tags.map((tag) => <li><a class="pill" href={`/blog/tags/${encodeURIComponent(tag)}/`}>{tag}</a></li>)}</ul>
     </header>
     {document.headings.length >= 2 && <ArticleToc headings={document.headings} />}
     <progress class="reading-progress" value="0" max="1" aria-hidden="true"></progress>

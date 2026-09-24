@@ -17,9 +17,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     if (post.comments_enabled !== 1) return seeOther(`/blog/${post.slug}/?comment=closed#comments`);
     const body = (form.get('body') || '').trim();
     if (body.length < 2 || body.length > 1000) return seeOther(`/blog/${post.slug}/?comment=invalid#comments`);
-    const normalizedBody = body.normalize('NFKC').toLocaleLowerCase('zh-CN');
+    const normalize = (value: string) => value.normalize('NFKC').toLocaleLowerCase('zh-CN').replace(/\s+/g, ' ').trim();
+    const normalizedBody = normalize(body);
     const isBlocked = getRuntimeSettings().blockedCommentKeywords
-      .some((keyword) => normalizedBody.includes(keyword.normalize('NFKC').toLocaleLowerCase('zh-CN')));
+      .some((keyword) => normalizedBody.includes(normalize(keyword)));
     if (isBlocked) {
       addComment(post.id, viewer.id, body, 'rejected');
       return seeOther(`/blog/${post.slug}/?comment=blocked#comments`);

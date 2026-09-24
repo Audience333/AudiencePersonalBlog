@@ -2,11 +2,12 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Pagination from '../../components/Pagination.astro';
 import { listPublicPosts, listPublicTags, parsePostTags } from '../../lib/posts';
+import { siteConfig } from '../../config/site';
 
 const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 100);
 const tag = (Astro.url.searchParams.get('tag') || '').trim().slice(0, 20);
 const page = Number(Astro.url.searchParams.get('page') || 1);
-const result = listPublicPosts({ q, tag, page });
+const result = listPublicPosts({ q, tag, page, pageSize: siteConfig.postsPerPage });
 const tags = listPublicTags();
 const posts = result.items;
 const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
@@ -24,11 +25,11 @@ const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'n
     {tags.length > 0 && <nav class="tag-index" aria-label="文章标签"><a href="/blog/" class:list={{ active: !tag }}>全部 <span>{result.totalItems}</span></a>{tags.map((item) => <a href={`/blog/?tag=${encodeURIComponent(item.tag)}`} class:list={{ active: tag === item.tag }}>{item.tag} <span>{item.count}</span></a>)}</nav>}
     {(q || tag) && <p class="filter-summary">当前筛选：{q && <span>“{q}”</span>}{q && tag && '，'}{tag && <span>标签「{tag}」</span>}，共 {result.totalItems} 篇。</p>}
     {posts.length ? <div class="article-list">
-      {posts.map((post) => <a class="article-item" href={`/blog/${post.slug}/`}>
+      {posts.map((post) => <article class="article-item">
         <time class="article-date" datetime={post.published_at}>{formatDate(post.published_at)}</time>
-        <div><h3>{post.title}</h3><p>{post.description}</p><ul class="pill-list">{parsePostTags(post.tags_json).map((postTag) => <li class="pill">{postTag}</li>)}</ul></div>
-        <span class="article-arrow" aria-hidden="true">↗</span>
-      </a>)}
+        <div><h3><a href={`/blog/${post.slug}/`}>{post.title}</a></h3><p>{post.description}</p><ul class="pill-list">{parsePostTags(post.tags_json).map((postTag) => <li><a class="pill" href={`/blog/tags/${encodeURIComponent(postTag)}/`}>{postTag}</a></li>)}</ul></div>
+        <a class="article-arrow" href={`/blog/${post.slug}/`} aria-label={`阅读：${post.title}`}>↗</a>
+      </article>)}
     </div> : <p class="empty-note">没有找到符合条件的文章。</p>}
     <Pagination page={result.page} totalPages={result.totalPages} basePath="/blog/" query={{ ...(q ? { q } : {}), ...(tag ? { tag } : {}) }} />
   </div>

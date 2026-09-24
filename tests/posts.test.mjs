@@ -6,6 +6,7 @@ import { openBlogDatabase } from '../src/lib/db.ts';
 import {
   findAdjacentPublicPosts,
   findPublicPostBySlug,
+  listAllPublicPosts,
   listPublicPosts,
   resolvePostState,
 } from '../src/lib/posts.ts';
@@ -84,6 +85,16 @@ test('treats search wildcards literally and clamps excessive page numbers', () =
   assert.deepEqual(listPublicPosts({ q: '   ', tag: '技术' }, Date.now(), db).items.map(({ slug }) => slug), ['second', 'literal-wildcards']);
   assert.equal(listPublicPosts({ page: 9999, pageSize: 2 }, Date.now(), db).page, 3);
 
+  db.close();
+  for (const suffix of ['', '-wal', '-shm']) rmSync(path + suffix, { force: true });
+});
+
+test('returns every public post for non-paginated discovery routes', () => {
+  const path = temporaryDatabase('all-public-posts');
+  const db = openBlogDatabase(path);
+  db.prepare('DELETE FROM posts').run();
+  for (let index = 0; index < 60; index++) createPost(db, { slug: `post-${index}`, status: 'published' });
+  assert.equal(listAllPublicPosts(Date.now(), db).length, 60);
   db.close();
   for (const suffix of ['', '-wal', '-shm']) rmSync(path + suffix, { force: true });
 });

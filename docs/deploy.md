@@ -15,9 +15,11 @@ npm run build
 mkdir -p data/uploads data/backups
 chmod 700 data
 npm run admin:create -- your-admin-name
+sudo adduser --system --group --home /srv/personal-blog personalblog
+sudo chown -R personalblog:personalblog /srv/personal-blog
 ```
 
-`npm ci` 会严格按照仓库的锁定依赖安装，适合服务器；`npm run build` 会生成 `dist/` 中的生产版本。请妥善保存刚创建的管理员密码。
+`npm ci` 会严格按照仓库的锁定依赖安装，适合服务器；`npm run build` 会生成 `dist/` 中的生产版本。最后两行创建受限的服务账号并将网站数据交给它管理，避免网站以 root 身份运行。请妥善保存刚创建的管理员密码。
 
 ## 生产环境变量
 

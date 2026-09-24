@@ -10,7 +10,7 @@ Astro.response.headers.set('Cache-Control', 'no-store');
 const settings = getRuntimeSettings();
 ---
 
-<BaseLayout title="网站设置" description="控制访客注册和评论策略。">
+<BaseLayout title="网站设置" description="控制访客注册和评论策略。" robots="noindex, nofollow">
   <div class="container dashboard">
     <header class="dashboard-head"><div><a class="back-link" href="/admin/">← 返回后台</a><h1>网站设置</h1><p class="muted">这些设置即时作用于访客注册和新的评论。</p></div></header>
     <form id="runtime-settings" class="editor-grid">

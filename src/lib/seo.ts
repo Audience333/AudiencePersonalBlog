@@ -1,4 +1,4 @@
-import { getPublicOrigin } from '../config/site.ts';
+import { getPublicOrigin, siteConfig } from '../config/site.ts';
 import type { PostRow } from './db.ts';
 
 export function absoluteUrl(path: string, requestUrl?: URL): string {
@@ -15,5 +15,9 @@ export function serializeJsonLd(value: Record<string, unknown>): string {
 }
 
 export function articleJsonLd(post: PostRow, canonical: string): Record<string, unknown> {
-  return { '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title, description: post.description, datePublished: post.published_at, mainEntityOfPage: canonical };
+  return {
+    '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title,
+    description: post.description, datePublished: post.published_at, mainEntityOfPage: canonical,
+    author: { '@type': 'Person', name: siteConfig.author }, image: post.cover_image || siteConfig.defaultOgImage,
+  };
 }

@@ -5,6 +5,8 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/srv/personal-blog
+User=personalblog
+Group=personalblog
 Environment=NODE_ENV=production
 EnvironmentFile=/etc/personal-blog.env
 ExecStart=/usr/bin/npm start

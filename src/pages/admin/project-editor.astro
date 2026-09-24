@@ -14,7 +14,7 @@ const tools = project ? JSON.parse(project.tools_json).join(', ') : '';
 const year = project?.year || new Date().getFullYear();
 ---
 
-<BaseLayout title={project ? `编辑：${project.title}` : '上传作品'} description="作品上传与编辑器。">
+<BaseLayout title={project ? `编辑：${project.title}` : '上传作品'} description="作品上传与编辑器。" robots="noindex, nofollow">
   <div class="container dashboard">
     <header class="dashboard-head"><div><a class="back-link" href="/admin/">← 返回后台</a><h1>{project ? '编辑作品' : '上传作品'}</h1><p class="muted">填写作品信息和 Markdown 正文；封面图可选，上传后会自动放入本机数据目录。</p></div></header>
     {Astro.url.searchParams.get('saved') === '1' && <p class="form-success" role="status">作品已保存。</p>}

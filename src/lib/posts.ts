@@ -63,6 +63,10 @@ function publicRows(now: number, query: string | undefined, db: Database.Databas
   `).all({ now, search: `%${escaped}%` }) as PostRow[];
 }
 
+export function listAllPublicPosts(now = Date.now(), db?: Database.Database): PostRow[] {
+  return publicRows(now, undefined, publicDatabase(db));
+}
+
 export function resolvePostState(post: PostRow, now = Date.now()): 'draft' | 'scheduled' | 'published' | 'archived' {
   if (post.archived === 1) return 'archived';
   if (post.status === 'draft') return 'draft';

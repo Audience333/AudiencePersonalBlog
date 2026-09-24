@@ -70,7 +70,7 @@ try {
   assert.equal(homeResponse.headers.get('x-content-type-options'), 'nosniff');
   assert.equal(homeResponse.headers.get('x-frame-options'), 'DENY');
   const home = await homeResponse.text();
-  assert.match(home, /archive-hero-v1\.png/);
+  assert.match(home, /archive-hero-v1\.webp/);
   assert.match(home, /data-theme="ark"/);
   assert.equal((await get('/projects/personal-website/')).status, 200);
 
@@ -110,6 +110,9 @@ try {
   const blockedComment = await post('/api/comments', { slug: 'welcome', body: 'blocked phrase' }, readerCookie);
   assert.equal(blockedComment.status, 303);
   assert.equal(getDb().prepare("SELECT status FROM comments WHERE body = 'blocked phrase'").get().status, 'rejected');
+  const whitespaceBlockedComment = await post('/api/comments', { slug: 'welcome', body: 'blocked\n phrase' }, readerCookie);
+  assert.equal(whitespaceBlockedComment.status, 303);
+  assert.equal(getDb().prepare("SELECT status FROM comments WHERE body = 'blocked\n phrase'").get().status, 'rejected');
 
   const imageData = new FormData();
   const tinyPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlX1JQAAAAASUVORK5CYII=', 'base64');
@@ -143,6 +146,11 @@ try {
 
   const like = await post('/api/likes', { slug: 'welcome' }, readerCookie);
   assert.equal(like.status, 303);
+  const scheduledLikePost = await post('/api/admin/posts', {
+    slug: 'future-like', title: '未来文章', description: '不可点赞的计划发布文章。', body: '正文', published_at: '2026-09-20', status: 'published', scheduled_at: '2099-01-01T00:00',
+  }, adminCookie);
+  assert.equal(scheduledLikePost.status, 200);
+  assert.equal((await post('/api/likes', { slug: 'future-like' }, readerCookie)).status, 404);
   const comment = await post('/api/comments', { slug: 'welcome', body: '很喜欢这个网站！' }, readerCookie);
   assert.equal(comment.status, 303);
   let article = await (await get('/blog/welcome/')).text();
@@ -174,6 +182,11 @@ try {
   const published = await (await get('/blog/test-post/')).text();
   assert.match(published, /测试文章/);
   assert.doesNotMatch(published, /<script>alert\(1\)<\/script>/);
+  assert.match(published, /href="\/blog\/tags\/%E6%B5%8B%E8%AF%95\//);
+  assert.match((await (await get('/blog/')).text()), /href="\/blog\/tags\/%E6%B5%8B%E8%AF%95\//);
+  assert.match((await (await get('/sitemap.xml')).text()), /\/blog\/test-post\//);
+  assert.match((await (await get('/login/')).text()), /noindex, nofollow/);
+  assert.match((await (await get('/admin/', adminCookie)).text()), /noindex, nofollow/);
 
   assert.equal((await post('/api/admin/posts', { title: '非法修改' }, readerCookie)).status, 401);
   assert.equal((await post('/api/admin/projects', { title: '非法修改' }, readerCookie)).status, 401);

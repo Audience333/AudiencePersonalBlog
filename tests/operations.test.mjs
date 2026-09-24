@@ -40,6 +40,8 @@ test('documents every supported setup and operations command', () => {
   assert.match(deployGuide, /npm ci/);
   assert.match(deployGuide, /4321/);
   assert.match(service, /EnvironmentFile=\/etc\/personal-blog\.env/);
+  assert.match(service, /User=personalblog/);
+  assert.match(service, /Group=personalblog/);
   assert.match(caddy, /127\.0\.0\.1:4321/);
 });
 
