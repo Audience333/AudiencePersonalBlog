@@ -1,20 +1,107 @@
-# 将来上线时的准备
+# Ubuntu 部署与维护
 
-目前先在本地调试，不需要购买服务器或域名。本页记录将来部署时需要理解的事项，购买前应按当时的服务商价格和备案规则重新确认。
+以下示例假定项目安装到 `/srv/personal-blog`，域名是 `example.com`。先准备一台已安装 Node.js `24.15+`、Git 和 Caddy 的 Ubuntu 服务器，并完成域名备案、解析和防火墙的 80/443 端口放行。
 
-## 为什么现在需要运行中的服务器
+## 首次部署
 
-旧版本只有静态页面，上传构建文件就可以展示。现在登录、网页编辑、作品上传、评论和点赞都要读写数据，因此上线后必须持续运行 `npm start` 对应的 Node.js 服务，并保留 `data/blog.sqlite` 与 `data/uploads/`。`dist/` 可以重新构建，数据库文件和上传目录不能随意删除或覆盖。
+```bash
+sudo mkdir -p /srv/personal-blog
+sudo chown $USER:$USER /srv/personal-blog
+git clone https://github.com/Audience333/AudiencePersonalBlog.git /srv/personal-blog
+cd /srv/personal-blog
+npm ci
+npm run check
+npm run build
+mkdir -p data/uploads data/backups
+chmod 700 data
+npm run admin:create -- your-admin-name
+```
 
-## 上线顺序
+`npm ci` 会严格按照仓库的锁定依赖安装，适合服务器；`npm run build` 会生成 `dist/` 中的生产版本。请妥善保存刚创建的管理员密码。
 
-1. 准备支持 Node.js 24.15+ 的服务器与域名。若服务器在中国大陆，先根据服务商和主管部门的现行要求办理备案，再开放网站。
-2. 在服务器上安装依赖并执行 `npm run check`、`npm run build`。用 `npm run admin:create -- 你的用户名` 在服务器终端创建管理员，不要把密码写进命令、代码或聊天记录。
-3. 让 `npm start` 作为长期服务运行，并只监听本机地址。设置 `BLOG_DB_PATH` 指向有持久存储和备份的 SQLite 文件；可选设置 `BLOG_UPLOAD_DIR` 指向作品封面图目录。运行账号必须能写入这两个目录。
-4. 用 Caddy 等反向代理把域名的 HTTPS 请求转给 Node.js 服务。`deploy/Caddyfile.example` 是按 4321 端口写的示例，需要换成实际域名和端口。
-5. 配置防火墙，只对外开放 HTTPS 所需端口；检查首页、注册、登录、后台、作品封面上传、评论审核与文章发布。
-6. 定期备份数据库、`data/uploads/` 和项目源文件。SQLite 使用 WAL 模式，备份时应使用 SQLite 在线备份方式或先停服务，避免只复制主文件而漏掉尚未合并的写入。
+## 生产环境变量
 
-如果正式网址与代理转发的请求来源不同，设置 `PUBLIC_SITE_ORIGIN=https://你的域名`，供表单同源检查使用。正式环境需要 HTTPS，因为登录 cookie 在生产模式下标记为 `Secure`。
+创建只有系统管理员可读取的变量文件：
 
-部署到服务器的具体命令会随你购买的系统、域名和服务商而变；等你确定这些信息后，再补齐对应的服务管理、DNS 和备份配置。
+```bash
+sudo install -m 600 /dev/null /etc/personal-blog.env
+sudo nano /etc/personal-blog.env
+```
+
+填入以下内容，并将 `example.com` 改为真实域名：
+
+```dotenv
+HOST=127.0.0.1
+PORT=4321
+PUBLIC_SITE_ORIGIN=https://example.com
+BLOG_DB_PATH=/srv/personal-blog/data/blog.sqlite
+BLOG_UPLOAD_DIR=/srv/personal-blog/data/uploads
+```
+
+`NODE_ENV=production` 已写入 systemd 服务。Astro 不会在运行时自动加载项目目录里的 `.env`，所以由 systemd 读取此文件并传入服务。
+
+## 安装应用服务
+
+复制仓库中的服务范例：
+
+```bash
+sudo cp deploy/personal-blog.service.example /etc/systemd/system/personal-blog.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now personal-blog
+sudo systemctl status personal-blog
+```
+
+服务只监听本机 `127.0.0.1:4321`，不会直接暴露 Node.js 端口。若启动失败，使用 `sudo journalctl -u personal-blog -n 100 --no-pager` 查看最近日志。
+
+## 配置 HTTPS 反向代理
+
+将 `deploy/Caddyfile.example` 的内容合并到 `/etc/caddy/Caddyfile`，把 `example.com` 替换成域名后验证并重载：
+
+```bash
+sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl reload caddy
+curl https://example.com/api/health
+```
+
+返回 `{"ok":true}` 表示应用和数据库可用。Caddy 会负责 HTTPS 证书与浏览器到服务器的加密连接。
+
+## 备份
+
+```bash
+cd /srv/personal-blog
+npm run backup -- --output data/backups
+```
+
+每次备份都会创建新的时间戳目录，包含 `blog.sqlite`、`uploads/` 和 `manifest.json`，不会覆盖旧备份。建议用服务器的定时任务将这个目录复制到另一台机器或对象存储。
+
+## 恢复
+
+先停止服务并保留当前数据副本，再从一个备份目录恢复：
+
+```bash
+sudo systemctl stop personal-blog
+cp -a data data.before-restore
+cp data/backups/<timestamp>/blog.sqlite data/blog.sqlite
+rm -rf data/uploads
+cp -a data/backups/<timestamp>/uploads data/uploads
+sudo systemctl start personal-blog
+curl https://example.com/api/health
+```
+
+如果健康检查失败，停止服务后将 `data.before-restore` 还原为 `data`，再启动服务。这就是回滚路径。
+
+## 升级与回滚
+
+升级前先运行备份，然后：
+
+```bash
+cd /srv/personal-blog
+git pull
+npm ci
+npm run check
+npm run build
+sudo systemctl restart personal-blog
+curl https://example.com/api/health
+```
+
+如果新版本无法正常工作，使用 `git log --oneline` 找到上一个可用提交，执行 `git checkout <commit>`，再次运行 `npm ci`、`npm run build` 和 `sudo systemctl restart personal-blog`。确认恢复后，再决定是否创建修复提交。

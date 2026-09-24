@@ -14,6 +14,7 @@
     "preview": "astro preview",
     "start": "node ./scripts/start.mjs",
     "backup": "node ./scripts/backup.mjs",
+    "optimize:assets": "node ./scripts/optimize-assets.mjs",
     "admin:create": "node ./scripts/create-admin.mjs",
     "astro": "astro"
   },
@@ -32,6 +33,7 @@
     "@astrojs/check": "^0.9.10",
     "@types/better-sqlite3": "^9.6.0",
     "@types/sanitize-html": "^2.16.1",
+    "sharp": "^0.35.4",
     "typescript": "^6.0.3"
   }
 }

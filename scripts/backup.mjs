@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { cpSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const outputIndex = process.argv.indexOf('--output');
@@ -13,7 +13,15 @@ try {
   const db = new Database(databasePath, { readonly: true });
   await db.backup(resolve(destination, 'blog.sqlite'));
   db.close();
-  cpSync(uploadsPath, resolve(destination, 'uploads'), { recursive: true, force: false, errorOnExist: false });
+  if (existsSync(uploadsPath)) {
+    cpSync(uploadsPath, resolve(destination, 'uploads'), { recursive: true, force: false, errorOnExist: false });
+  } else {
+    mkdirSync(resolve(destination, 'uploads'));
+  }
   writeFileSync(resolve(destination, 'manifest.json'), JSON.stringify({ createdAt: new Date().toISOString(), database: 'blog.sqlite', uploads: 'uploads' }, null, 2));
   console.log(destination);
-} catch (error) { console.error(error); process.exitCode = 1; }
+} catch (error) {
+  rmSync(destination, { recursive: true, force: true });
+  console.error(error);
+  process.exitCode = 1;
+}

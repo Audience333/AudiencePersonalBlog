@@ -11,7 +11,10 @@ const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'n
 <BaseLayout title="首页" description="一个展示作品、分享文章与记录成长的个人网站。">
   <div class="container">
     <section class="archive-hero">
-      <img class="archive-hero-image" src="/archive-hero-v1.png" alt="" />
+      <picture>
+        <source srcset="/archive-hero-v1.webp" type="image/webp" />
+        <img class="archive-hero-image" src="/archive-hero-v1.png" alt="" width="1920" height="1080" />
+      </picture>
       <div class="archive-identity"><strong>观众</strong><span>PERSONAL ARCHIVE<br />CREATIVE RECORDS</span></div>
       <div class="archive-hero-copy">
         <p class="eyebrow">ARCHIVE / SELECT · 2026</p>

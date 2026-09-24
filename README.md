@@ -1,167 +1,113 @@
 # Archive Portfolio Blog
 
-一个可自行部署的「作品集 + 博客」模板。界面采用暖白档案库风格，内置账号系统、文章与作品后台、评论审核和点赞功能。
+一个可自行部署的作品集与个人博客模板。网站、管理员后台、访客账号、评论与 SQLite 数据库都运行在同一个 Astro Node.js 应用中，适合从本地调试逐步迁移到自己的服务器。
 
-项目使用 Astro 的 Node.js 服务端渲染模式。页面、后端接口和管理后台都在同一个代码库中；数据保存在 SQLite 文件里，不需要额外安装 MySQL 或 PostgreSQL。
+## 截图
+
+首页采用档案馆式版面，使用 WebP 首图并保留 PNG 后备。启动本地开发服务后可在 `http://localhost:4321/` 查看当前主题。
 
 ## 功能
 
-- 响应式作品集、博客、关于页面和双主题切换
-- 管理员登录与基于 Markdown 的文章编辑器
-- 作品创建、草稿、发布、首页推荐和封面上传
-- 访客注册、登录、文章点赞和评论
-- 评论先审核后公开
-- SQLite 持久化账号、会话、文章、作品、评论和点赞
-- 密码使用 Node.js `scrypt` 加盐哈希保存
-- 上传文件类型、文件签名和 4 MB 大小限制
-- 同源表单校验、HttpOnly 会话 Cookie 和基础请求限流
+- Markdown 写作、实时安全预览、草稿预览、文章图片和作品封面上传
+- 计划发布、归档、单篇文章评论开关、目录、阅读进度、代码复制和相邻文章
+- 访客注册、登录、点赞、评论审核、注册开关和关键词拦截
+- 搜索、标签归档、分页、RSS、sitemap、规范链接、Open Graph 和结构化数据
+- SQLite 自动迁移、健康检查、安全响应头、备份与 systemd/Caddy 部署范例
 
-## 技术栈
+## 要求
 
-- Astro 7
-- TypeScript
-- Node.js 服务端适配器
-- SQLite / better-sqlite3
-- marked + sanitize-html
-- 原生 CSS
+需要 Node.js `24.15` 或更高版本，以及 Git。开发与生产环境都使用 Node.js；不需要另行安装 MySQL、Redis 或第三方 CMS。
 
-## 本地运行
-
-需要 Node.js 24.15 或更新版本。
+## 快速开始
 
 ```bash
-git clone <你的仓库地址>
-cd <仓库目录>
+git clone https://github.com/Audience333/AudiencePersonalBlog.git
+cd AudiencePersonalBlog
 npm install
 npm run dev
 ```
 
-开发服务器默认使用 `http://localhost:4321`。首次访问时，程序会自动创建 `data/blog.sqlite`，并写入示例文章和示例作品。
+首次启动会自动建立 `data/blog.sqlite` 并写入示例内容。浏览器打开终端显示的网址，默认是 `http://localhost:4321/`。
+
+## 集中修改网站信息
+
+| 想修改的内容 | 位置 |
+| --- | --- |
+| 网站名、作者、时区、默认分享图 | `src/config/site.ts` |
+| 首页的标题和介绍 | `src/pages/index.astro` |
+| 颜色、排版和响应式样式 | `src/styles/global.css` |
+| 皮卡丘演示素材 | `public/pikachu-official.png` |
+| 首页背景图 | `public/archive-hero-v1.png` 与 `public/archive-hero-v1.webp` |
 
 ## 创建管理员
-
-注册页面创建的账号都是普通访客，不能进入后台。第一次运行时，在交互式终端执行：
 
 ```bash
 npm run admin:create -- your-admin-name
 ```
 
-命令会要求输入两次密码。用户名长度为 3–24 位，可使用中文、字母、数字、下划线和连字符；密码长度为 12–128 位。密码输入不会显示在终端中。
+按提示设置密码后，访问 `/login/` 登录，再进入 `/admin/`。管理员可管理文章、作品、评论与网站设置。
 
-管理员创建完成后：
+## 写作流程
 
-1. 打开 `/login/` 登录。
-2. 访问 `/admin/` 进入管理后台。
-3. 使用「写新文章」编辑 Markdown 文章。
-4. 使用「上传作品」创建作品并上传封面。
-5. 在后台审核访客提交的评论。
+1. 在后台新建文章，输入标题、摘要、标签和 Markdown 正文。
+2. 使用编辑器内的预览确认排版；上传图片后会自动生成可插入正文的 Markdown 链接。
+3. 保存为草稿、直接发布，或选择未来的发布时间。
+4. 草稿可通过管理员预览页查看，访客不会获得草稿网址。
 
-创建脚本只允许建立第一个管理员，不会覆盖已有管理员。
+## 访客功能
 
-## 常用命令
+访客注册后可以登录、点赞和评论。管理员在后台审核评论；可在“网站设置”关闭新注册、设置默认评论状态和拦截关键词。
 
-| 命令 | 用途 |
+## 运行时设置
+
+`.env.example` 列出了生产环境变量：
+
+| 变量 | 用途 |
 | --- | --- |
-| `npm run dev` | 启动开发服务器 |
-| `npm run check` | 检查 Astro 页面和 TypeScript 类型 |
-| `npm run build` | 生成 Node.js 生产构建 |
-| `npm start` | 运行已经生成的生产构建 |
-| `npm run test:integration` | 测试注册、权限、文章、作品、上传、评论和点赞流程 |
-| `npm run admin:create -- <用户名>` | 创建第一个管理员 |
+| `PUBLIC_SITE_ORIGIN` | 正式网址，用于同源校验、RSS、sitemap 和规范链接 |
+| `BLOG_DB_PATH` | SQLite 数据库位置 |
+| `BLOG_UPLOAD_DIR` | 上传图片目录 |
+| `HOST` / `PORT` | 服务监听地址，部署示例为 `127.0.0.1:4321` |
+| `NODE_ENV` | 生产环境设为 `production` |
 
-## 环境变量
+Astro 不会在生产运行时自动读取项目根目录的 `.env`；部署范例通过 systemd 的 `/etc/personal-blog.env` 显式提供这些变量。
 
-所有变量都是可选的。本地开发不配置也可以运行。
-
-| 变量 | 默认值 | 说明 |
-| --- | --- | --- |
-| `BLOG_DB_PATH` | `./data/blog.sqlite` | SQLite 数据库文件位置 |
-| `BLOG_UPLOAD_DIR` | `./data/uploads` | 作品封面保存目录 |
-| `PUBLIC_SITE_ORIGIN` | 当前请求来源 | 生产环境用于表单同源校验，例如 `https://example.com` |
-| `HOST` | Astro 默认值 | 服务监听地址 |
-| `PORT` | `4321` | 服务监听端口 |
-
-生产环境示例：
+## 检查与构建
 
 ```bash
-npm install
 npm run check
 npm run build
-PUBLIC_SITE_ORIGIN=https://example.com npm start
+npm run test:unit
+npm run test:integration
 ```
 
-Windows PowerShell 设置变量的语法不同：
+`npm run check` 检查 Astro 与 TypeScript，`npm run build` 生成可部署的服务端文件，两个测试命令分别检查核心逻辑和完整的登录、后台、公开页面流程。
 
-```powershell
-$env:PUBLIC_SITE_ORIGIN = "https://example.com"
+## 生产部署
+
+```bash
 npm start
+npm run backup -- --output data/backups
 ```
 
-## 内容与数据
+`npm start` 运行已经构建好的站点。完整的 Ubuntu、systemd、Caddy、HTTPS、备份、恢复、升级与回滚步骤见 [docs/deploy.md](docs/deploy.md)。生产环境必须把 `data/blog.sqlite` 和 `data/uploads/` 放在持久磁盘中。
 
-文章和作品以 SQLite 中的版本为准。管理员保存草稿后，访客无法访问；发布后立即生效，不需要重新构建网站。
+## 备份、恢复与升级
 
-以下内容不会提交到 Git：
-
-- `data/blog.sqlite`：账号、文章、作品、评论、点赞和会话
-- `data/uploads/`：后台上传的作品封面
-
-迁移或备份网站时必须同时保留数据库和上传目录。SQLite 使用 WAL 模式；运行中备份时应使用 SQLite 在线备份方式，或者先停止服务再复制数据库相关文件。
+备份命令会创建一个独立的时间戳目录，里面包含数据库、上传文件和清单。恢复或升级前先运行备份；详细操作和回滚步骤见部署文档。
 
 ## 项目结构
 
 ```text
-src/
-  layouts/               公共页面布局和导航
-  lib/                   数据库、登录、Markdown 和上传逻辑
-  pages/                 页面与服务端 API
-    admin/               管理后台
-    api/                 登录、文章、作品、评论、点赞和上传接口
-  styles/global.css      全站主题与响应式样式
-public/                  首页背景、图标等公开静态资源
-scripts/create-admin.mjs 管理员创建脚本
-tests/integration.mjs    完整流程集成测试
-data/                    运行时数据，不提交到 Git
-docs/deploy.md           部署说明
+src/config/       网站固定信息
+src/pages/        公开页面、后台和 API
+src/lib/          数据库、登录、文章、SEO 与业务逻辑
+public/           图片和静态资源
+scripts/          管理员创建、启动、备份和图片压缩
+deploy/           systemd 与 Caddy 配置范例
+docs/             部署说明
 ```
 
-## 自定义模板
+## Pokémon 素材
 
-- 网站名称、导航和页脚：`src/layouts/BaseLayout.astro`
-- 首页文案和档案编号：`src/pages/index.astro`
-- 颜色、排版和响应式布局：`src/styles/global.css`
-- 首页背景：`public/archive-hero-v1.png`
-- 首页角色图片：`public/pikachu-official.png`
-- 示例文章与作品：`src/lib/db.ts` 中的首次初始化数据
-
-若修改首次初始化数据，已有数据库不会自动重置。请在空数据库上测试新初始化内容，不要直接删除仍包含正式内容的数据库。
-
-## 部署要求
-
-这个项目包含登录、数据库和文件上传，因此不能部署为纯静态网站。服务器需要：
-
-- 持续运行 Node.js 24.15+
-- 为 SQLite 和上传目录提供持久存储
-- 使用 HTTPS
-- 使用 Caddy、Nginx 等反向代理转发到 Node.js 服务
-- 定期备份数据库和上传文件
-
-更完整的上线步骤见 [部署说明](docs/deploy.md)。
-
-## 品牌与素材说明
-
-`public/pikachu-official.png` 来自 [Pokémon 官方图鉴](https://www.pokemon.com/uk/pokedex/pikachu)，仅用于本模板的视觉演示。Pokémon、Pikachu 及相关角色和素材的商标与版权归其权利人所有，该素材不随本项目代码获得开源授权。
-
-如果你准备公开发布、商业使用或允许其他人复用此模板，请先确认你拥有相应素材的使用权，或者将该文件替换为你自己的原创角色图片。项目中的代码与第三方品牌素材应分别处理授权。
-
-本仓库目前未附带代码开源许可证。公开到 GitHub 前，请根据你希望他人如何使用代码选择并添加许可证，例如 MIT License。
-
-## 发布前检查
-
-```bash
-npm run check
-npm run build
-npm run test:integration
-```
-
-不要提交真实数据库、上传文件、管理员密码、Cookie 或 `.env` 文件。
+`public/pikachu-official.png` 只作主题演示。公开发布或商业使用前，请替换成你拥有使用授权的素材。
