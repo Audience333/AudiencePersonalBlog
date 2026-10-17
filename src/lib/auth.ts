@@ -10,6 +10,7 @@ export interface Viewer {
   id: number;
   username: string;
   role: Role;
+  avatar?: string | null;
 }
 
 function derive(password: string, salt: Buffer): Promise<Buffer> {
@@ -82,7 +83,7 @@ export function getViewer(cookies: AstroCookies): Viewer | undefined {
     .get(digest(token)) as { user_id: number; expires_at: number } | undefined;
   if (!session || session.expires_at <= Date.now()) return undefined;
   const user = findUserById(session.user_id);
-  return user ? { id: user.id, username: user.username, role: user.role } : undefined;
+  return user ? { id: user.id, username: user.username, role: user.role, avatar: user.avatar } : undefined;
 }
 
 export function destroySession(cookies: AstroCookies): void {

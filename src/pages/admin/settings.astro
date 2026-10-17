@@ -23,20 +23,25 @@ const settings = getRuntimeSettings();
 </BaseLayout>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>('#runtime-settings');
-  const status = document.querySelector<HTMLElement>('#save-status');
-  form?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!status) return;
-    status.textContent = '正在保存…';
-    const body = new URLSearchParams();
-    new FormData(form).forEach((value, key) => body.set(key, String(value)));
-    try {
-      const response = await fetch('/api/admin/settings', { method: 'POST', body });
-      const result = await response.json();
-      status.textContent = response.ok ? '设置已保存。' : (result.error || '保存失败。');
-    } catch {
-      status.textContent = '网络错误，设置尚未保存。';
-    }
-  });
+  function setupSettingsPage() {
+    const form = document.querySelector<HTMLFormElement>('#runtime-settings');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const status = document.querySelector<HTMLElement>('#save-status');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!status) return;
+      status.textContent = '正在保存…';
+      const body = new URLSearchParams();
+      new FormData(form).forEach((value, key) => body.set(key, String(value)));
+      try {
+        const response = await fetch('/api/admin/settings', { method: 'POST', body });
+        const result = await response.json();
+        status.textContent = response.ok ? '设置已保存。' : (result.error || '保存失败。');
+      } catch {
+        status.textContent = '网络错误，设置尚未保存。';
+      }
+    });
+  }
+  document.addEventListener('astro:page-load', setupSettingsPage);
 </script>

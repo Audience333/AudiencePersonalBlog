@@ -1,0 +1,51 @@
+---
+import { getPublicStats } from '../lib/db';
+import { listPublicTags } from '../lib/posts';
+import { siteConfig } from '../config/site';
+
+const profile = siteConfig.authorProfile;
+const stats = getPublicStats();
+const friendLinks = siteConfig.friendLinks;
+const tags = listPublicTags().sort((a, b) => b.count - a.count).slice(0, 15);
+---
+
+<aside class="profile-sidebar" aria-label="站长信息">
+  <div class="profile-card">
+    <div class="profile-head">
+      <img class="profile-avatar" src={profile.avatar} alt={`${profile.name} 的头像`} width="64" height="64" />
+      <strong class="profile-name">{profile.name}</strong>
+    </div>
+    <ul class="profile-info">
+      <li><span class="profile-info-label">Occupation</span><span>{profile.occupation}</span></li>
+      <li><span class="profile-info-label">Hometown</span><span>{profile.hometown}</span></li>
+      <li><span class="profile-info-label">Location</span><span>{profile.location}</span></li>
+      <li><span class="profile-info-label">Bio</span><span>{profile.bio}</span></li>
+    </ul>
+    {profile.links.length > 0 && <nav class="profile-links" aria-label="站长社交链接">
+      {profile.links.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>)}
+    </nav>}
+    <dl class="profile-stats">
+      <div><dt>Posts</dt><dd>{stats.posts}</dd></div>
+      <div><dt>Views</dt><dd>{stats.views}</dd></div>
+      <div><dt>Comments</dt><dd>{stats.comments}</dd></div>
+    </dl>
+  </div>
+  {tags.length > 0 && <div class="profile-card sidebar-tags">
+    <h2 class="sidebar-block-title">标签</h2>
+    <ul class="sidebar-tag-list">
+      {tags.map((item) => <li><a href={`/blog/?tag=${encodeURIComponent(item.tag)}`}>{item.tag} <span>{item.count}</span></a></li>)}
+    </ul>
+  </div>}
+  {friendLinks.length > 0 && <div class="profile-card sidebar-friends">
+    <h2 class="sidebar-block-title">友情链接</h2>
+    <ul class="sidebar-friend-list">
+      {friendLinks.map((link) => (
+        <li><a href={link.href} target="_blank" rel="noopener noreferrer">
+          <strong>{link.label}</strong>
+          {link.note && <span>{link.note}</span>}
+        </a></li>
+      ))}
+    </ul>
+  </div>}
+  <slot />
+</aside>

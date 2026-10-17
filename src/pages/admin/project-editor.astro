@@ -42,15 +42,18 @@ const year = project?.year || new Date().getFullYear();
 </BaseLayout>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>('#project-editor');
-  const saveStatus = document.querySelector<HTMLElement>('#save-status');
-  const uploadStatus = document.querySelector<HTMLElement>('#upload-status');
-  const fileInput = document.querySelector<HTMLInputElement>('#cover-file');
-  const coverInput = document.querySelector<HTMLInputElement>('#cover-image');
-  const preview = document.querySelector<HTMLElement>('#cover-preview');
-  const uploadButton = document.querySelector<HTMLButtonElement>('#upload-cover');
+  function setupProjectEditorPage() {
+    const form = document.querySelector<HTMLFormElement>('#project-editor');
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const saveStatus = document.querySelector<HTMLElement>('#save-status');
+    const uploadStatus = document.querySelector<HTMLElement>('#upload-status');
+    const fileInput = document.querySelector<HTMLInputElement>('#cover-file');
+    const coverInput = document.querySelector<HTMLInputElement>('#cover-image');
+    const preview = document.querySelector<HTMLElement>('#cover-preview');
+    const uploadButton = document.querySelector<HTMLButtonElement>('#upload-cover');
 
-  uploadButton?.addEventListener('click', async () => {
+    uploadButton?.addEventListener('click', async () => {
     const file = fileInput?.files?.[0];
     if (!file || !uploadStatus || !coverInput || !preview) { if (uploadStatus) uploadStatus.textContent = '请先选择一张图片。'; return; }
     if (file.size > 4 * 1024 * 1024) { uploadStatus.textContent = '图片不能超过 4 MB。'; return; }
@@ -77,22 +80,24 @@ const year = project?.year || new Date().getFullYear();
     }
   });
 
-  form?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!saveStatus) return;
-    saveStatus.textContent = '正在保存…';
-    const body = new URLSearchParams();
-    new FormData(form).forEach((value, key) => {
-      if (value instanceof File) return;
-      body.set(key, String(value));
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!saveStatus) return;
+      saveStatus.textContent = '正在保存…';
+      const body = new URLSearchParams();
+      new FormData(form).forEach((value, key) => {
+        if (value instanceof File) return;
+        body.set(key, String(value));
+      });
+      try {
+        const response = await fetch('/api/admin/projects', { method: 'POST', body });
+        const result = await response.json();
+        if (!response.ok) { saveStatus.textContent = result.error || '保存失败。'; return; }
+        window.location.assign(`${result.location}&saved=1`);
+      } catch {
+        saveStatus.textContent = '网络错误，作品尚未保存，请重试。';
+      }
     });
-    try {
-      const response = await fetch('/api/admin/projects', { method: 'POST', body });
-      const result = await response.json();
-      if (!response.ok) { saveStatus.textContent = result.error || '保存失败。'; return; }
-      window.location.assign(`${result.location}&saved=1`);
-    } catch {
-      saveStatus.textContent = '网络错误，作品尚未保存，请重试。';
-    }
-  });
+  }
+  document.addEventListener('astro:page-load', setupProjectEditorPage);
 </script>

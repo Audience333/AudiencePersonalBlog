@@ -29,12 +29,20 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const coverImage = (form.get('cover_image') || '').trim();
     const status = form.get('status') === 'published' ? 'published' : 'draft';
     const tags = (form.get('tags') || '').split(',').map((tag) => tag.trim()).filter(Boolean);
+    const series = (form.get('series') || '').trim();
+    const seriesOrderRaw = (form.get('series_order') || '').trim();
     if (id && (!Number.isSafeInteger(id) || !findPostById(id))) return json({ error: '文章不存在。' }, 404);
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 80) return json({ error: '网址标识只能使用小写英文字母、数字和连字符。' }, 422);
     if (title.length < 2 || title.length > 100 || description.length < 5 || description.length > 240) return json({ error: '请检查标题和简介长度。' }, 422);
     if (body.length < 2 || body.length > 100_000) return json({ error: '正文长度需为 2–100000 字。' }, 422);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(publishedAt) || Number.isNaN(Date.parse(`${publishedAt}T00:00:00Z`))) return json({ error: '发布日期无效。' }, 422);
     if (tags.length > 8 || tags.some((tag) => tag.length > 20)) return json({ error: '最多填写 8 个标签，每个不超过 20 字。' }, 422);
+    if (series.length > 30) return json({ error: '系列名称不能超过 30 字。' }, 422);
+    let seriesOrder = 0;
+    if (seriesOrderRaw) {
+      seriesOrder = Number(seriesOrderRaw);
+      if (!Number.isInteger(seriesOrder) || seriesOrder < 0 || seriesOrder > 999) return json({ error: '系列序号需为 0–999 的整数。' }, 422);
+    }
     const scheduledAt = scheduledValue ? parseZonedDateTime(scheduledValue, siteConfig.timezone) : null;
     if (scheduledValue && scheduledAt === undefined) return json({ error: '计划发布时间无效。' }, 422);
     let validCoverImage: string | null = null;
@@ -54,7 +62,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const savedId = savePost({
       slug, title, description, body_markdown: body, tags_json: JSON.stringify(tags), status, published_at: publishedAt,
       scheduled_at: scheduledAt, archived, comments_enabled: effectiveCommentsEnabled,
-      cover_image: validCoverImage,
+      cover_image: validCoverImage, series: series || null, series_order: series ? seriesOrder : 0,
     }, id || undefined);
     return json({ ok: true, location: `/admin/editor/?id=${savedId}` });
   } catch (error) {

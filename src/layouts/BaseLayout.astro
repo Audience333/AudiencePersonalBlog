@@ -1,8 +1,11 @@
 ---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 import { getViewer } from '../lib/auth';
 import { siteConfig } from '../config/site';
 import { absoluteUrl, serializeJsonLd } from '../lib/seo';
+import MusicPlayer from '../components/MusicPlayer.astro';
+import SearchPalette from '../components/SearchPalette.astro';
 
 interface Props {
   title: string;
@@ -40,6 +43,7 @@ const viewer = getViewer(Astro.cookies);
     {jsonLd && <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />}
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ClientRouter />
     <title>{pageTitle}</title>
   </head>
   <body>
@@ -51,13 +55,16 @@ const viewer = getViewer(Astro.cookies);
           <a href="/" aria-current={pathname === '/' ? 'page' : undefined}><span>01</span>首页</a>
           <a href="/projects/" aria-current={pathname.startsWith('/projects/') ? 'page' : undefined}><span>02</span>作品</a>
           <a href="/blog/" aria-current={pathname.startsWith('/blog/') ? 'page' : undefined}><span>03</span>文章</a>
-          <a href="/about/" aria-current={pathname.startsWith('/about/') ? 'page' : undefined}><span>04</span>关于</a>
+          <a href="/updates/" aria-current={pathname.startsWith('/updates/') ? 'page' : undefined}><span>04</span>动态</a>
+          <a href="/resources/" aria-current={pathname.startsWith('/resources/') ? 'page' : undefined}><span>05</span>资源库</a>
+          <a href="/about/" aria-current={pathname.startsWith('/about/') ? 'page' : undefined}><span>06</span>关于</a>
         </nav>
         <div class="header-tools">
+          <SearchPalette />
           <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换博客主题">◐ <span>主题</span></button>
           {viewer ? <>
             {viewer.role === 'admin' && <a class="account-link" href="/admin/">后台</a>}
-            <span class="account-name">{viewer.username}</span>
+            <a class="account-name" href="/account/" title="我的账号">{viewer.avatar ? <img class="avatar avatar-small" src={viewer.avatar} alt="" /> : null}{viewer.username}</a>
             <form action="/api/auth/logout" method="post"><button class="logout-link" type="submit">退出</button></form>
           </> : <a class="account-link" href="/login/">登录</a>}
         </div>
@@ -67,9 +74,19 @@ const viewer = getViewer(Astro.cookies);
 
       <footer class="site-footer container">
         <span>{siteConfig.footer}</span>
+        <nav class="footer-links" aria-label="更多页面">
+          <a href="/guestbook/">留言墙</a>
+          <a href="/resources/">资源库</a>
+          <a href="/blog/series/">文库</a>
+          <a href="/rss.xml">RSS</a>
+        </nav>
+        {siteConfig.socialLinks.length > 0 && <nav class="footer-links footer-social" aria-label="社交链接">
+          {siteConfig.socialLinks.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>)}
+        </nav>}
         <span>© {new Date().getFullYear()} {siteConfig.author}</span>
       </footer>
     </div>
+    <MusicPlayer />
     <script is:inline>
       const toggle = document.querySelector('[data-theme-toggle]');
       if (toggle) {

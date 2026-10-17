@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getViewer } from '../../lib/auth';
+import { getAnalyticsSummary } from '../../lib/analytics';
+
+const viewer = getViewer(Astro.cookies);
+if (!viewer) return Astro.redirect('/login/?error=required');
+if (viewer.role !== 'admin') return new Response('Forbidden', { status: 403 });
+Astro.response.headers.set('Cache-Control', 'no-store');
+const summary = getAnalyticsSummary(30);
+const maxDayViews = Math.max(1, ...summary.perDay.map((day) => day.views));
+---
+
+<BaseLayout title="访问统计" description="自托管的页面访问统计，不记录访客 IP。" robots="noindex, nofollow">
+  <div class="container dashboard">
+    <header class="dashboard-head">
+      <div><a class="back-link" href="/admin/">← 返回后台</a><h1>访问统计</h1><p class="muted">只记录公开页面的路径、来源和浏览器信息，不记录 IP；管理员自己的访问不计入。</p></div>
+    </header>
+
+    <section class="stats-cards" aria-label="总览">
+      <div class="stats-card"><strong>{summary.totalViews}</strong><span>近 {summary.days} 天浏览量</span></div>
+      <div class="stats-card"><strong>{summary.todayViews}</strong><span>今日浏览量</span></div>
+      <div class="stats-card"><strong>{summary.topPages.length}</strong><span>有访问的页面</span></div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="trend-title">
+      <div class="section-heading"><h2 id="trend-title">近 {summary.days} 天趋势</h2></div>
+      <div class="stats-chart" role="img" aria-label={`近 ${summary.days} 天每日浏览量柱状图`}>
+        {summary.perDay.map((day) => (
+          <div class="stats-bar" title={`${day.day}：${day.views} 次`}>
+            <span style={`height: ${Math.max(2, (day.views / maxDayViews) * 100)}%`}></span>
+          </div>
+        ))}
+      </div>
+      <div class="stats-chart-axis"><span>{summary.perDay[0]?.day}</span><span>{summary.perDay[summary.perDay.length - 1]?.day}</span></div>
+    </section>
+
+    <div class="stats-columns">
+      <section class="dashboard-section" aria-labelledby="pages-title">
+        <div class="section-heading"><h2 id="pages-title">热门页面</h2></div>
+        {summary.topPages.length ? <ol class="stats-list">
+          {summary.topPages.map((page) => <li><span class="stats-path">{page.path}</span><span class="stats-count">{page.views}</span></li>)}
+        </ol> : <p class="empty-note">还没有访问记录，等有访客打开页面后这里会出现数据。</p>}
+      </section>
+      <section class="dashboard-section" aria-labelledby="referrers-title">
+        <div class="section-heading"><h2 id="referrers-title">访客来源</h2></div>
+        {summary.topReferrers.length ? <ol class="stats-list">
+          {summary.topReferrers.map((referrer) => <li><span class="stats-path">{referrer.referrer}</span><span class="stats-count">{referrer.views}</span></li>)}
+        </ol> : <p class="empty-note">暂无外部来源记录；直接访问的访客不会留下来源。</p>}
+      </section>
+    </div>
+  </div>
+</BaseLayout>

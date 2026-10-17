@@ -1,11 +1,14 @@
 import type Database from 'better-sqlite3';
 import { getDb, type PostRow } from './db.ts';
 
+export type PublicPostSort = 'new' | 'hot' | 'words';
+
 export type PublicPostFilters = {
   q?: string;
   tag?: string;
   page?: number;
   pageSize?: number;
+  sort?: PublicPostSort;
 };
 
 export type PostPage = {
@@ -47,13 +50,7 @@ function normalizedPage(value?: number) {
   return Math.max(1, Math.floor(value!));
 }
 
-function publicRows(now: number, query: string | undefined, db: Database.Database): PostRow[] {
-  const search = query?.trim();
-  if (!search) {
-    return db.prepare(`SELECT * FROM posts WHERE ${PUBLIC_WHERE} ORDER BY published_at DESC, id DESC`)
-      .all({ now }) as PostRow[];
-  }
-
+function likeSearchRows(db: Database.Database, now: number, search: string): PostRow[] {
   const escaped = search.replace(/[\\%_]/g, '\\$&');
   return db.prepare(`
     SELECT * FROM posts
@@ -61,6 +58,35 @@ function publicRows(now: number, query: string | undefined, db: Database.Databas
       AND (title LIKE @search ESCAPE '\\' OR description LIKE @search ESCAPE '\\' OR body_markdown LIKE @search ESCAPE '\\')
     ORDER BY published_at DESC, id DESC
   `).all({ now, search: `%${escaped}%` }) as PostRow[];
+}
+
+function ftsSearchRows(db: Database.Database, now: number, search: string): PostRow[] {
+  const tokens = search.split(/\s+/).filter(Boolean).map((token) => `"${token.replace(/"/g, '')}"`);
+  if (!tokens.length) return [];
+  // trigram 分词要求每个词至少 3 个字符，短词回退到 LIKE。
+  if (tokens.some((token) => token.length - 2 < 3)) return likeSearchRows(db, now, search);
+  const rows = db.prepare(`
+    SELECT * FROM posts
+    WHERE ${PUBLIC_WHERE}
+      AND id IN (SELECT rowid FROM posts_fts WHERE posts_fts MATCH @match)
+    ORDER BY published_at DESC, id DESC
+  `).all({ now, match: tokens.join(' AND ') }) as PostRow[];
+  // trigram 对标点或极短片段可能查不到，空结果时回退 LIKE 保证召回。
+  return rows.length ? rows : likeSearchRows(db, now, search);
+}
+
+function publicRows(now: number, query: string | undefined, db: Database.Database): PostRow[] {
+  const search = query?.trim();
+  if (!search) {
+    return db.prepare(`SELECT * FROM posts WHERE ${PUBLIC_WHERE} ORDER BY published_at DESC, id DESC`)
+      .all({ now }) as PostRow[];
+  }
+  try {
+    return ftsSearchRows(db, now, search);
+  } catch {
+    // FTS 表缺失或查询语法异常时回退到 LIKE，保证搜索永远可用。
+    return likeSearchRows(db, now, search);
+  }
 }
 
 export function listAllPublicPosts(now = Date.now(), db?: Database.Database): PostRow[] {
@@ -85,6 +111,8 @@ export function listPublicPosts(
   const tag = filters.tag?.trim();
   const visible = publicRows(now, filters.q, connection)
     .filter((post) => !tag || parsePostTags(post.tags_json).includes(tag));
+  if (filters.sort === 'hot') visible.sort((a, b) => b.view_count - a.view_count || b.published_at.localeCompare(a.published_at));
+  else if (filters.sort === 'words') visible.sort((a, b) => countPostWords(b.body_markdown) - countPostWords(a.body_markdown));
   const totalItems = visible.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const page = Math.min(requestedPage, totalPages);
@@ -97,6 +125,18 @@ export function listPublicPosts(
     totalItems,
     totalPages,
   };
+}
+
+// 卡片统计：字数（CJK 按字、英文按词）与配图数
+export function countPostWords(markdown: string): number {
+  const withoutCode = markdown.replace(/```[\s\S]*?```|`[^`]*`/g, '');
+  const cjk = (withoutCode.match(/[㐀-鿿]/g) ?? []).length;
+  const latin = withoutCode.replace(/[㐀-鿿]/g, ' ').trim().split(/\s+/).filter(Boolean).length;
+  return cjk + latin;
+}
+
+export function countPostImages(markdown: string): number {
+  return (markdown.match(/!\[[^\]]*\]\(/g) ?? []).length;
 }
 
 export function findPublicPostBySlug(slug: string, now = Date.now(), db?: Database.Database): PostRow | undefined {
@@ -123,4 +163,34 @@ export function listPublicTags(now = Date.now(), db?: Database.Database): Array<
   return [...counts]
     .map(([tag, count]) => ({ tag, count }))
     .sort((left, right) => left.tag.localeCompare(right.tag, 'zh-CN'));
+}
+
+export function findRelatedPublicPosts(
+  post: PostRow,
+  limit = 3,
+  now = Date.now(),
+  db?: Database.Database,
+): PostRow[] {
+  const tags = new Set(parsePostTags(post.tags_json));
+  return publicRows(now, undefined, publicDatabase(db))
+    .filter((candidate) => candidate.id !== post.id)
+    .map((candidate) => ({
+      candidate,
+      score: parsePostTags(candidate.tags_json).filter((tag) => tags.has(tag)).length,
+    }))
+    .filter(({ score }) => score > 0)
+    .sort((left, right) => right.score - left.score || right.candidate.published_at.localeCompare(left.candidate.published_at))
+    .slice(0, limit)
+    .map(({ candidate }) => candidate);
+}
+
+export function listPublicSeriesPosts(
+  series: string,
+  now = Date.now(),
+  db?: Database.Database,
+): PostRow[] {
+  return publicDatabase(db)
+    .prepare(`SELECT * FROM posts WHERE series = @series AND ${PUBLIC_WHERE}
+      ORDER BY series_order ASC, published_at ASC, id ASC`)
+    .all({ series, now }) as PostRow[];
 }

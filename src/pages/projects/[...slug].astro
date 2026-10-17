@@ -21,3 +21,11 @@ const tools = JSON.parse(project.tools_json) as string[];
     <div class="prose" set:html={content}></div>
   </article>
 </BaseLayout>
+
+<script>
+  import { enhanceProse } from '../../lib/prose-enhance';
+  document.addEventListener('astro:page-load', () => {
+    const article = document.querySelector<HTMLElement>('.prose');
+    if (article) enhanceProse(article);
+  });
+</script>

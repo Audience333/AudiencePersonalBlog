@@ -1,15 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { listFeaturedProjects } from '../lib/db';
-import { listPublicPosts } from '../lib/posts';
+import ProfileSidebar from '../components/ProfileSidebar.astro';
+import { listApprovedResources, listFeaturedProjects, listUpdates } from '../lib/db';
+import { countPostWords, countPostImages, listPublicPosts } from '../lib/posts';
+import { estimateReadingMinutes } from '../lib/reading';
 
 const posts = listPublicPosts({ pageSize: 3 }).items;
 const projects = listFeaturedProjects().slice(0, 2);
+const updates = listUpdates().slice(0, 4);
+const resources = listApprovedResources().slice(0, 5);
 const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
 ---
 
 <BaseLayout title="首页" description="一个展示作品、分享文章与记录成长的个人网站。">
   <div class="container">
+    <div class="layout-with-sidebar home-layout">
+    <ProfileSidebar />
+    <div class="layout-main">
     <section class="archive-hero">
       <picture>
         <source srcset="/archive-hero-v1.webp" type="image/webp" />
@@ -58,11 +65,37 @@ const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'n
         {posts.map((post) => (
           <a class="article-item" href={`/blog/${post.slug}/`}>
             <time class="article-date" datetime={post.published_at}>{formatDate(post.published_at)}</time>
-            <div><h3>{post.title}</h3><p>{post.description}</p></div>
+            <div><h3>{post.title}</h3><p>{post.description}</p><p class="article-stats muted">{countPostWords(post.body_markdown).toLocaleString('zh-CN')} 字 · {countPostImages(post.body_markdown)} 图 · 约 {estimateReadingMinutes(post.body_markdown)} 分钟</p></div>
             <span class="article-arrow" aria-hidden="true">↗</span>
           </a>
         ))}
       </div>
     </section>
+
+    {updates.length > 0 && <section class="section" aria-labelledby="recent-updates">
+      <div class="section-heading"><div><p class="eyebrow">UPDATES</p><h2 id="recent-updates">最新动态</h2></div><a class="text-link" href="/updates/">全部动态 →</a></div>
+      <ol class="update-timeline update-timeline-compact">
+        {updates.map((entry) => (
+          <li class="update-item">
+            <time datetime={new Date(entry.created_at).toISOString()}>{new Date(entry.created_at).toLocaleDateString('zh-CN')}</time>
+            <p class="update-excerpt">{entry.body.replace(/[#*`>\[\]!]/g, '').slice(0, 80)}{entry.body.length > 80 ? '…' : ''}</p>
+          </li>
+        ))}
+      </ol>
+    </section>}
+
+    <section class="section" aria-labelledby="resource-hub">
+      <div class="section-heading"><div><p class="eyebrow">RESOURCE HUB</p><h2 id="resource-hub">资源库</h2></div><a class="text-link" href="/resources/">全部资源 →</a></div>
+      {resources.length ? <div class="friend-grid">
+        {resources.map((item) => (
+          <a class="friend-card" href={item.url} target="_blank" rel="noopener noreferrer">
+            <strong>{item.recommended ? '★ ' : ''}{item.title}</strong>
+            {item.description && <span>{item.description.slice(0, 60)}{item.description.length > 60 ? '…' : ''}</span>}
+          </a>
+        ))}
+      </div> : <p class="empty-note">还没有收录的资源。欢迎到<a class="text-link" href="/resources/">资源库</a>提交你珍藏的站点与工具。</p>}
+    </section>
+    </div>
+    </div>
   </div>
 </BaseLayout>

@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { runMigrations } from './migrations.ts';
+import { rebuildPostsFts, runMigrations } from './migrations.ts';
 
 export type Role = 'admin' | 'reader';
 export type PostStatus = 'draft' | 'published';
@@ -13,6 +13,7 @@ export interface UserRow {
   username: string;
   password_hash: string;
   role: Role;
+  avatar: string | null;
   created_at: number;
 }
 
@@ -29,6 +30,9 @@ export interface PostRow {
   archived: 0 | 1;
   comments_enabled: 0 | 1;
   cover_image: string | null;
+  view_count: number;
+  series: string | null;
+  series_order: number;
   created_at: number;
   updated_at: number;
 }
@@ -38,8 +42,49 @@ export interface CommentRow {
   post_id: number;
   user_id: number;
   username: string;
+  avatar: string | null;
+  parent_id: number | null;
   body: string;
   status: CommentStatus;
+  created_at: number;
+}
+
+export interface GuestbookRow {
+  id: number;
+  user_id: number | null;
+  nickname: string;
+  avatar: string | null;
+  body: string;
+  status: CommentStatus;
+  created_at: number;
+}
+
+export interface UpdateRow {
+  id: number;
+  kind: 'site' | 'tech';
+  body: string;
+  created_at: number;
+}
+
+export interface ResourceRow {
+  id: number;
+  title: string;
+  url: string;
+  description: string;
+  tags_json: string;
+  submitter: string;
+  recommended: 0 | 1;
+  status: CommentStatus;
+  created_at: number;
+}
+
+export interface DanmakuRow {
+  id: number;
+  post_id: number;
+  user_id: number;
+  username: string;
+  body: string;
+  status: 'approved' | 'rejected';
   created_at: number;
 }
 
@@ -73,6 +118,7 @@ export function openBlogDatabase(path: string): Database.Database {
       username TEXT NOT NULL UNIQUE COLLATE NOCASE,
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL CHECK(role IN ('admin', 'reader')),
+      avatar TEXT,
       created_at INTEGER NOT NULL
     );
     CREATE TABLE IF NOT EXISTS sessions (
@@ -94,6 +140,9 @@ export function openBlogDatabase(path: string): Database.Database {
       archived INTEGER NOT NULL DEFAULT 0 CHECK(archived IN (0, 1)),
       comments_enabled INTEGER NOT NULL DEFAULT 1 CHECK(comments_enabled IN (0, 1)),
       cover_image TEXT,
+      view_count INTEGER NOT NULL DEFAULT 0,
+      series TEXT,
+      series_order INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     );
@@ -115,6 +164,7 @@ export function openBlogDatabase(path: string): Database.Database {
       id INTEGER PRIMARY KEY,
       post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      parent_id INTEGER REFERENCES comments(id),
       body TEXT NOT NULL,
       status TEXT NOT NULL CHECK(status IN ('pending', 'approved', 'rejected')),
       created_at INTEGER NOT NULL
@@ -129,6 +179,50 @@ export function openBlogDatabase(path: string): Database.Database {
       key TEXT PRIMARY KEY,
       count INTEGER NOT NULL,
       reset_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS page_views (
+      id INTEGER PRIMARY KEY,
+      path TEXT NOT NULL,
+      referrer TEXT NOT NULL DEFAULT '',
+      user_agent TEXT NOT NULL DEFAULT '',
+      created_at INTEGER NOT NULL
+    );
+    CREATE VIRTUAL TABLE IF NOT EXISTS posts_fts USING fts5(
+      title, description, body, tags, tokenize = 'trigram'
+    );
+    CREATE TABLE IF NOT EXISTS guestbook (
+      id INTEGER PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      nickname TEXT NOT NULL DEFAULT '匿名用户',
+      body TEXT NOT NULL,
+      status TEXT NOT NULL CHECK(status IN ('pending', 'approved', 'rejected')),
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS updates (
+      id INTEGER PRIMARY KEY,
+      kind TEXT NOT NULL DEFAULT 'site' CHECK(kind IN ('site', 'tech')),
+      body TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS resources (
+      id INTEGER PRIMARY KEY,
+      title TEXT NOT NULL,
+      url TEXT NOT NULL DEFAULT '',
+      description TEXT NOT NULL DEFAULT '',
+      tags_json TEXT NOT NULL DEFAULT '[]',
+      submitter TEXT NOT NULL DEFAULT '',
+      recommended INTEGER NOT NULL DEFAULT 0 CHECK(recommended IN (0, 1)),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS danmaku (
+      id INTEGER PRIMARY KEY,
+      post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      username TEXT NOT NULL,
+      body TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'approved' CHECK(status IN ('approved', 'rejected')),
+      created_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_posts_status_date ON posts(status, published_at DESC);
     CREATE INDEX IF NOT EXISTS idx_projects_status_year ON projects(status, featured DESC, year DESC);
@@ -160,6 +254,7 @@ export function openBlogDatabase(path: string): Database.Database {
     );
     db.prepare("INSERT INTO settings (key, value) VALUES ('projects_seeded', '1')").run();
   }
+  rebuildPostsFts(db);
   return db;
 }
 
@@ -206,7 +301,14 @@ export function findPostById(id: number): PostRow | undefined {
 
 type PostWriteInput = Pick<PostRow,
   'slug' | 'title' | 'description' | 'body_markdown' | 'tags_json' | 'status' | 'published_at'
-> & Partial<Pick<PostRow, 'scheduled_at' | 'archived' | 'comments_enabled' | 'cover_image'>>;
+> & Partial<Pick<PostRow, 'scheduled_at' | 'archived' | 'comments_enabled' | 'cover_image' | 'series' | 'series_order'>>;
+
+function syncPostToFts(id: number) {
+  const db = getDb();
+  db.prepare('DELETE FROM posts_fts WHERE rowid = ?').run(id);
+  db.prepare(`INSERT INTO posts_fts(rowid, title, description, body, tags)
+    SELECT id, title, description, body_markdown, tags_json FROM posts WHERE id = ?`).run(id);
+}
 
 export function savePost(input: PostWriteInput, id?: number): number {
   const now = Date.now();
@@ -214,21 +316,39 @@ export function savePost(input: PostWriteInput, id?: number): number {
   const archived = input.archived ?? 0;
   const commentsEnabled = input.comments_enabled ?? 1;
   const coverImage = input.cover_image ?? null;
+  const series = input.series ?? null;
+  const seriesOrder = input.series_order ?? 0;
   if (id) {
     getDb().prepare(`UPDATE posts SET slug = ?, title = ?, description = ?, body_markdown = ?, tags_json = ?,
-      status = ?, published_at = ?, scheduled_at = ?, archived = ?, comments_enabled = ?, cover_image = ?, updated_at = ?
+      status = ?, published_at = ?, scheduled_at = ?, archived = ?, comments_enabled = ?, cover_image = ?,
+      series = ?, series_order = ?, updated_at = ?
       WHERE id = ?`)
       .run(input.slug, input.title, input.description, input.body_markdown, input.tags_json, input.status,
-        input.published_at, scheduledAt, archived, commentsEnabled, coverImage, now, id);
+        input.published_at, scheduledAt, archived, commentsEnabled, coverImage, series, seriesOrder, now, id);
+    syncPostToFts(id);
     return id;
   }
   const result = getDb().prepare(`INSERT INTO posts
-    (slug, title, description, body_markdown, tags_json, status, published_at, scheduled_at, archived, comments_enabled, cover_image, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    (slug, title, description, body_markdown, tags_json, status, published_at, scheduled_at, archived, comments_enabled, cover_image, series, series_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       input.slug, input.title, input.description, input.body_markdown, input.tags_json, input.status,
-      input.published_at, scheduledAt, archived, commentsEnabled, coverImage, now, now,
+      input.published_at, scheduledAt, archived, commentsEnabled, coverImage, series, seriesOrder, now, now,
     );
-  return Number(result.lastInsertRowid);
+  const newId = Number(result.lastInsertRowid);
+  syncPostToFts(newId);
+  return newId;
+}
+
+export function incrementPostView(id: number): number {
+  const db = getDb();
+  db.prepare('UPDATE posts SET view_count = view_count + 1 WHERE id = ?').run(id);
+  const row = db.prepare('SELECT view_count FROM posts WHERE id = ?').get(id) as { view_count: number } | undefined;
+  return row?.view_count ?? 0;
+}
+
+export function listSeriesNames(): string[] {
+  return (getDb().prepare(`SELECT DISTINCT series FROM posts WHERE series IS NOT NULL AND series != '' ORDER BY series COLLATE NOCASE`).all() as { series: string }[])
+    .map((row) => row.series);
 }
 
 export function listPublishedProjects(): ProjectRow[] {
@@ -266,19 +386,24 @@ export function saveProject(input: Omit<ProjectRow, 'id' | 'created_at' | 'updat
 }
 
 export function listApprovedComments(postId: number): CommentRow[] {
-  return getDb().prepare(`SELECT comments.*, users.username FROM comments JOIN users ON users.id = comments.user_id
+  return getDb().prepare(`SELECT comments.*, users.username, users.avatar FROM comments JOIN users ON users.id = comments.user_id
     WHERE comments.post_id = ? AND comments.status = 'approved' ORDER BY comments.created_at ASC`).all(postId) as CommentRow[];
 }
 
 export function listPendingComments(): (CommentRow & { post_title: string })[] {
-  return getDb().prepare(`SELECT comments.*, users.username, posts.title AS post_title FROM comments
+  return getDb().prepare(`SELECT comments.*, users.username, users.avatar, posts.title AS post_title FROM comments
     JOIN users ON users.id = comments.user_id JOIN posts ON posts.id = comments.post_id
     WHERE comments.status = 'pending' ORDER BY comments.created_at ASC`).all() as (CommentRow & { post_title: string })[];
 }
 
-export function addComment(postId: number, userId: number, body: string, status: CommentStatus = 'pending') {
-  getDb().prepare('INSERT INTO comments (post_id, user_id, body, status, created_at) VALUES (?, ?, ?, ?, ?)')
-    .run(postId, userId, body, status, Date.now());
+export function addComment(postId: number, userId: number, body: string, status: CommentStatus = 'pending', parentId: number | null = null) {
+  getDb().prepare('INSERT INTO comments (post_id, user_id, parent_id, body, status, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(postId, userId, parentId, body, status, Date.now());
+}
+
+export function findCommentById(id: number): CommentRow | undefined {
+  return getDb().prepare(`SELECT comments.*, users.username FROM comments JOIN users ON users.id = comments.user_id
+    WHERE comments.id = ?`).get(id) as CommentRow | undefined;
 }
 
 export function setCommentStatus(id: number, status: CommentStatus) {
@@ -309,4 +434,97 @@ export function consumeRateLimit(key: string, maxCount: number, windowMs: number
   if (entry.count >= maxCount) return false;
   db.prepare('UPDATE rate_limits SET count = count + 1 WHERE key = ?').run(key);
   return true;
+}
+
+// ===== 留言墙 =====
+export function listApprovedGuestbook(): GuestbookRow[] {
+  return getDb().prepare(`SELECT guestbook.*, users.avatar FROM guestbook
+    LEFT JOIN users ON users.id = guestbook.user_id
+    WHERE guestbook.status = 'approved' ORDER BY guestbook.created_at DESC`).all() as GuestbookRow[];
+}
+
+export function listPendingGuestbook(): GuestbookRow[] {
+  return getDb().prepare(`SELECT guestbook.*, users.avatar FROM guestbook
+    LEFT JOIN users ON users.id = guestbook.user_id
+    WHERE guestbook.status = 'pending' ORDER BY guestbook.created_at ASC`).all() as GuestbookRow[];
+}
+
+export function addGuestbookEntry(userId: number | null, nickname: string, body: string, status: CommentStatus = 'pending') {
+  getDb().prepare('INSERT INTO guestbook (user_id, nickname, body, status, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(userId, nickname, body, status, Date.now());
+}
+
+export function setGuestbookStatus(id: number, status: CommentStatus) {
+  getDb().prepare('UPDATE guestbook SET status = ? WHERE id = ?').run(status, id);
+}
+
+// ===== 动态时间线 =====
+export function listUpdates(kind?: 'site' | 'tech'): UpdateRow[] {
+  if (kind) return getDb().prepare('SELECT * FROM updates WHERE kind = ? ORDER BY created_at DESC, id DESC').all(kind) as UpdateRow[];
+  return getDb().prepare('SELECT * FROM updates ORDER BY created_at DESC, id DESC').all() as UpdateRow[];
+}
+
+export function addUpdate(kind: 'site' | 'tech', body: string): void {
+  getDb().prepare('INSERT INTO updates (kind, body, created_at) VALUES (?, ?, ?)').run(kind, body, Date.now());
+}
+
+export function deleteUpdate(id: number): void {
+  getDb().prepare('DELETE FROM updates WHERE id = ?').run(id);
+}
+
+// ===== 资源分享 =====
+export function listApprovedResources(): ResourceRow[] {
+  return getDb().prepare(`SELECT * FROM resources WHERE status = 'approved'
+    ORDER BY recommended DESC, created_at DESC, id DESC`).all() as ResourceRow[];
+}
+
+export function listPendingResources(): ResourceRow[] {
+  return getDb().prepare("SELECT * FROM resources WHERE status = 'pending' ORDER BY created_at ASC").all() as ResourceRow[];
+}
+
+export function addResource(input: { title: string; url: string; description: string; tags_json: string; submitter: string }, status: CommentStatus = 'pending') {
+  getDb().prepare('INSERT INTO resources (title, url, description, tags_json, submitter, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(input.title, input.url, input.description, input.tags_json, input.submitter, status, Date.now());
+}
+
+export function setResourceStatus(id: number, status: CommentStatus) {
+  getDb().prepare('UPDATE resources SET status = ? WHERE id = ?').run(status, id);
+}
+
+export function setResourceRecommended(id: number, recommended: 0 | 1) {
+  getDb().prepare('UPDATE resources SET recommended = ? WHERE id = ?').run(recommended, id);
+}
+
+// ===== 弹幕 =====
+export function listApprovedDanmaku(postId: number, limit = 50): DanmakuRow[] {
+  return getDb().prepare(`SELECT * FROM danmaku WHERE post_id = ? AND status = 'approved'
+    ORDER BY created_at DESC, id DESC LIMIT ?`).all(postId, limit) as DanmakuRow[];
+}
+
+export function addDanmaku(postId: number, userId: number, username: string, body: string, status: 'approved' | 'rejected' = 'approved') {
+  getDb().prepare('INSERT INTO danmaku (post_id, user_id, username, body, status, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(postId, userId, username, body, status, Date.now());
+}
+
+export function listRecentDanmaku(limit = 30): (DanmakuRow & { post_title: string })[] {
+  return getDb().prepare(`SELECT danmaku.*, posts.title AS post_title FROM danmaku
+    JOIN posts ON posts.id = danmaku.post_id ORDER BY danmaku.created_at DESC LIMIT ?`).all(limit) as (DanmakuRow & { post_title: string })[];
+}
+
+export function deleteDanmaku(id: number): void {
+  getDb().prepare('DELETE FROM danmaku WHERE id = ?').run(id);
+}
+
+// ===== 头像 =====
+export function setUserAvatar(userId: number, avatar: string | null): void {
+  getDb().prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatar, userId);
+}
+
+// ===== 侧边栏站点统计 =====
+export function getPublicStats(): { posts: number; views: number; comments: number } {
+  const db = getDb();
+  const posts = (db.prepare("SELECT COUNT(*) AS count FROM posts WHERE status = 'published' AND archived = 0").get() as { count: number }).count;
+  const views = (db.prepare("SELECT COALESCE(SUM(view_count), 0) AS total FROM posts WHERE status = 'published' AND archived = 0").get() as { total: number }).total;
+  const comments = (db.prepare("SELECT COUNT(*) AS count FROM comments WHERE status = 'approved'").get() as { count: number }).count;
+  return { posts, views, comments };
 }

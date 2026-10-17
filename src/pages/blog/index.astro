@@ -1,36 +1,59 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Pagination from '../../components/Pagination.astro';
-import { listPublicPosts, listPublicTags, parsePostTags } from '../../lib/posts';
+import ProfileSidebar from '../../components/ProfileSidebar.astro';
+import { countPostImages, countPostWords, listPublicPosts, listPublicTags, parsePostTags, type PublicPostSort } from '../../lib/posts';
+import { estimateReadingMinutes } from '../../lib/reading';
 import { siteConfig } from '../../config/site';
 
 const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 100);
 const tag = (Astro.url.searchParams.get('tag') || '').trim().slice(0, 20);
+const sortParam = Astro.url.searchParams.get('sort') || 'new';
+const sort: PublicPostSort = (['hot', 'words'] as const).includes(sortParam as 'hot' | 'words') ? sortParam as PublicPostSort : 'new';
 const page = Number(Astro.url.searchParams.get('page') || 1);
-const result = listPublicPosts({ q, tag, page, pageSize: siteConfig.postsPerPage });
+const result = listPublicPosts({ q, tag, page, pageSize: siteConfig.postsPerPage, sort });
 const tags = listPublicTags();
 const posts = result.items;
 const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+const sortQuery = (value: string) => {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (tag) params.set('tag', tag);
+  if (value !== 'new') params.set('sort', value);
+  const query = params.toString();
+  return `/blog/${query ? `?${query}` : ''}`;
+};
 ---
 
 <BaseLayout title="文章" description="阅读我的文章、随笔和学习记录。">
-  <div class="container">
-    <header class="page-head"><p class="eyebrow">JOURNAL</p><h1>文章</h1><p>记录新想法、学习笔记和做项目时的思考。</p></header>
+  <div class="container layout-with-sidebar">
+    <ProfileSidebar />
+    <div class="layout-main">
+    <header class="page-head"><p class="eyebrow">JOURNAL</p><h1>文章</h1><p>记录新想法、学习笔记和做项目时的思考。<a class="text-link" href="/blog/series/">系列文库 →</a></p></header>
     <form class="blog-search" action="/blog/" method="get">
       <label for="blog-search-input">搜索文章</label>
       <input id="blog-search-input" name="q" value={q} maxlength="100" placeholder="标题、简介或正文关键词" />
       {tag && <input type="hidden" name="tag" value={tag} />}
+      {sort !== 'new' && <input type="hidden" name="sort" value={sort} />}
       <button class="small-button" type="submit">搜索</button>
     </form>
-    {tags.length > 0 && <nav class="tag-index" aria-label="文章标签"><a href="/blog/" class:list={{ active: !tag }}>全部 <span>{result.totalItems}</span></a>{tags.map((item) => <a href={`/blog/?tag=${encodeURIComponent(item.tag)}`} class:list={{ active: tag === item.tag }}>{item.tag} <span>{item.count}</span></a>)}</nav>}
+    <nav class="sort-bar" aria-label="排序方式">
+      排序：<a href={sortQuery('new')} class:list={{ active: sort === 'new' }}>最新</a>
+      <a href={sortQuery('hot')} class:list={{ active: sort === 'hot' }}>最热</a>
+      <a href={sortQuery('words')} class:list={{ active: sort === 'words' }}>最长</a>
+    </nav>
+    {tags.length > 0 && <nav class="tag-index" aria-label="文章标签"><a href={sortQuery(sort)} class:list={{ active: !tag }}>全部 <span>{result.totalItems}</span></a>{tags.map((item) => <a href={`/blog/?tag=${encodeURIComponent(item.tag)}${sort !== 'new' ? `&sort=${sort}` : ''}`} class:list={{ active: tag === item.tag }}>{item.tag} <span>{item.count}</span></a>)}</nav>}
     {(q || tag) && <p class="filter-summary">当前筛选：{q && <span>“{q}”</span>}{q && tag && '，'}{tag && <span>标签「{tag}」</span>}，共 {result.totalItems} 篇。</p>}
     {posts.length ? <div class="article-list">
       {posts.map((post) => <article class="article-item">
         <time class="article-date" datetime={post.published_at}>{formatDate(post.published_at)}</time>
-        <div><h3><a href={`/blog/${post.slug}/`}>{post.title}</a></h3><p>{post.description}</p><ul class="pill-list">{parsePostTags(post.tags_json).map((postTag) => <li><a class="pill" href={`/blog/tags/${encodeURIComponent(postTag)}/`}>{postTag}</a></li>)}</ul></div>
+        <div><h3><a href={`/blog/${post.slug}/`}>{post.title}</a></h3><p>{post.description}</p>
+          <p class="article-stats muted">{countPostWords(post.body_markdown).toLocaleString('zh-CN')} 字 · {countPostImages(post.body_markdown)} 图 · 约 {estimateReadingMinutes(post.body_markdown)} 分钟 · 阅读 {post.view_count} 次</p>
+          <ul class="pill-list">{parsePostTags(post.tags_json).map((postTag) => <li><a class="pill" href={`/blog/tags/${encodeURIComponent(postTag)}/`}>{postTag}</a></li>)}</ul></div>
         <a class="article-arrow" href={`/blog/${post.slug}/`} aria-label={`阅读：${post.title}`}>↗</a>
       </article>)}
     </div> : <p class="empty-note">没有找到符合条件的文章。</p>}
-    <Pagination page={result.page} totalPages={result.totalPages} basePath="/blog/" query={{ ...(q ? { q } : {}), ...(tag ? { tag } : {}) }} />
+    <Pagination page={result.page} totalPages={result.totalPages} basePath="/blog/" query={{ ...(q ? { q } : {}), ...(tag ? { tag } : {}), ...(sort !== 'new' ? { sort } : {}) }} />
+    </div>
   </div>
 </BaseLayout>

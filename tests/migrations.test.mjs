@@ -22,12 +22,12 @@ test('migrates a legacy database without losing content and remains repeatable',
     comments_enabled: 1,
     cover_image: null,
   });
-  assert.equal(first.pragma('user_version', { simple: true }), 1);
+  assert.equal(first.pragma('user_version', { simple: true }), 3);
   first.close();
 
   const second = openBlogDatabase(path);
   assert.equal(second.prepare("SELECT COUNT(*) AS count FROM posts WHERE slug = 'kept-post'").get().count, 1);
-  assert.equal(second.pragma('user_version', { simple: true }), 1);
+  assert.equal(second.pragma('user_version', { simple: true }), 3);
   second.close();
 
   for (const suffix of ['', '-wal', '-shm']) rmSync(path + suffix, { force: true });
