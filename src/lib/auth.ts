@@ -69,7 +69,8 @@ export function createSession(cookies: AstroCookies, viewer: Viewer): void {
     .run(digest(token), viewer.id, now + SESSION_AGE_MS, now);
   cookies.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    // 只有 HTTPS 站点才标记 Secure，允许纯 IP 的 HTTP 部署登录；域名上线后自动恢复。
+    secure: (process.env.PUBLIC_SITE_ORIGIN || '').startsWith('https://'),
     sameSite: 'lax',
     path: '/',
     maxAge: SESSION_AGE_MS / 1000,
