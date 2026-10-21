@@ -16,8 +16,8 @@ export class StartupGate {
     const { root } = options;
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
-    root.setAttribute("aria-label", "进入莱茵生命档案终端");
-    root.insertAdjacentHTML("beforeend", '<div class="entry-controls"><button class="entry-start" disabled>正在准备终端…</button><button class="entry-silent" hidden>关闭声音并进入</button><p class="entry-status" role="status">资源就绪后即可进入</p></div>');
+    root.setAttribute("aria-label", "Rhine Lab archive terminal entry");
+    root.insertAdjacentHTML("beforeend", '<div class="entry-controls"><button class="entry-start" disabled>PREPARING TERMINAL…</button><button class="entry-silent" hidden>Enter without sound</button><p class="entry-status" role="status">Enter once the resources are ready</p></div>');
     this.button = root.querySelector<HTMLButtonElement>(".entry-start")!;
     this.silent = root.querySelector<HTMLButtonElement>(".entry-silent")!;
     this.status = root.querySelector<HTMLElement>(".entry-status")!;
@@ -47,9 +47,9 @@ export class StartupGate {
     this.state = "waiting";
     this.options.root.dataset.entry = "waiting";
     this.button.disabled = false;
-    this.button.textContent = "浏览作品 →";
+    this.button.textContent = "Browse Works →";
     this.options.root.querySelector(":scope > span")!.textContent = "INTERNAL DATABASE / READY";
-    this.status.textContent = "轻触屏幕或按 Enter 开始";
+    this.status.textContent = "Tap anywhere or press Enter to start";
     this.button.focus({ preventScroll: true });
   }
   private async enter() {
@@ -58,8 +58,8 @@ export class StartupGate {
     this.options.root.dataset.entry = "starting";
     // aria-disabled preserves keyboard focus while repeated input is ignored.
     this.button.setAttribute("aria-disabled", "true");
-    this.button.textContent = "正在准备声音…";
-    this.status.textContent = "准备完成后开始播放";
+    this.button.textContent = "Preparing sound…";
+    this.status.textContent = "Playback starts once ready";
     this.silent.hidden = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
@@ -74,8 +74,8 @@ export class StartupGate {
         this.state = "error";
         this.options.root.dataset.entry = "error";
         this.button.removeAttribute("aria-disabled");
-        this.button.textContent = "重试声音并进入 →";
-        this.status.textContent = "声音暂未就绪，请重试或无声进入";
+        this.button.textContent = "Retry Sound & Enter →";
+        this.status.textContent = "Audio is not ready; retry or enter silently";
       }
     } catch {
       if (request !== this.request) return;
@@ -83,8 +83,8 @@ export class StartupGate {
       this.state = "error";
       this.options.root.dataset.entry = "error";
       this.button.removeAttribute("aria-disabled");
-      this.button.textContent = "重试声音并进入 →";
-      this.status.textContent = "声音暂未就绪，请重试或无声进入";
+      this.button.textContent = "Retry Sound & Enter →";
+      this.status.textContent = "Audio is not ready; retry or enter silently";
     } finally { clearTimeout(timer); }
   }
   private finish(silent: boolean) {

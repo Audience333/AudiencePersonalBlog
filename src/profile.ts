@@ -5,38 +5,46 @@ import { assetUrl } from "./asset-url";
 import "./profile.css";
 
 type SiteLink = { label: string; url: string };
+type FriendLink = { label: string; labelEn?: string; url: string; note?: string };
 const links = site.links as SiteLink[];
+const friendLinks = site.friendLinks as FriendLink[];
 
 const statItems = [
-  { value: stats.posts, label: "文章" },
-  { value: stats.views, label: "阅读" },
-  { value: stats.comments, label: "评论" },
+  { value: stats.posts, label: "Posts" },
+  { value: stats.views, label: "Views" },
+  { value: stats.comments, label: "Comments" },
 ];
 
 /** 首页进入前的站长档案面板：访客第一眼看到的个人信息。 */
 export function buildProfile(): HTMLElement {
   const panel = document.createElement("section");
   panel.className = "profile-panel";
-  panel.setAttribute("aria-label", "站长档案");
+  panel.setAttribute("aria-label", "Author profile");
   panel.innerHTML = `
     <div class="profile-head">
-      <img class="profile-avatar" src="${assetUrl(site.avatar.replace(/^\//, ""))}" alt="${escapeHtml(site.author)}的头像" width="112" height="112">
+      <img class="profile-avatar" src="${assetUrl(site.avatar.replace(/^\//, ""))}" alt="Avatar of ${escapeHtml(site.authorEn)}" width="112" height="112">
       <div class="profile-id">
-        <h1>${escapeHtml(site.author)}</h1>
-        <p>${escapeHtml(site.authorEn)}<span> · </span>${escapeHtml(site.description)}</p>
+        <h1>${escapeHtml(site.authorEn)}</h1>
+        <p>${escapeHtml(site.descriptionEn)}</p>
       </div>
     </div>
     <dl class="profile-fields">
-      <div><dt>在读</dt><dd>${escapeHtml(site.profile.occupation)}</dd></div>
-      <div><dt>来自</dt><dd>${escapeHtml(site.profile.hometown)}</dd></div>
-      <div><dt>现居</dt><dd>${escapeHtml(site.profile.location)}</dd></div>
-      <div><dt>简介</dt><dd>${escapeHtml(site.profile.bio)}</dd></div>
+      <div><dt>OCCUPATION</dt><dd>${escapeHtml(site.profile.occupationEn)}</dd></div>
+      <div><dt>HOMETOWN</dt><dd>${escapeHtml(site.profile.hometownEn)}</dd></div>
+      <div><dt>LOCATION</dt><dd>${escapeHtml(site.profile.locationEn)}</dd></div>
+      <div><dt>BIO</dt><dd>${escapeHtml(site.profile.bio)}</dd></div>
     </dl>
     <div class="profile-links">
       ${links
         .map(
           (link) =>
             `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.label)}</a>`,
+        )
+        .join("")}
+      ${friendLinks
+        .map(
+          (link) =>
+            `<a class="profile-friend" href="${escapeHtml(link.url)}" target="_blank" rel="noopener" title="${escapeHtml(link.label)} · ${escapeHtml(link.note ?? "")}">${escapeHtml(link.labelEn ?? link.label)} ↗</a>`,
         )
         .join("")}
     </div>

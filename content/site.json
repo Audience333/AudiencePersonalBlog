@@ -1,16 +1,20 @@
 {
   "name": "观众 · 作品与博客",
   "author": "观众",
-  "authorEn": "AUDIENCE",
+  "authorEn": "Audience",
   "avatar": "/avatar.jpg",
   "description": "一个记录作品、想法与学习过程的个人网站。",
+  "descriptionEn": "A personal site documenting works, ideas and the process of learning.",
   "motto": "慢慢写，认真做。",
   "timezone": "Asia/Shanghai",
   "profile": {
     "bio": "Writing notes, building projects, and learning in public.",
     "hometown": "山东菏泽",
     "location": "四川成都",
-    "occupation": "四川师范大学本科生"
+    "occupation": "四川师范大学本科生",
+    "hometownEn": "Heze, Shandong",
+    "locationEn": "Chengdu, Sichuan",
+    "occupationEn": "Undergraduate at Sichuan Normal University"
   },
   "links": [
     { "label": "GitHub", "url": "https://github.com/Audience333" },
@@ -18,6 +22,6 @@
     { "label": "Email", "url": "mailto:1742777946@qq.com" }
   ],
   "friendLinks": [
-    { "label": "Travelling to next world", "url": "https://www.travellings.cn/go.html", "note": "开往 · 友链接龙，随机前往下一个世界" }
+    { "label": "Travelling to next world", "labelEn": "Next Stop", "url": "https://www.travellings.cn/go.html", "note": "开往 · 友链接龙，随机前往下一个世界" }
   ]
 }
