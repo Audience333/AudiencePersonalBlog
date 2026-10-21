@@ -59,6 +59,7 @@ import {
 } from "./wallpaper";
 import "./startup.css";
 import "./wallpaper.css";
+import { buildProfile } from "./profile";
 import { Workbench } from "./workbench";
 let workbench: Workbench | undefined;
 import { ArchivePlayground } from "./archive-playground";
@@ -310,6 +311,11 @@ if (entry) {
       /* Entry offers retry. */
     });
 }
+// 首屏站长档案：个人信息在进入按钮之上，访客第一眼可见。
+loading.insertBefore(
+  buildProfile(),
+  document.querySelector(".entry-controls"),
+);
 let audioPreview = false,
   audioPreviewRequest = 0;
 let scene: ArchiveScene | undefined;

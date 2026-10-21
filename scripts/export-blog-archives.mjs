@@ -34,6 +34,13 @@ const guestbook = db
   )
   .get();
 const pageViews = db.prepare(`SELECT COUNT(*) AS n FROM page_views`).get().n;
+const postStats = db
+  .prepare(
+    `SELECT COUNT(*) AS posts, COALESCE(SUM(view_count), 0) AS views
+     FROM posts WHERE status = 'published' AND archived = 0`,
+  )
+  .get();
+const commentCount = db.prepare(`SELECT COUNT(*) AS n FROM comments`).get().n;
 const postTags = post ? JSON.parse(post.tags_json) : [];
 db.close();
 
@@ -673,4 +680,13 @@ for (const name of categories) {
 
 const output = `${JSON.stringify({ categories, columns, records }, null, 2)}\n`;
 await fs.writeFile(new URL("content/archives.json", root), output, "utf8");
-console.log(`已从博客数据生成 40 份档案：content/archives.json`);
+// 首页个人面板使用的站点统计，与档案共用同一份数据源。
+const stats = `${JSON.stringify(
+  { posts: postStats.posts, views: postStats.views, comments: commentCount },
+  null,
+  2,
+)}\n`;
+await fs.writeFile(new URL("content/stats.json", root), stats, "utf8");
+console.log(
+  `已从博客数据生成 40 份档案：content/archives.json；站点统计：content/stats.json`,
+);

@@ -1,0 +1,122 @@
+/* 首屏站长档案面板：暖白底、细线、近黑文字，沿用终端的克制版式。
+   字号整体比终端主界面大一号，作为访客第一眼看到的内容。 */
+.profile-panel {
+  width: min(560px, calc(100vw - 48px));
+  margin-top: 28px;
+  text-align: left;
+  color: #1c1e1a;
+}
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.profile-avatar {
+  width: 112px;
+  height: 112px;
+  object-fit: cover;
+  border: 1px solid #969183;
+  background: #fff;
+}
+.profile-id h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.profile-id p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: #777468;
+}
+.profile-fields {
+  margin: 24px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid #bab3a5;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 28px;
+}
+.profile-fields div {
+  display: contents;
+}
+.profile-fields dt {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #888277;
+  padding-top: 3px;
+  white-space: nowrap;
+}
+.profile-fields dd {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.profile-links a {
+  display: inline-block;
+  padding: 9px 18px;
+  border: 1px solid #969183;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #1c1e1a;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.profile-links a:hover {
+  background: #1c1e1a;
+  color: #f2efe9;
+}
+.profile-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 24px;
+  padding: 18px 0 0;
+  border-top: 1px solid #bab3a5;
+}
+.profile-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-stats b {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+}
+.profile-stats span {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: #888277;
+}
+
+@media (max-width: 640px) {
+  .profile-panel {
+    margin-top: 20px;
+  }
+  .profile-avatar {
+    width: 84px;
+    height: 84px;
+  }
+  .profile-id h1 {
+    font-size: 26px;
+  }
+  .profile-fields dd {
+    font-size: 15px;
+  }
+  .profile-stats {
+    gap: 28px;
+  }
+  .profile-stats b {
+    font-size: 22px;
+  }
+}
