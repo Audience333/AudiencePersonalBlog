@@ -1,0 +1,19 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-018 / 站点地图
+SITE MAP
+
+科室：站务科
+编目范围：旧版路由
+相关人物：观众
+访问范围：INTERNAL AREA
+
+旧版博客的主要页面。本站替换为莱茵终端后，这些内容以档案形式继续保存。
+
+研究记录
+1. /blog 文章列表，支持排序与关键词搜索。
+2. /blog/tags/ 与 /blog/series 按标签、系列浏览文章。
+3. /projects 展示项目作品。
+4. /guestbook 留言板，RSS 与 sitemap 提供订阅入口。
+
+设定参考：https://github.com/Audience333
+本文为基于公开设定的档案式改写，非游戏原文。

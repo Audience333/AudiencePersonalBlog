@@ -1,0 +1,22 @@
+{
+  "name": "观众 · 作品与博客",
+  "author": "观众",
+  "authorEn": "AUDIENCE",
+  "description": "一个记录作品、想法与学习过程的个人网站。",
+  "motto": "慢慢写，认真做。",
+  "timezone": "Asia/Shanghai",
+  "profile": {
+    "bio": "Writing notes, building projects, and learning in public.",
+    "hometown": "山东菏泽",
+    "location": "四川成都",
+    "occupation": "四川师范大学本科生"
+  },
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/Audience333" },
+    { "label": "Bilibili", "url": "https://space.bilibili.com/2058896001" },
+    { "label": "Email", "url": "mailto:1742777946@qq.com" }
+  ],
+  "friendLinks": [
+    { "label": "Travelling to next world", "url": "https://www.travellings.cn/go.html", "note": "开往 · 友链接龙，随机前往下一个世界" }
+  ]
+}

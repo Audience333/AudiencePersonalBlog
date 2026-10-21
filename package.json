@@ -1,44 +1,35 @@
 {
-  "name": "personalblog",
+  "name": "audience-rhine-archive",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
   "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=24.15.0"
-  },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "check": "astro check",
-    "test:unit": "node --test tests/*.test.mjs",
-    "test:integration": "node ./tests/integration.mjs",
-    "preview": "astro preview",
-    "start": "node ./scripts/start.mjs",
-    "backup": "node ./scripts/backup.mjs",
-    "optimize:assets": "node ./scripts/optimize-assets.mjs",
-    "admin:create": "node ./scripts/create-admin.mjs",
-    "astro": "astro"
+    "postinstall": "node scripts/patch-rolling-number.mjs",
+    "predev": "node scripts/patch-rolling-number.mjs && node scripts/export-records.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "node scripts/patch-rolling-number.mjs && node scripts/export-records.mjs && node scripts/prepare-webfonts.mjs",
+    "check:content": "node --experimental-strip-types --test scripts/check-content.mjs",
+    "check:viewport": "node --experimental-strip-types scripts/check-viewport.mjs",
+    "review:mobile": "node scripts/serve-mobile-review.mjs",
+    "export:blog": "node scripts/export-blog-archives.mjs",
+    "export:archives": "node scripts/export-records.mjs",
+    "build": "tsc && vite build && node scripts/build-pwa.mjs",
+    "build:cloudflare": "npm run build && node scripts/package-cloudflare.mjs",
+    "build:wallpaper": "node scripts/patch-rolling-number.mjs && node scripts/export-records.mjs && tsc && vite build --mode wallpaper --outDir release/wallpaper && node scripts/build-wallpaper.mjs",
+    "format": "prettier --write src scripts index.html package.json tsconfig.json",
+    "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
-    "@astrojs/node": "^11.1.6",
-    "@js-temporal/polyfill": "^0.5.1",
-    "astro": "^7.3.3",
-    "better-sqlite3": "^13.0.3",
-    "katex": "^0.19.0",
-    "marked": "^18.0.13",
-    "mermaid": "^12.2.0",
-    "sanitize-html": "^2.17.7"
-  },
-  "allowScripts": {
-    "esbuild": true,
-    "better-sqlite3": true,
-    "sharp": true
+    "@kitlangton/rolling-number": "0.4.1",
+    "three": "^0.183.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
-    "@types/better-sqlite3": "^9.6.0",
-    "@types/katex": "^0.16.8",
-    "@types/sanitize-html": "^2.16.1",
-    "sharp": "^0.35.4",
-    "typescript": "^6.0.3"
+    "@types/three": "^0.183.0",
+    "better-sqlite3": "^13.0.3",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
   }
 }
+

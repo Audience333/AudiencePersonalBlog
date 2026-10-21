@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-011 / SQLite 数据库
+SQLITE
+
+科室：工程科
+编目范围：技术选型
+相关人物：Audience
+访问范围：REFERENCE AREA
+
+全部博客数据保存在单个 data/blog.sqlite 文件中，开启 WAL 模式兼顾读写并发。
+
+研究记录
+1. 使用 better-sqlite3 同步驱动，在页面渲染时直接查询。
+2. 共 19 张表，覆盖文章、项目、评论、留言、弹幕、点赞与统计。
+3. FTS5 三元组索引覆盖标题、描述、正文与标签，支撑全文搜索。
+
+设定参考：https://www.sqlite.org
+本文为基于公开设定的档案式改写，非游戏原文。

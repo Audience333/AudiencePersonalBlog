@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-012 / Markdown 渲染
+MARKDOWN PIPELINE
+
+科室：工程科
+编目范围：技术选型
+相关人物：Audience
+访问范围：REFERENCE AREA
+
+正文以 Markdown 存储，渲染管线负责公式、图表与安全过滤。
+
+研究记录
+1. marked 以 GFM 模式解析正文。
+2. $ 与 $$ 公式交给 KaTeX，```mermaid 代码块渲染为图表。
+3. sanitize-html 白名单过滤，输出安全 HTML。
+
+设定参考：https://marked.js.org
+本文为基于公开设定的档案式改写，非游戏原文。

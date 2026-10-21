@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-029 / GitHub 主页
+GITHUB PROFILE
+
+科室：人事档案科
+编目范围：长期有效
+相关人物：Audience
+访问范围：PUBLIC AREA
+
+代码与开源活动的主页，本站源码也托管在这里。
+
+研究记录
+1. 账号：Audience333。
+2. 本站仓库与其迭代历史均可在 GitHub 查看。
+3. 欢迎通过 issue 交流建站与编码问题。
+
+设定参考：https://github.com/Audience333
+本文为基于公开设定的档案式改写，非游戏原文。

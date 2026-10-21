@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-013 / 样式与组件
+STYLES & COMPONENTS
+
+科室：工程科
+编目范围：技术选型
+相关人物：Audience
+访问范围：REFERENCE AREA
+
+旧版博客使用手写 CSS 与 Astro 组件组织界面，无前端框架。
+
+研究记录
+1. 布局、排版与配色集中在 src/styles 管理。
+2. 目录、相关文章、分页等以组件形式复用。
+3. 代码块带复制按钮，长文带阅读进度条。
+
+设定参考：https://astro.build
+本文为基于公开设定的档案式改写，非游戏原文。

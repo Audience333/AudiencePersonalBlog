@@ -1,125 +1,60 @@
-# Archive Portfolio Blog
+# 观众 · 莱茵档案终端
 
-一个可自行部署的作品集与个人博客模板。网站、管理员后台、访客账号、评论与 SQLite 数据库都运行在同一个 Astro Node.js 应用中，适合从本地调试逐步迁移到自己的服务器。
+个人博客「观众 · 作品与博客」的新界面：把博客内容整编成莱茵生命终端风格的三维档案阵列。
+界面基于开源项目 [RhineLabUI](https://github.com/LBEILC/RhineLabUI)（TypeScript + Three.js + Vite）搭建，
+文章、项目、站点资料与互动数据继承自旧版 Astro 博客。
 
-## 截图
+在线形态：白底开场 → 身份验证 → 五列循环档案阵列 → 抽取档案、玻璃解密 → 正文阅读、360° 模型查看、收藏与导出。
 
-首页采用档案馆式版面，使用 WebP 首图并保留 PNG 后备。启动本地开发服务后可在 `http://localhost:4321/` 查看当前主题。
+## 快速运行
 
-## 功能
-
-- Markdown 写作、实时安全预览、草稿预览、文章图片和作品封面上传
-- 计划发布、归档、单篇文章评论开关、目录、阅读进度、代码复制和相邻文章
-- 文章系列（专栏串联）、文库汇总页（`/blog/series/`）、相关文章推荐、浏览量统计
-- Mermaid 图表与 KaTeX 数学公式（` ```mermaid ` 代码块、`$…$` / `$$…$$`）
-- 访客注册、登录、头像上传、点赞、评论嵌套回复、评论审核、注册开关和关键词拦截
-- 留言墙（`/guestbook/`，支持匿名昵称、审核上墙）、动态时间线（`/updates/`，网站动态/科技资讯双分类）
-- 资源分享（`/resources/`，访客投稿、管理员推荐徽章、标签筛选与搜索）
-- 文章弹幕（登录访客发送，关键词拦截 + 频率限制，后台可删除）
-- 全局搜索面板（Ctrl/⌘+K 唤起）、阅读位置记忆、文章列表排序（最新/最热/最长）与字数图数卡片
-- FTS5 全文搜索（中文子串匹配，短词自动回退）、标签归档、分页、RSS、sitemap、规范链接、Open Graph 和结构化数据
-- 全局音乐播放器：`music/` 文件夹里的音频自动成列表，切换页面播放不中断
-- 自托管访问统计（不记录 IP，管理员访问不计入），后台 `/admin/stats/` 查看
-- 自定义 404 页面、SQLite 自动迁移、健康检查、安全响应头、备份与 systemd/Caddy 部署范例
-
-## 音乐播放器
-
-把音频文件放进项目根目录的 `music/` 文件夹（支持 mp3 / m4a / aac / flac / ogg / opus / wav），刷新页面后右下角就会出现播放器；文件夹为空时播放器自动隐藏。文件名即歌曲名，按文件名排序播放，可用 `01-` 前缀控制顺序。目录位置可用环境变量 `BLOG_MUSIC_DIR` 修改。`music/01-测试音调.wav` 是演示文件，确认播放器正常后可删除。
-
-## 要求
-
-需要 Node.js `24.15` 或更高版本，以及 Git。开发与生产环境都使用 Node.js；不需要另行安装 MySQL、Redis 或第三方 CMS。
-
-## 快速开始
+需要 Node.js 22.12 或更高版本（推荐 Node.js 24）。
 
 ```bash
-git clone https://github.com/Audience333/AudiencePersonalBlog.git
-cd AudiencePersonalBlog
-npm install
-npm run dev
+npm ci
+npm run dev        # 开发，通常为 http://127.0.0.1:5173/
+npm run build      # 产出 dist/，交给任意静态 HTTP 服务托管
+npm run preview    # 本地预览构建产物
 ```
 
-首次启动会自动建立 `data/blog.sqlite` 并写入示例内容。浏览器打开终端显示的网址，默认是 `http://localhost:4321/`。
+Windows 也可以双击 `启动终端.cmd`。
 
-## 集中修改网站信息
+## 数据从哪来
 
-| 想修改的内容 | 位置 |
-| --- | --- |
-| 网站名、作者、时区、默认分享图 | `src/config/site.ts` |
-| 首页的标题和介绍 | `src/pages/index.astro` |
-| 颜色、排版和响应式样式 | `src/styles/global.css` |
-| 皮卡丘演示素材 | `public/pikachu-official.png` |
-| 首页背景图 | `public/archive-hero-v1.png` 与 `public/archive-hero-v1.webp` |
+档案内容不是手写进页面的，而是从博客数据生成：
 
-## 创建管理员
+1. `data/blog.sqlite` —— 旧版 Astro 博客的 SQLite 数据库（本地保留，不进 Git）。
+   首篇已发布文章、首个已发布项目会被整编为旗舰档案（X-001、X-009）；
+   留言簿、阅读数、访问统计等动态数据注入对应档案。
+2. `content/site.json` —— 站点资料（名称、作者、简介、 motto 、链接、友链），从旧版站点配置继承。
+3. 运行 `npm run export:blog` 读取以上两者，生成 `content/archives.json`
+   （五类、每类八份、X-001 至 X-040）。随后 `npm run export:archives` 校验并导出 TXT 下载文件；
+   `dev` / `build` 前会自动执行校验与导出。
 
-```bash
-npm run admin:create -- your-admin-name
-```
+在旧后台新增文章或项目后，重新执行 `npm run export:blog && npm run export:archives` 即可刷新档案。
+修改站点资料直接编辑 `content/site.json`。
 
-按提示设置密码后，访问 `/login/` 登录，再进入 `/admin/`。管理员可管理文章、作品、评论与网站设置。
+档案布局固定为五类各八份，与三维循环阵列、编号稳定性（收藏与导出文件名）绑定；
+校验规则见 `scripts/archive-content.mjs`，修改内容也可参考 `content/README.md`。
 
-## 写作流程
+## 操作说明
 
-1. 在后台新建文章，输入标题、摘要、标签和 Markdown 正文。
-2. 使用编辑器内的预览确认排版；上传图片后会自动生成可插入正文的 Markdown 链接。
-3. 保存为草稿、直接发布，或选择未来的发布时间。
-4. 草稿可通过管理员预览页查看，访客不会获得草稿网址。
+- 开场按 Enter / Esc 或点击 ENTER SYSTEM 进入阵列。
+- ← / → 切换档案列，↑ / ↓ 翻阅同列档案，首尾循环。
+- Enter 或 ACCESS FILE 读取当前档案；详情中可阅读摘要与研究记录、收藏、导出文本。
+- / 打开检索；Esc 关闭弹窗或返回阵列。
+- 详情页可进入 360° 查看器：拖动旋转、滚轮缩放、拆解与重组模型。
+- 收藏、音效、画质、明暗配色等偏好保存在当前浏览器。
 
-## 访客功能
+## 部署
 
-访客注册后可以登录、点赞和评论。管理员在后台审核评论；可在“网站设置”关闭新注册、设置默认评论状态和拦截关键词。
+`npm run build` 输出 `dist/`（含 PWA 离线缓存），交给任意静态托管即可：Nginx、Caddy、
+Cloudflare Pages、Vercel、GitHub Pages 均可。注意通过服务地址访问，不要直接双击 `dist/index.html`。
 
-## 运行时设置
+## 许可与归属
 
-`.env.example` 列出了生产环境变量：
-
-| 变量 | 用途 |
-| --- | --- |
-| `PUBLIC_SITE_ORIGIN` | 正式网址，用于同源校验、RSS、sitemap 和规范链接 |
-| `BLOG_DB_PATH` | SQLite 数据库位置 |
-| `BLOG_UPLOAD_DIR` | 上传图片目录 |
-| `HOST` / `PORT` | 服务监听地址，部署示例为 `127.0.0.1:4321` |
-| `NODE_ENV` | 生产环境设为 `production` |
-
-Astro 不会在生产运行时自动读取项目根目录的 `.env`；部署范例通过 systemd 的 `/etc/personal-blog.env` 显式提供这些变量。
-
-## 检查与构建
-
-```bash
-npm run check
-npm run build
-npm run test:unit
-npm run test:integration
-```
-
-`npm run check` 检查 Astro 与 TypeScript，`npm run build` 生成可部署的服务端文件，两个测试命令分别检查核心逻辑和完整的登录、后台、公开页面流程。
-
-## 生产部署
-
-```bash
-npm start
-npm run backup -- --output data/backups
-```
-
-`npm start` 运行已经构建好的站点。完整的 Ubuntu、systemd、Caddy、HTTPS、备份、恢复、升级与回滚步骤见 [docs/deploy.md](docs/deploy.md)。生产环境必须把 `data/blog.sqlite` 和 `data/uploads/` 放在持久磁盘中。
-
-## 备份、恢复与升级
-
-备份命令会创建一个独立的时间戳目录，里面包含数据库、上传文件和清单。恢复或升级前先运行备份；详细操作和回滚步骤见部署文档。
-
-## 项目结构
-
-```text
-src/config/       网站固定信息
-src/pages/        公开页面、后台和 API
-src/lib/          数据库、登录、文章、SEO 与业务逻辑
-public/           图片和静态资源
-scripts/          管理员创建、启动、备份和图片压缩
-deploy/           systemd 与 Caddy 配置范例
-docs/             部署说明
-```
-
-## Pokémon 素材
-
-`public/pikachu-official.png` 只作主题演示。公开发布或商业使用前，请替换成你拥有使用授权的素材。
+- 本站界面代码与三维资产基于 [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI)，
+  适用 MIT License（Copyright (c) 2026 LBEILC），见 [LICENSE](LICENSE) 与 [PR15-ATTRIBUTION.md](PR15-ATTRIBUTION.md)。
+- 档案内容为观众个人博客的原创数据，按同一 MIT 协议发布。
+- 《明日方舟》及莱茵生命相关名称、标志、设定的权利归各自权利人所有，本站为非官方的个人复刻用途；
+  MiSans、Novecento 等第三方资源遵循其原有许可，见 `public/licenses/` 与 `public/fonts/NOTICE.txt`。

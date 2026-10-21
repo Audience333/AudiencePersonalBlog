@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-016 / 静态资源优化
+ASSET PIPELINE
+
+科室：工程科
+编目范围：工程质量
+相关人物：Audience
+访问范围：INTERNAL AREA
+
+旧版博客用 sharp 处理图片资源，并提供一键优化脚本。
+
+研究记录
+1. optimize-assets.mjs 压缩并生成 WebP 版本。
+2. 站点头图 archive-hero 同时保留 PNG 与 WebP。
+3. 头像与图标集中在 public 目录分发。
+
+设定参考：https://sharp.pixelplumbing.com
+本文为基于公开设定的档案式改写，非游戏原文。

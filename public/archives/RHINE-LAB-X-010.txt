@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-010 / Astro 框架
+ASTRO
+
+科室：工程科
+编目范围：技术选型
+相关人物：Audience
+访问范围：REFERENCE AREA
+
+旧版博客基于 Astro 7 构建：服务端渲染、按路由组织页面、内容与模板分离。
+
+研究记录
+1. 使用 @astrojs/node 独立适配器输出 Node 服务。
+2. 文章在请求时从 SQLite 读取，不经过静态生成。
+3. 空内容集合保留在 src/content，仅作为 Astro 配置占位。
+
+设定参考：https://astro.build
+本文为基于公开设定的档案式改写，非游戏原文。

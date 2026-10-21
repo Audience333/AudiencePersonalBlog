@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-023 / 部署与运维
+DEPLOYMENT
+
+科室：站务科
+编目范围：运维记录
+相关人物：观众
+访问范围：RESTRICTED
+
+旧版博客的服务端部署方式：systemd 托管、Caddy 反代、脚本备份。
+
+研究记录
+1. personal-blog.service 以 systemd 常驻运行 Node 服务。
+2. Caddyfile 提供反向代理与自动 HTTPS。
+3. backup.mjs 定期备份 SQLite 数据库。
+
+设定参考：https://github.com/Audience333
+本文为基于公开设定的档案式改写，非游戏原文。

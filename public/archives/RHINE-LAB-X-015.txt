@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-015 / 测试
+TESTS
+
+科室：工程科
+编目范围：工程质量
+相关人物：Audience
+访问范围：INTERNAL AREA
+
+旧版博客带有单元与集成测试，覆盖数据迁移、文章操作、阅读统计与 SEO。
+
+研究记录
+1. node --test 运行 migrations、operations、posts、reading、seo、time 等用例。
+2. tests/integration.mjs 做端到端接口验证。
+3. astro check 负责 TypeScript 与模板类型检查。
+
+设定参考：https://nodejs.org
+本文为基于公开设定的档案式改写，非游戏原文。

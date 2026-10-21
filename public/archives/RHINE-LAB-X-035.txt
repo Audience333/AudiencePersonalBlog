@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-035 / 点赞机制
+LIKES
+
+科室：接待台
+编目范围：旧版功能
+相关人物：观众
+访问范围：REFERENCE AREA
+
+旧版博客的点赞规则：登录用户每篇文章可点赞一次，重复点赞由数据库主键拦截。
+
+研究记录
+1. likes 表以 post_id + user_id 作为联合主键。
+2. 点赞数随文章元数据一起展示。
+3. 当前点赞记录为零，等待第一位读者。
+
+设定参考：https://github.com/Audience333
+本文为基于公开设定的档案式改写，非游戏原文。

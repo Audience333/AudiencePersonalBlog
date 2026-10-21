@@ -1,0 +1,18 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-014 / Node 运行时
+NODE RUNTIME
+
+科室：工程科
+编目范围：技术选型
+相关人物：Audience
+访问范围：REFERENCE AREA
+
+生产环境以 Node 服务运行旧版博客，要求 Node.js 24.15 或更高版本。
+
+研究记录
+1. @astrojs/node 独立模式输出可启动的服务端入口。
+2. 登录会话通过 cookie 与服务器端 sessions 表维持。
+3. start.mjs 脚本用于生产启动。
+
+设定参考：https://nodejs.org
+本文为基于公开设定的档案式改写，非游戏原文。
