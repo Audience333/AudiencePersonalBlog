@@ -22,6 +22,6 @@
     { "label": "Email", "url": "mailto:1742777946@qq.com" }
   ],
   "friendLinks": [
-    { "label": "Travelling to next world", "labelEn": "Next Stop", "url": "https://www.travellings.cn/go.html", "note": "开往 · 友链接龙，随机前往下一个世界" }
+    { "label": "Travelling to next world", "labelEn": "Travelling", "url": "https://www.travellings.cn/go.html", "note": "开往 · 友链接龙，随机前往下一个世界" }
   ]
 }

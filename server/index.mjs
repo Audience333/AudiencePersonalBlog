@@ -27,7 +27,9 @@ import {
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const dist = path.join(root, "dist");
 const PORT = Number(process.env.PORT || 4321);
-const HOST = process.env.HOST || "0.0.0.0";
+// :: 为双栈监听，localhost 解析到 IPv6(::1) 或 IPv4(127.0.0.1) 都能命中，
+// 避免 ::1 被其他进程抢占后浏览器拿到旧服务。
+const HOST = process.env.HOST || "::";
 const COLUMNS = ["作品", "文章", "资源库"];
 
 seedIfEmpty();
