@@ -35,6 +35,24 @@ db.exec(`
   );
 `);
 
+// 认证表：全新部署（无历史数据库）时也能直接创建管理员账号并登录。
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('admin', 'reader')),
+    avatar TEXT,
+    created_at INTEGER NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS sessions (
+    token_hash TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+  );
+`);
+
 // 旧库迁移：body 列保存 Markdown 正文（文章列在详情页直接阅读）。
 {
   const columns = db.prepare(`PRAGMA table_info(records)`).all();
