@@ -18,6 +18,14 @@ export default defineConfig(({ mode }) => ({
     __RHINE_MODELS__: JSON.stringify(Object.fromEntries(models.map(model => [model.key,model.fileName]))),
     __RHINE_NOVECENTO__: JSON.stringify(hasNovecento),
   },
+  build: {
+    rollupOptions: {
+      input: {
+        index: "index.html",
+        admin: "admin.html",
+      },
+    },
+  },
   plugins: [{
     name: "versioned-model-assets", apply: "build",
     buildStart() { for (const model of models) this.emitFile({type:"asset",fileName:model.fileName,source:model.source}); },
