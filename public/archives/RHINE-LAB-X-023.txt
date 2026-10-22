@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-023 / 部署与运维
-DEPLOYMENT
+FILE X-023 / Node.js
+NODE.JS
 
-科室：站务科
-编目范围：运维记录
-相关人物：观众
-访问范围：RESTRICTED
+科室：资源部
+编目范围：2026
+相关人物：nodejs
+访问范围：REFERENCE AREA
 
-旧版博客的服务端部署方式：systemd 托管、Caddy 反代、脚本备份。
+本站运行时所依赖的 JavaScript 运行时：本终端的服务端、构建脚本与管理后台都跑在它上面。
 
 研究记录
-1. personal-blog.service 以 systemd 常驻运行 Node 服务。
-2. Caddyfile 提供反向代理与自动 HTTPS。
-3. backup.mjs 定期备份 SQLite 数据库。
+1. 本站要求 22.12 或更高版本（推荐 24 LTS）。
+2. 内置加密模块即可完成密码哈希，无需额外依赖。
+3. 配合 systemd 常驻即可获得稳定的个人站点服务。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+官方网站：https://nodejs.org
+源代码仓库：https://github.com/nodejs/node
+
+设定参考：https://nodejs.org
+本文档由站长档案终端生成。

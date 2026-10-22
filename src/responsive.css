@@ -35,7 +35,7 @@
 [data-layout="desktop"] .archive-navigation { left: 26.25%; }
 [data-layout="desktop"] .column-navigation { left: 52.34375%; }
 [data-layout="desktop"] .archive-hint { left: 26.302083%; }
-[data-layout="desktop"] .detail-content { left: 60.104167%; width: min(636px, 33.125%); max-height: calc(100% - 429px); overflow-y: auto; scrollbar-width: thin; }
+[data-layout="desktop"] .detail-content { left: 60.104167%; width: min(636px, 33.125%); max-height: calc(100% - 480px); overflow-y: auto; scrollbar-width: thin; }
 [data-layout="desktop"] .terminal-modal { max-width: calc(100% - 100px); }
 [data-layout="desktop"] .viewer-help, [data-layout="desktop"] .viewer-reset { width: 25%; }
 

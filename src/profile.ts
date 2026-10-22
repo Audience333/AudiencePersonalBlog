@@ -10,9 +10,9 @@ const links = site.links as SiteLink[];
 const friendLinks = site.friendLinks as FriendLink[];
 
 const statItems = [
-  { value: stats.posts, label: "Posts" },
-  { value: stats.views, label: "Views" },
-  { value: stats.comments, label: "Comments" },
+  { value: stats.works, label: "Works" },
+  { value: stats.articles, label: "Articles" },
+  { value: stats.resources, label: "Resources" },
 ];
 
 /** 首页进入前的站长档案面板：访客第一眼看到的个人信息。 */

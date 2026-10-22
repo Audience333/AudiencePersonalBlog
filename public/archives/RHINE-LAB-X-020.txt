@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-020 / 音乐播放器
-MUSIC PLAYER
+FILE X-020 / Vite
+VITE
 
-科室：站务科
-编目范围：旧版功能
-相关人物：观众
-访问范围：INTERNAL AREA
+科室：资源部
+编目范围：2026
+相关人物：vitejs
+访问范围：REFERENCE AREA
 
-旧版博客内置音乐播放器，曲目来自 music/ 目录的扫描结果，不经过数据库。
+前端构建工具：秒级冷启动与热更新，本站与 RhineLabUI 都用它开发构建。
 
 研究记录
-1. 当前曲库保留测试音轨《01-测试音调》与说明文件。
-2. 曲目通过 /api/music 接口按文件名点播。
-3. 新终端保留三轨循环配乐作为站点声音。
+1. 基于原生 ESM 的开发服务器，改动即时反映。
+2. 生产构建用 Rollup 打包，输出精简。
+3. 插件体系成熟，JSON、CSS 等开箱可用。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+官方网站：https://vite.dev
+源代码仓库：https://github.com/vitejs/vite
+
+设定参考：https://vite.dev
+本文档由站长档案终端生成。

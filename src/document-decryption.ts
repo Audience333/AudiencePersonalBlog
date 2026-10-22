@@ -23,7 +23,7 @@ export class DocumentDecryption {
     // Measure text fragments, including wrapped lines, without splitting or
     // replacing the actual text. Stage scaling cancels out in local coordinates.
     const targets = this.root.querySelectorAll<HTMLElement>(
-      "h2, .detail-title-cn, .metadata dd, .tab-panel p, .research-notes li, .log-row",
+      "h2, .detail-title-cn, .metadata dd, .tab-panel p, .research-notes li, .log-row, .article-body h3, .article-body h4, .article-body h5, .article-body p, .article-body li",
     );
     targets.forEach((target) => {
       target.classList.add("document-redacted");

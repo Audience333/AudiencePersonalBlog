@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-005 / 话题：网站建设
-TOPIC: SITE BUILDING
+FILE X-005 / 终端管理后台
+TERMINAL ADMIN
 
-科室：编辑部
-编目范围：首篇文章标签
+科室：工程科
+编目范围：2026-10
 相关人物：观众
-访问范围：PUBLIC AREA
+访问范围：INTERNAL AREA
 
-“网站建设”是首篇文章使用的标签之一。旧版博客按标签聚合文章，本站继承这一话题作为独立档案。
+本站的内容管理后台：登录后可以直接增删改作品、文章与资源库档案，保存后首页立即生效。
 
 研究记录
-1. 当前这座终端本身就是这一话题的实例。
-2. 同标签的文章在旧版站点通过 /blog/tags/ 页面聚合。
-3. 之后发布的同主题文章继续归入此话题。
+1. 复用旧博客的 scrypt 密码哈希与 sessions 表，旧管理员账号直接可用。
+2. 会话 Cookie httpOnly + SameSite=Lax，登录接口带限流。
+3. 档案写入 SQLite 后同步刷新 JSON 快照与 TXT 导出。
+4. 界面沿用终端视觉语言，从首页右下角可进入。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+
+设定参考：https://github.com/Audience333/AudiencePersonalBlog
+本文档由站长档案终端生成。

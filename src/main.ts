@@ -35,7 +35,11 @@ import {
   archiveColumns,
   columnFiles,
   fileLocation,
+  laneCenter,
+  initRecords,
+  type ArchiveRecord,
 } from "./data";
+import { renderMarkdown } from "./markdown";
 import { TerminalAudio } from "./audio";
 import { audioSettingsMarkup } from "./audio-settings";
 import {
@@ -100,7 +104,7 @@ $("#stage").innerHTML = `
     <div id="hover-label" class="hover-label" hidden>X-<span id="hover-code">001</span> / <span id="hover-title"></span></div>
     <div class="archive-counter"><span class="tiny-label">ARCHIVE / SELECT</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">12</span></div></div>
     <div class="archive-navigation"><button data-action="prev" aria-label="上一个档案">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="下一个档案">↓</button></div>
-    <div class="column-navigation"><button data-action="column-prev" aria-label="上一列">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name">机构档案</strong></div><button data-action="column-next" aria-label="下一列">→</button></div>
+    <div class="column-navigation"><button data-action="column-prev" aria-label="上一列">←</button><div><span id="column-number">COLUMN <span id="column-index">02</span> / <span id="column-total">03</span></span><strong id="column-name">作品</strong></div><button data-action="column-next" aria-label="下一列">→</button></div>
     <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> 切换列 <span>／</span> <kbd>↑</kbd> <kbd>↓</kbd> 前后档案 <span>／</span> <kbd>ENTER</kbd> 读取</div>
   </section>
   <section id="detail-ui" class="detail-ui" aria-label="档案内容" hidden>
@@ -236,8 +240,9 @@ const fileCounter = createRollingNumber($("#selected-number"), {
 });
 const columnCounter = createRollingNumber($("#column-index"), {
   ...numberOptions,
-  value: 3,
+  value: laneCenter + 1,
 });
+$("#column-total").textContent = String(archiveColumns.length).padStart(2, "0");
 const codeOptions = {
   ...numberOptions,
   format: { minimumIntegerDigits: 3, useGrouping: false },
@@ -688,16 +693,65 @@ function toggleSaved() {
   audio.play("confirm");
   notify(saved.has(id) ? "档案已加入收藏" : "已取消收藏");
 }
+/** 本站链接（站内路径或同源地址）可内嵌 iframe 直接预览。 */
+const isLocalUrl = (url: string) =>
+  url.startsWith("/") || url.startsWith(window.location.origin);
+
+function previewUrl(r: ArchiveRecord) {
+  return r.links?.find((link) => isLocalUrl(link.url))?.url;
+}
+
+/** 按列特性组装详情页签：文章读正文、资源库取链接、作品可直接打开或内嵌预览。 */
+function detailTabs(r: ArchiveRecord) {
+  const tabs: { id: string; label: string }[] = [
+    { id: "overview", label: "概述" },
+  ];
+  if (r.category === "文章" && r.body?.trim())
+    tabs.push({ id: "article", label: "正文" });
+  if (r.category === "资源库" && r.links?.length)
+    tabs.push({ id: "resources", label: "获取资源" });
+  if (r.category === "作品" && r.links?.some((link) => isLocalUrl(link.url)))
+    tabs.push({ id: "preview", label: "在线预览" });
+  tabs.push({ id: "notes", label: r.category === "作品" ? "项目要点" : "研究记录" });
+  tabs.push({ id: "history", label: "访问日志" });
+  return tabs.map((tab, index) => ({
+    ...tab,
+    num: String(index + 1).padStart(2, "0"),
+  }));
+}
+
 function renderDetail() {
   tabTransition.cancel();
   const r = records[selected];
   $("#object-id").textContent = "NO." + String(selected + 1).padStart(3, "0");
+  const tabs = detailTabs(r);
+  if (!tabs.some((tab) => tab.id === activeTab)) activeTab = "overview";
+  // 资源库的链接统一在「获取资源」页签展示；文章提供直达正文入口。
+  const typeLinks =
+    r.category !== "资源库" && r.links?.length
+      ? `<div class="detail-links">${r.links
+          .map(
+            (link) =>
+              `<a class="detail-link" href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.label)} <span>↗</span></a>`,
+          )
+          .join("")}${
+          r.category === "文章" && r.body?.trim()
+            ? `<button class="detail-link" data-tab="article">READ ARTICLE <span>→</span></button>`
+            : ""
+        }</div>`
+      : "";
   $("#detail-content").innerHTML = `
   <div class="detail-kicker"><span>FILE ${r.id}</span><span>${escapeHtml(r.clearance)}</span></div>
   <h2>${escapeHtml(r.en)}</h2><div class="detail-title-cn">${escapeHtml(r.title)}<span>${escapeHtml(r.category)}</span></div>
   <div class="detail-rule"></div>
   <dl class="metadata"><div><dt>DEPARTMENT / 科室</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>COLLECTION / 编目范围</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>RELATED / 相关人物</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS / 状态</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "目录访问" : "已归档 · 可读取"}</dd></div></dl>
-  <div class="detail-tabs" role="tablist"><button id="tab-overview" class="active" role="tab" aria-controls="tab-panel" aria-selected="true" data-tab="overview">01 <span>概述</span></button><button id="tab-notes" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="notes">02 <span>研究记录</span></button><button id="tab-history" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="history">03 <span>访问日志</span></button><i class="tab-indicator" aria-hidden="true"></i></div>
+  ${typeLinks}
+  <div class="detail-tabs" role="tablist">${tabs
+    .map(
+      (tab) =>
+        `<button id="tab-${tab.id}" class="${tab.id === activeTab ? "active" : ""}" role="tab" aria-controls="tab-panel" aria-selected="${tab.id === activeTab}" data-tab="${tab.id}">${tab.num} <span>${tab.label}</span></button>`,
+    )
+    .join("")}<i class="tab-indicator" aria-hidden="true"></i></div>
   <div id="tab-panel" class="tab-panel" role="tabpanel">${overview()}</div>
   <div class="detail-actions"><button class="solid-button" data-action="bookmark">${saved.has(r.id) ? "− REMOVE FROM SAVED" : "＋ SAVE ARCHIVE"}<span>${saved.has(r.id) ? "已收藏" : "收藏档案"}</span></button><a class="export-button" href="${assetUrl(`archives/RHINE-LAB-${r.id}.txt`)}" download="RHINE-LAB-${r.id}.txt" aria-label="导出 ${r.id} 档案">EXPORT <span>↓</span></a></div>
   <div class="detail-footnote"><a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">设定参考 ↗</a><span>${String(selected + 1).padStart(3, "0")} / ${String(records.length).padStart(3, "0")}</span></div>`;
@@ -732,23 +786,39 @@ function setTab(tab: string, sound = true) {
   indicator.style.transition =
     sound && motionActive("surfaceTransitions") ? "" : "none";
   indicator.style.transform = `translateX(${tabButton.offsetLeft}px) scaleX(${tabButton.offsetWidth})`;
-  $("#tab-panel").setAttribute("aria-labelledby", tabButton.id);
-  $("#tab-panel").innerHTML =
+  const panel = $("#tab-panel");
+  panel.setAttribute("aria-labelledby", tabButton.id);
+  panel.classList.toggle(
+    "tall",
+    tab === "article" || tab === "resources" || tab === "preview",
+  );
+  panel.innerHTML =
     tab === "overview"
       ? overview()
-      : tab === "notes"
-        ? `<div class="panel-label">RESEARCH NOTES / 研究记录</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
-        : `<div class="panel-label">ACCESS LOG / 本次访问</div>${accessLog
-            .filter((entry) => entry.id === r.id)
-            .slice(0, 4)
-            .map(
-              (entry) =>
-                `<div class="log-row"><span>${entry.time}</span><span>AUDIENCE</span><b>READ AUTHORIZED</b></div>`,
-            )
-            .join(
-              "",
-            )}<p class="log-note">本次会话已通过身份验证。档案内容以当前终端可访问范围展示。</p>`;
-  $("#tab-panel").scrollTop = 0;
+      : tab === "article"
+        ? `<div class="panel-label">FULL TEXT / 正文</div><div class="article-body">${renderMarkdown(r.body ?? "")}</div>`
+        : tab === "resources"
+          ? `<div class="panel-label">RESOURCES / 获取资源</div><div class="resource-list">${(r.links ?? [])
+              .map(
+                (link) =>
+                  `<div class="resource-row"><span class="resource-name">${escapeHtml(link.label)}</span><span class="resource-url">${escapeHtml(link.url)}</span><span class="resource-actions"><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener">打开 ↗</a><a href="${escapeHtml(link.url)}" download>下载 ↓</a></span></div>`,
+              )
+              .join("")}</div>`
+          : tab === "preview"
+            ? `<div class="panel-label">LIVE PREVIEW / 在线预览</div><iframe class="preview-frame" src="${escapeHtml(previewUrl(r) ?? "")}" sandbox="allow-scripts allow-same-origin allow-forms" title="${escapeHtml(r.title)} 在线预览"></iframe><p class="preview-note">内嵌预览仅对本站页面可用；外部仓库请使用上方链接在新标签页打开。</p>`
+            : tab === "notes"
+              ? `<div class="panel-label">${r.category === "作品" ? "PROJECT NOTES" : "RESEARCH NOTES"} / ${r.category === "作品" ? "项目要点" : "研究记录"}</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
+              : `<div class="panel-label">ACCESS LOG / 本次访问</div>${accessLog
+                  .filter((entry) => entry.id === r.id)
+                  .slice(0, 4)
+                  .map(
+                    (entry) =>
+                      `<div class="log-row"><span>${entry.time}</span><span>AUDIENCE</span><b>READ AUTHORIZED</b></div>`,
+                  )
+                  .join(
+                    "",
+                  )}<p class="log-note">本次会话已通过身份验证。档案内容以当前终端可访问范围展示。</p>`;
+  panel.scrollTop = 0;
   documentDecryption.refresh();
   if (sound) {
     tabTransition.reveal($("#tab-panel"), !motionActive("surfaceTransitions"));
@@ -1484,6 +1554,8 @@ async function toggleThree() {
 async function start() {
   try {
     if (isWallpaper) await window.rhineWallpaperPropertiesReady;
+    // 自带服务在线时用最新档案（后台改动即时生效），否则用打包快照。
+    if (!isWallpaper) await initRecords();
     if (
       !isWallpaper ||
       wallpaperHost()?.properties.load3donstartup?.value !== false
@@ -1697,7 +1769,8 @@ if (isWallpaper) {
       if (ready && mode !== "boot") setMode("archive");
     },
     (lane) => {
-      if (ready && !modal) select(columnMemory[lane]);
+      if (ready && !modal && lane < archiveColumns.length)
+        select(columnMemory[lane]);
     },
   );
   workbench.setMotion(prefs.motion);

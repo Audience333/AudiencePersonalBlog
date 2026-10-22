@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { COLUMN_SPACING, ROW_SPACING, type ArchiveCell } from './archive-loop.ts';
+import { laneCenter } from './data.ts';
 
 const edges = [[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]];
 /** A view-aligned pool, clipped to the height slab the array can occupy. */
@@ -39,8 +40,8 @@ export class ArchiveVisibility {
       if(t>=0&&t<=1)slab.expandByPoint(start.clone().lerp(end,t));
     }
     if(slab.isEmpty()) { this.candidates=0; return this.cachedCells = []; }
-    const minLane=Math.floor((slab.min.x-2.8+trackX)/COLUMN_SPACING+2)-1;
-    const maxLane=Math.ceil((slab.max.x+2.8+trackX)/COLUMN_SPACING+2)+1;
+    const minLane=Math.floor((slab.min.x-2.8+trackX)/COLUMN_SPACING+laneCenter)-1;
+    const maxLane=Math.ceil((slab.max.x+2.8+trackX)/COLUMN_SPACING+laneCenter)+1;
     const minRow=Math.floor((slab.min.z-.6-trackZ)/ROW_SPACING+15.5)-2;
     const maxRow=Math.ceil((slab.max.z+.6-trackZ)/ROW_SPACING+15.5)+2;
     const cells: ArchiveCell[]=[];

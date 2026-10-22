@@ -781,6 +781,35 @@ button {
   gap: 25px 42px;
   margin: 28px 0 34px;
 }
+.detail-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: -12px 0 30px;
+}
+.detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 20px;
+  border: 1px solid #969183;
+  font-size: 14.3px;
+  letter-spacing: 1px;
+  color: #1c1e1a;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.detail-link span {
+  font-size: 16.9px;
+  line-height: 1;
+}
+.detail-link:hover {
+  background: #1c1e1a;
+  color: #f2efe9;
+}
 .metadata dt {
   font-size: 11.7px;
   letter-spacing: 0.7px;
@@ -832,7 +861,7 @@ button {
   transition: none;
 }
 .tab-panel {
-  height: 150px;
+  height: 130px;
   padding-top: 22px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -883,6 +912,109 @@ button {
 }
 .tab-panel .log-note {
   font-size: 16.9px;
+}
+/* 三列差异化预览：文章正文 / 资源获取 / 作品内嵌预览 */
+.tab-panel.tall {
+  height: 400px;
+}
+.article-body h3 {
+  font-size: 19.5px;
+  color: #25281e;
+  margin: 18px 0 0;
+}
+.article-body h4,
+.article-body h5 {
+  font-size: 18.2px;
+  color: #2c2f27;
+  margin: 14px 0 0;
+}
+.article-body ul,
+.article-body ol {
+  margin: 10px 0 0;
+  padding-left: 22px;
+  font-size: 16.9px;
+  line-height: 1.75;
+  color: #5a584e;
+}
+.article-body code {
+  background: #e6e2d7;
+  padding: 1px 5px;
+  font-size: 0.88em;
+}
+.article-body pre {
+  background: #16170f;
+  color: #d9d5c6;
+  padding: 12px 16px;
+  margin: 12px 0 0;
+  overflow-x: auto;
+  font-size: 14.3px;
+  line-height: 1.65;
+}
+.article-body pre code {
+  background: none;
+  padding: 0;
+}
+.article-body a {
+  color: #7a5c2e;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.resource-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 13px;
+  font-size: 14.3px;
+}
+.resource-name {
+  min-width: 130px;
+  color: #25281e;
+  letter-spacing: 0.5px;
+}
+.resource-url {
+  flex: 1;
+  min-width: 0;
+  color: #8a857a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+.resource-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.resource-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 14px;
+  border: 1px solid #969183;
+  color: #1c1e1a;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.resource-actions a:hover {
+  background: #1c1e1a;
+  color: #f2efe9;
+}
+.preview-frame {
+  display: block;
+  width: 100%;
+  height: 330px;
+  margin-top: 12px;
+  border: 1px solid #bdb8ad;
+  background: #fff;
+}
+.preview-note {
+  font-size: 13px !important;
+  color: #8a857a !important;
+  margin-top: 8px !important;
 }
 .detail-actions {
   display: flex;
@@ -1791,6 +1923,23 @@ button {
 }
 .research-notes li {
   font-size: 20.8px;
+}
+.article-body h3 {
+  font-size: 22.5px;
+}
+.article-body h4,
+.article-body h5 {
+  font-size: 21.3px;
+}
+.article-body ul,
+.article-body ol {
+  font-size: 20.8px;
+}
+.article-body pre {
+  font-size: 18.2px;
+}
+.resource-row {
+  font-size: 18.2px;
 }
 .panel-label {
   font-size: 14.3px;

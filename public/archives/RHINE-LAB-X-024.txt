@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-024 / 数据与备份
-DATA & BACKUP
+FILE X-024 / KaTeX
+KATEX
 
-科室：站务科
-编目范围：运维记录
-相关人物：观众
-访问范围：RESTRICTED
+科室：资源部
+编目范围：2026
+相关人物：KaTeX
+访问范围：REFERENCE AREA
 
-博客数据的存放约定：单一 SQLite 文件 + 本地音乐目录，全部可以整体搬走。
+快速的数学公式排版库：旧版博客用它在浏览器里渲染行内与块级公式，无需服务端转换。
 
 研究记录
-1. data/blog.sqlite 是唯一的持久化数据文件，开启 WAL。
-2. music/ 目录保存音乐文件，随仓库一起备份。
-3. 本文档涉及的旧版脚本与配置已归档至 git 历史。
+1. 渲染速度快，公式无需图片。
+2. 与 Markdown 渲染链配合成熟。
+3. 本资源库及文章中的数学表达式均可由它呈现。
 
-设定参考：https://www.sqlite.org
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+官方网站：https://katex.org
+源代码仓库：https://github.com/KaTeX/KaTeX
+
+设定参考：https://katex.org
+本文档由站长档案终端生成。

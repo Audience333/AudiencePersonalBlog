@@ -1,19 +1,21 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-008 / 阅读体验
-READING EXPERIENCE
+FILE X-008 / 终端静态服务
+STATIC SERVER
 
-科室：编辑部
-编目范围：旧版站点功能
+科室：工程科
+编目范围：2026-10
 相关人物：观众
 访问范围：INTERNAL AREA
 
-旧版博客为长文准备的阅读辅助：阅读时长估算、目录、相关文章与订阅。
+本站的运行时：零依赖 Node HTTP 服务，既托管构建后的静态文件，也提供档案 API、管理接口与 TXT 导出生成。
 
 研究记录
-1. 阅读时长按中文约 500 字/分钟、西文约 220 词/分钟估算。
-2. 标题达到两个以上时生成目录，支持 h2 与 h3。
-3. 文章底部有上一篇/下一篇与按标签匹配的相关文章。
-4. 全站提供 RSS 订阅与 sitemap。
+1. 静态文件带内容类型与安全头，API 与静态路由分离。
+2. 同一进程内完成鉴权、档案 CRUD 与快照再导出。
+3. 默认监听 4321 端口，可用环境变量覆盖。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+
+设定参考：https://github.com/Audience333/AudiencePersonalBlog
+本文档由站长档案终端生成。

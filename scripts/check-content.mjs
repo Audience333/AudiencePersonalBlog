@@ -65,16 +65,22 @@ const invalidCases = [
   [
     "unbalanced columns",
     (c) => {
-      c.records[0].category = c.columns[0];
+      const target = c.columns.find(
+        (name) => name !== c.records[0].category,
+      );
+      for (const record of c.records.slice(0, 6))
+        record.category = target;
     },
-    /八份档案/,
+    /每列 3 至 12 份档案/,
   ],
   [
     "missing record",
     (c) => {
-      c.records.pop();
+      c.records = c.records.filter(
+        (record) => record.category !== c.columns[c.columns.length - 1],
+      );
     },
-    /四十份档案/,
+    /每列 3 至 12 份档案/,
   ],
   [
     "null record",
@@ -130,7 +136,7 @@ const invalidCases = [
     (c) => {
       c.columns[0] = "其他";
     },
-    /相同的五个分类/,
+    /相同的三个分类/,
   ],
 ];
 for (const [name, mutate, error] of invalidCases) {

@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-019 / 检索系统
-FULL-TEXT SEARCH
+FILE X-019 / Three.js
+THREE.JS
 
-科室：站务科
-编目范围：旧版功能
-相关人物：观众
-访问范围：INTERNAL AREA
+科室：资源部
+编目范围：2026
+相关人物：mrdoob
+访问范围：REFERENCE AREA
 
-旧版博客在服务端实现全文检索；本站改用终端内置的档案检索（按 / 键打开）。
+浏览器三维渲染库，本站的档案阵列、模型解密与 360° 查看器都建立在它之上。
 
 研究记录
-1. FTS5 三元组索引覆盖标题、描述、正文与标签。
-2. 索引不可用时自动退回 LIKE 模糊匹配。
-3. 新终端支持按编号、标题、科室与分类筛选档案。
+1. WebGL 封装友好，示例与文档覆盖面广。
+2. 实例化渲染让数百个档案盒同屏也能流畅运动。
+3. 配 RhineLabUI 这类完整项目学习曲线平缓很多。
 
-设定参考：https://www.sqlite.org
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+官方网站：https://threejs.org
+源代码仓库：https://github.com/mrdoob/three.js
+
+设定参考：https://threejs.org
+本文档由站长档案终端生成。

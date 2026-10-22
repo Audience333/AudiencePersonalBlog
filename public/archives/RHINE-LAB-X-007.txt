@@ -1,18 +1,21 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-007 / 发布约定
-PUBLISHING RULES
+FILE X-007 / 静态资源优化管线
+ASSET PIPELINE
 
-科室：编辑部
-编目范围：旧版站点规则
+科室：工程科
+编目范围：2026-09
 相关人物：观众
 访问范围：INTERNAL AREA
 
-旧版博客的文章发布规则。文章由后台写入 SQLite，站点时区固定为 Asia/Shanghai。
+旧版博客的图片优化脚本：压缩图片并生成 WebP 版本，站点头图同时保留 PNG 与 WebP 两种格式。
 
 研究记录
-1. 文章有草稿与已发布两种状态，支持定时发布。
-2. 系列文章按 series 与 series_order 字段排序。
-3. 列表页每页默认 10 篇，可按最新、最热、字数排序。
+1. 基于 sharp，批量处理 public 目录下的图片资源。
+2. 压缩后显著降低首屏加载体积。
+3. 新终端的头图与图标延续了这套产出。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+
+设定参考：https://github.com/Audience333/AudiencePersonalBlog
+本文档由站长档案终端生成。

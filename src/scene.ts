@@ -20,7 +20,7 @@ import { applyTextureQuality, resizeQuality } from "./quality-renderer";
 import { CardAppearance } from "./appearance";
 import { configureInternalOptics } from "./internal-optics";
 import { DecryptionController } from "./decryption";
-import { fileAtSlot, fileLocation } from "./data";
+import { archiveColumns, fileAtSlot, fileLocation, laneCenter } from "./data";
 import {
   cellKey,
   sameCell,
@@ -187,13 +187,13 @@ export class ArchiveScene {
   private raycaster = new THREE.Raycaster();
   private dummy = new THREE.Object3D();
   private cells: ArchiveCell[] = [];
-  private selectedCell: ArchiveCell = { lane: 2, row: 12 };
+  private selectedCell: ArchiveCell = { lane: laneCenter, row: 12 };
   private looping = false;
   private coordinateOrigin: ArchiveCell = { lane: 0, row: 0 };
   private lift = { value: 0, velocity: 0 };
   private rail = { value: 0, velocity: 0 };
   private shoulder = { value: 12, velocity: 0 };
-  private laneFocus = { value: 2, velocity: 0 };
+  private laneFocus = { value: laneCenter, velocity: 0 };
   private columnCamera = { value: 0, velocity: 0 };
   private returnY: number | null = null;
   private canInspect = false;
@@ -214,7 +214,7 @@ export class ArchiveScene {
   }[] = [];
   private pulses: { row: number; lane: number; time: number }[] = [];
   private pendingPulse: ArchiveCell | null = null;
-  private selectedSlot = 76;
+  private selectedSlot = laneCenter * 32 + 12;
   private detail = 0;
   private targetDetail = 0;
   private reveal = 0;
@@ -665,7 +665,7 @@ export class ArchiveScene {
   }
   private cellPosition(cell: ArchiveCell) {
     return new THREE.Vector3(
-      (cell.lane - 2) * COLUMN_SPACING,
+      (cell.lane - laneCenter) * COLUMN_SPACING,
       -4.6,
       (cell.row - 15.5) * ROW_SPACING,
     );
@@ -676,7 +676,7 @@ export class ArchiveScene {
     const shift = {
       lane:
         Math.abs(this.selectedCell.lane) > 2048
-          ? Math.round((this.selectedCell.lane - 2) / 5) * 5
+          ? Math.round((this.selectedCell.lane - laneCenter) / archiveColumns.length) * archiveColumns.length
           : 0,
       row:
         Math.abs(this.selectedCell.row) > 2048
@@ -904,7 +904,7 @@ export class ArchiveScene {
   }
   private trackCoordinate(axis: DragAxis, value: number) {
     return axis === "lane"
-      ? value / COLUMN_SPACING + 2
+      ? value / COLUMN_SPACING + laneCenter
       : (-value - 2.17) / ROW_SPACING + 15.5;
   }
   private dragProjection(): DragProjection {
@@ -934,7 +934,7 @@ export class ArchiveScene {
   }
   private trackPosition(axis: DragAxis, coordinate: number) {
     return axis === "lane"
-      ? (coordinate - 2) * COLUMN_SPACING
+      ? (coordinate - laneCenter) * COLUMN_SPACING
       : -2.17 - (coordinate - 15.5) * ROW_SPACING;
   }
   private navigatePlane(coordinate: DragPosition) {
@@ -1327,7 +1327,7 @@ export class ArchiveScene {
     }
     const spectrumPoint = new THREE.Vector3();
     const screenX = (row: number, lane: number) => {
-      spectrumPoint.set((lane - 2) * COLUMN_SPACING - trackX, -4.6, (row - 15.5) * ROW_SPACING + this.rail.value).project(this.camera);
+      spectrumPoint.set((lane - laneCenter) * COLUMN_SPACING - trackX, -4.6, (row - 15.5) * ROW_SPACING + this.rail.value).project(this.camera);
       return (spectrumPoint.x + 1) / 2;
     };
     const fieldCache = new Map<number, Map<number, number>>();
@@ -1688,7 +1688,7 @@ export class ArchiveScene {
     for (const cell of this.cells) {
       const { row, lane } = cell;
       if (hidden.has(cellKey(cell))) continue;
-      const x = (lane - 2) * COLUMN_SPACING - trackX;
+      const x = (lane - laneCenter) * COLUMN_SPACING - trackX;
       const y = -4.6 + field(row, lane) + hoverLift(cell) - this.presentationDrop(cell);
       const z = (row - 15.5) * ROW_SPACING + entryZ + this.rail.value;
       if (!fixed && !this.visibility.intersects(x, y, z)) continue;

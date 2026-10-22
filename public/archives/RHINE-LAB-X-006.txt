@@ -1,18 +1,21 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-006 / 话题：随笔
-TOPIC: ESSAYS
+FILE X-006 / 博客备份脚本
+BACKUP UTILITY
 
-科室：编辑部
-编目范围：首篇文章标签
+科室：工程科
+编目范围：2026-09
 相关人物：观众
-访问范围：PUBLIC AREA
+访问范围：INTERNAL AREA
 
-“随笔”是首篇文章使用的标签之一，用来存放不设主题的日常记录。
+旧版博客的备份工具：为 SQLite 数据库与上传文件创建带时间戳的备份目录，并生成清单文件， successive 备份互不覆盖。
 
 研究记录
-1. 随笔没有固定格式，长短都可以。
-2. 写给自己看的记录，也值得留下来。
-3. 与“网站建设”话题互补：一个记录过程，一个记录想法。
+1. 一条命令导出 blog.sqlite、uploads/ 与 manifest.json。
+2. 按日期命名目录，方便回滚到任意一次备份。
+3. 建议配合定时任务同步到对象存储。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+
+设定参考：https://github.com/Audience333/AudiencePersonalBlog
+本文档由站长档案终端生成。

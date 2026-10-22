@@ -1,18 +1,21 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-021 / 留言板
-GUESTBOOK
+FILE X-021 / better-sqlite3
+BETTER-SQLITE3
 
-科室：站务科
-编目范围：旧版功能
-相关人物：观众
-访问范围：INTERNAL AREA
+科室：资源部
+编目范围：2026
+相关人物：WiseLibs
+访问范围：REFERENCE AREA
 
-旧版博客的公开留言板：匿名也可以留言，所有留言经审核后展示。
+Node.js 的 SQLite 同步驱动：事务与预处理语句性能优秀，本站后台的档案读写都由它完成。
 
 研究记录
-1. 未留昵称时显示为“匿名用户”。
-2. 留言状态分待审核、已通过、已拒绝三种。
-3. 新终端不再接收留言，历史留言见互动记录档案。
+1. 同步 API 让服务端代码更直白。
+2. 事务批量写入速度快，适合导入与重建索引。
+3. 与 Node 24 兼容良好，无需额外守护进程。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/WiseLibs/better-sqlite3
+
+设定参考：https://github.com/WiseLibs/better-sqlite3
+本文档由站长档案终端生成。

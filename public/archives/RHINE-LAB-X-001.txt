@@ -1,19 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-001 / 网站从这里开始
-THE FIRST POST
+FILE X-001 / 莱茵档案终端
+RHINE ARCHIVE TERMINAL
 
-科室：编辑部
-编目范围：2026-09-17
+科室：工程科
+编目范围：2026-10
 相关人物：观众
 访问范围：PUBLIC AREA
 
-这是一篇示例文章，展示如何用 Markdown 发布博客内容。
+本站：基于开源项目 RhineLabUI 复刻的莱茵生命风格三维档案终端，把博客内容整编成可抽取、解密、阅读的档案阵列，并配有管理后台。
 
 研究记录
-1. 你好，欢迎来到观众的个人网站。
-2. 这是一篇示例文章。管理员登录后台后，可以直接修改这篇内容。
-3. 接下来写什么？
-4. 可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。
+1. 三维档案阵列使用 Three.js 实时渲染，开场动画按原 PV 时间轴复刻。
+2. 内容层与管理后台分离：后台改数据，前台运行时加载，无需重新构建。
+3. 五类档案已重构为作品、文章、资源库三列，每类有适配的预览方式。
+4. 整站可静态构建，也可由自带 Node 服务托管并提供 API。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+
+设定参考：https://github.com/Audience333/AudiencePersonalBlog
+本文档由站长档案终端生成。

@@ -1,19 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-018 / 站点地图
-SITE MAP
+FILE X-018 / Astro
+ASTRO
 
-科室：站务科
-编目范围：旧版路由
-相关人物：观众
-访问范围：INTERNAL AREA
+科室：资源部
+编目范围：2026
+相关人物：withastro
+访问范围：REFERENCE AREA
 
-旧版博客的主要页面。本站替换为莱茵终端后，这些内容以档案形式继续保存。
+旧版博客使用的 Web 框架：以内容为中心的岛屿架构，支持 SSR/SSG，Markdown 体验开箱即用。
 
 研究记录
-1. /blog 文章列表，支持排序与关键词搜索。
-2. /blog/tags/ 与 /blog/series 按标签、系列浏览文章。
-3. /projects 展示项目作品。
-4. /guestbook 留言板，RSS 与 sitemap 提供订阅入口。
+1. 适合以文章和页面为主、交互较少的站点。
+2. 官方适配器可以把同一套代码输出为 Node 服务。
+3. 本站的上一任形态即由它驱动。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+官方网站：https://astro.build
+源代码仓库：https://github.com/withastro/astro
+
+设定参考：https://astro.build
+本文档由站长档案终端生成。

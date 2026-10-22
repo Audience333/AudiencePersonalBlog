@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-022 / 弹幕系统
-DANMAKU
+FILE X-022 / Caddy
+CADDY
 
-科室：站务科
-编目范围：旧版功能
-相关人物：观众
-访问范围：INTERNAL AREA
+科室：资源部
+编目范围：2026
+相关人物：caddyserver
+访问范围：REFERENCE AREA
 
-旧版博客在阅读页提供弹幕：评论以浮动文字飘过正文区域。
+自带 HTTPS 的 Web 服务器：配置简短，自动申请与续期证书，旧版博客曾由它反向代理。
 
 研究记录
-1. 弹幕与文章关联，经审核后飘过阅读页。
-2. 弹幕和评论使用不同的表，互不影响。
-3. 迁移到终端界面后，弹幕功能随之退役。
+1. 一句配置即可获得自动 HTTPS。
+2. 同时胜任静态托管与反向代理。
+3. 个人站点用它替代 Nginx 省心很多。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+官方网站：https://caddyserver.com
+源代码仓库：https://github.com/caddyserver/caddy
+
+设定参考：https://caddyserver.com
+本文档由站长档案终端生成。

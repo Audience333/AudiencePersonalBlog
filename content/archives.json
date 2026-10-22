@@ -1,25 +1,211 @@
 {
   "categories": [
-    "文章档案",
-    "项目工程",
-    "站点备忘",
-    "关于观众",
-    "互动记录"
+    "作品",
+    "文章",
+    "资源库"
   ],
   "columns": [
-    "项目工程",
-    "文章档案",
-    "站点备忘",
-    "关于观众",
-    "互动记录"
+    "作品",
+    "文章",
+    "资源库"
   ],
   "records": [
     {
       "id": "X-001",
-      "category": "文章档案",
+      "title": "莱茵档案终端",
+      "en": "RHINE ARCHIVE TERMINAL",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "本站：基于开源项目 RhineLabUI 复刻的莱茵生命风格三维档案终端，把博客内容整编成可抽取、解密、阅读的档案阵列，并配有管理后台。",
+      "findings": [
+        "三维档案阵列使用 Three.js 实时渲染，开场动画按原 PV 时间轴复刻。",
+        "内容层与管理后台分离：后台改数据，前台运行时加载，无需重新构建。",
+        "五类档案已重构为作品、文章、资源库三列，每类有适配的预览方式。",
+        "整站可静态构建，也可由自带 Node 服务托管并提供 API。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-002",
+      "title": "个人网站",
+      "en": "PERSONAL WEBSITE",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "把作品和文章放在同一个地方，持续记录做过的事与学到的知识。",
+      "findings": [
+        "这是本站的第一个项目：一个同时展示作品与文章的个人网站。",
+        "目标：让来访者快速了解作品与写作主题。",
+        "在网页后台编辑 Markdown 内容。",
+        "用 SQLite 保存账号、文章、评论与作品。",
+        "后续可以在这里补充设计过程、截图、遇到的问题和最终成果。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-003",
+      "title": "旧版 Astro 博客系统",
+      "en": "ASTRO BLOG SYSTEM",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-09",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "本站的上一任形态：Astro 服务端渲染的全栈博客，含文章、作品、留言板、弹幕、搜索与管理后台，数据全部保存在单个 SQLite 文件中。",
+      "findings": [
+        "Astro 7 + @astrojs/node 独立适配器输出 Node 服务。",
+        "FTS5 三元组索引支撑全文搜索，sanitize-html 过滤正文。",
+        "后台支持文章定时发布、评论审核、图片上传与访问统计。",
+        "2026-10 由本终端接替，其数据完整迁移进档案。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-004",
+      "title": "档案迁移工具",
+      "en": "ARCHIVE MIGRATION TOOL",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "把旧博客 SQLite 数据整编成莱茵终端档案的导出脚本：读取文章、项目、留言与统计，生成校验过的档案目录与 TXT 下载文件。",
+      "findings": [
+        "输入是 data/blog.sqlite 与 content/site.json，输出 content/archives.json。",
+        "Markdown 正文自动整理为纯文本研究记录，损坏数据回退为可读说明。",
+        "结构自检与页面校验共用一套规则，失败时不写入任何文件。",
+        "本站首批档案即由它生成。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-005",
+      "title": "终端管理后台",
+      "en": "TERMINAL ADMIN",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "INTERNAL AREA",
+      "abstract": "本站的内容管理后台：登录后可以直接增删改作品、文章与资源库档案，保存后首页立即生效。",
+      "findings": [
+        "复用旧博客的 scrypt 密码哈希与 sessions 表，旧管理员账号直接可用。",
+        "会话 Cookie httpOnly + SameSite=Lax，登录接口带限流。",
+        "档案写入 SQLite 后同步刷新 JSON 快照与 TXT 导出。",
+        "界面沿用终端视觉语言，从首页右下角可进入。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-006",
+      "title": "博客备份脚本",
+      "en": "BACKUP UTILITY",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-09",
+      "lead": "观众",
+      "clearance": "INTERNAL AREA",
+      "abstract": "旧版博客的备份工具：为 SQLite 数据库与上传文件创建带时间戳的备份目录，并生成清单文件， successive 备份互不覆盖。",
+      "findings": [
+        "一条命令导出 blog.sqlite、uploads/ 与 manifest.json。",
+        "按日期命名目录，方便回滚到任意一次备份。",
+        "建议配合定时任务同步到对象存储。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-007",
+      "title": "静态资源优化管线",
+      "en": "ASSET PIPELINE",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-09",
+      "lead": "观众",
+      "clearance": "INTERNAL AREA",
+      "abstract": "旧版博客的图片优化脚本：压缩图片并生成 WebP 版本，站点头图同时保留 PNG 与 WebP 两种格式。",
+      "findings": [
+        "基于 sharp，批量处理 public 目录下的图片资源。",
+        "压缩后显著降低首屏加载体积。",
+        "新终端的头图与图标延续了这套产出。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-008",
+      "title": "终端静态服务",
+      "en": "STATIC SERVER",
+      "department": "工程科",
+      "category": "作品",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "INTERNAL AREA",
+      "abstract": "本站的运行时：零依赖 Node HTTP 服务，既托管构建后的静态文件，也提供档案 API、管理接口与 TXT 导出生成。",
+      "findings": [
+        "静态文件带内容类型与安全头，API 与静态路由分离。",
+        "同一进程内完成鉴权、档案 CRUD 与快照再导出。",
+        "默认监听 4321 端口，可用环境变量覆盖。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        }
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+    },
+    {
+      "id": "X-009",
       "title": "网站从这里开始",
-      "en": "THE FIRST POST",
+      "en": "THE SITE BEGINS HERE",
       "department": "编辑部",
+      "category": "文章",
       "date": "2026-09-17",
       "lead": "观众",
       "clearance": "PUBLIC AREA",
@@ -30,671 +216,353 @@
         "接下来写什么？",
         "可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。"
       ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-002",
-      "category": "文章档案",
-      "title": "写作方向：学习经历",
-      "en": "LEARNING NOTES",
-      "department": "编辑部",
-      "date": "写作计划",
-      "lead": "观众",
-      "clearance": "PUBLIC AREA",
-      "abstract": "博客的第一批写作方向之一：从一次具体的学习经历写起。计划出自首篇文章《网站从这里开始》的“接下来写什么”。",
-      "findings": [
-        "记录一个真实的学习过程，而不是泛泛的感想。",
-        "写清楚卡住的点，以及最后是怎么解决的。",
-        "篇幅长的学习记录允许拆成多篇，用系列归档连起来。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-003",
-      "category": "文章档案",
-      "title": "写作方向：小项目",
-      "en": "PET PROJECTS",
-      "department": "编辑部",
-      "date": "写作计划",
-      "lead": "观众",
-      "clearance": "PUBLIC AREA",
-      "abstract": "博客的第一批写作方向之一：从做过的一个小项目开始写。计划出自首篇文章《网站从这里开始》的“接下来写什么”。",
-      "findings": [
-        "写清楚做了什么、为什么做、做到什么程度。",
-        "配上真实截图和踩坑记录，比只写结论更有用。",
-        "项目结束后可以回写一篇总结，补上当时没看到的部分。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-004",
-      "category": "文章档案",
-      "title": "写作方向：有趣文章",
-      "en": "READING LOG",
-      "department": "编辑部",
-      "date": "写作计划",
-      "lead": "观众",
-      "clearance": "PUBLIC AREA",
-      "abstract": "博客的第一批写作方向之一：记录最近读到的有趣文章。计划出自首篇文章《网站从这里开始》的“接下来写什么”。",
-      "findings": [
-        "摘录原文链接，并用一句话说明为什么值得读。",
-        "写下自己认同的部分，也保留存疑的部分。",
-        "隔一段时间可以回看，检验想法有没有变化。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-005",
-      "category": "文章档案",
-      "title": "话题：网站建设",
-      "en": "TOPIC: SITE BUILDING",
-      "department": "编辑部",
-      "date": "首篇文章标签",
-      "lead": "观众",
-      "clearance": "PUBLIC AREA",
-      "abstract": "“网站建设”是首篇文章使用的标签之一。旧版博客按标签聚合文章，本站继承这一话题作为独立档案。",
-      "findings": [
-        "当前这座终端本身就是这一话题的实例。",
-        "同标签的文章在旧版站点通过 /blog/tags/ 页面聚合。",
-        "之后发布的同主题文章继续归入此话题。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-006",
-      "category": "文章档案",
-      "title": "话题：随笔",
-      "en": "TOPIC: ESSAYS",
-      "department": "编辑部",
-      "date": "首篇文章标签",
-      "lead": "观众",
-      "clearance": "PUBLIC AREA",
-      "abstract": "“随笔”是首篇文章使用的标签之一，用来存放不设主题的日常记录。",
-      "findings": [
-        "随笔没有固定格式，长短都可以。",
-        "写给自己看的记录，也值得留下来。",
-        "与“网站建设”话题互补：一个记录过程，一个记录想法。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-007",
-      "category": "文章档案",
-      "title": "发布约定",
-      "en": "PUBLISHING RULES",
-      "department": "编辑部",
-      "date": "旧版站点规则",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客的文章发布规则。文章由后台写入 SQLite，站点时区固定为 Asia/Shanghai。",
-      "findings": [
-        "文章有草稿与已发布两种状态，支持定时发布。",
-        "系列文章按 series 与 series_order 字段排序。",
-        "列表页每页默认 10 篇，可按最新、最热、字数排序。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-008",
-      "category": "文章档案",
-      "title": "阅读体验",
-      "en": "READING EXPERIENCE",
-      "department": "编辑部",
-      "date": "旧版站点功能",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客为长文准备的阅读辅助：阅读时长估算、目录、相关文章与订阅。",
-      "findings": [
-        "阅读时长按中文约 500 字/分钟、西文约 220 词/分钟估算。",
-        "标题达到两个以上时生成目录，支持 h2 与 h3。",
-        "文章底部有上一篇/下一篇与按标签匹配的相关文章。",
-        "全站提供 RSS 订阅与 sitemap。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-009",
-      "category": "项目工程",
-      "title": "个人网站",
-      "en": "PERSONAL WEBSITE",
-      "department": "工程科",
-      "date": "2026",
-      "lead": "观众",
-      "clearance": "PUBLIC AREA",
-      "abstract": "把作品和文章放在同一个地方，持续记录做过的事与学到的知识。",
-      "findings": [
-        "这是本站的第一个项目：一个同时展示作品与文章的个人网站。",
-        "目标",
-        "让来访者快速了解作品与写作主题。",
-        "在网页后台编辑 Markdown 内容。",
-        "用 SQLite 保存账号、文章、评论与作品。",
-        "后续可以在这里补充设计过程、截图、遇到的问题和最终成果。"
-      ],
-      "source": "https://github.com/Audience333"
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "你好，欢迎来到观众的个人网站。\n\n这篇文章是整个站点的第一块砖，用来确认一件事：内容真的可以顺利发布、顺利展示。\n\n## 这个站点是什么\n\n这里同时放着我的**编程作品**、**随笔与技术感悟**，以及平时用到的**开源资源**。所有内容都整编成「档案」的形式，选中、解密、阅读，像翻一份份实体卷宗。\n\n## 内容怎么更新\n\n- 登录管理后台，直接在线编辑 Markdown 正文；\n- 保存后前台立即生效，不需要重新构建；\n- 每篇档案都可以导出为 TXT，带完整编号与归档信息。\n\n## 接下来\n\n可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。写作的目标很简单：三个月后的自己回来看，还能看懂当时在做什么、为什么这么做。"
     },
     {
       "id": "X-010",
-      "category": "项目工程",
-      "title": "Astro 框架",
-      "en": "ASTRO",
-      "department": "工程科",
-      "date": "技术选型",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "旧版博客基于 Astro 7 构建：服务端渲染、按路由组织页面、内容与模板分离。",
+      "title": "把博客搬进莱茵终端",
+      "en": "MOVING THE BLOG INTO THE TERMINAL",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10-21",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "迁移手记：为什么把传统博客界面换成《明日方舟》莱茵生命风格的三维档案终端，以及这次改造保留了什么、放弃了什么。",
       "findings": [
-        "使用 @astrojs/node 独立适配器输出 Node 服务。",
-        "文章在请求时从 SQLite 读取，不经过静态生成。",
-        "空内容集合保留在 src/content，仅作为 Astro 配置占位。"
+        "理由很简单：想要一个让自己愿意常回来看的首页，而不是又一个文章列表。",
+        "数据全部继承：旧数据库的文章、项目、留言和阅读数一件没丢，整编成档案继续展示。",
+        "放弃的是动态功能：评论、弹幕、登录阅读随旧版退役，静态内容更适合档案式阅读。",
+        "界面基于开源项目 RhineLabUI（MIT），保留版权与署名。"
       ],
-      "source": "https://astro.build"
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "把博客从传统的「文章列表」换成莱茵生命风格的三维档案终端，是这次改造最大的决定。\n\n## 为什么换\n\n理由很简单：想要一个让自己愿意常回来看的首页，而不是又一个文章列表。三维阵列、抽取动画、解密阅读——这些仪式感让「打开网站」变成一件有期待的事。\n\n## 保留了什么\n\n数据全部继承：旧数据库的文章、项目、留言和阅读数一件没丢，整编成档案继续展示。内容层面几乎没有损失，变的是容器。\n\n## 放弃了什么\n\n放弃的是动态功能：评论、弹幕、登录阅读随旧版退役。静态内容更适合档案式阅读，维护成本也低了一个数量级。\n\n## 许可说明\n\n界面基于开源项目 [RhineLabUI](https://github.com/Audience333/AudiencePersonalBlog)（MIT），保留版权与署名。"
     },
     {
       "id": "X-011",
-      "category": "项目工程",
-      "title": "SQLite 数据库",
-      "en": "SQLITE",
-      "department": "工程科",
-      "date": "技术选型",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "全部博客数据保存在单个 data/blog.sqlite 文件中，开启 WAL 模式兼顾读写并发。",
+      "title": "三栏重构手记",
+      "en": "THREE-COLUMN REDESIGN NOTES",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10-21",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "把终端自带的五类档案改成「作品、文章、资源库」三列的过程记录：列数、阵列中心、编号与校验规则都要跟着动。",
       "findings": [
-        "使用 better-sqlite3 同步驱动，在页面渲染时直接查询。",
-        "共 19 张表，覆盖文章、项目、评论、留言、弹幕、点赞与统计。",
-        "FTS5 三元组索引覆盖标题、描述、正文与标签，支撑全文搜索。"
+        "阵列的列中心在代码里写死为五列的中线，全部替换为按列数计算后才居中。",
+        "每列档案数从固定八份放宽到三至十二份，循环阵列用取模自动补齐。",
+        "编号仍按 X-001 起顺序分配，保证收藏与导出文件名稳定。",
+        "教训：改数据结构前先搜一遍魔法数字，比改完再调快得多。"
       ],
-      "source": "https://www.sqlite.org"
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "终端自带的示例是五类档案，而本站只需要「作品、文章、资源库」三列。改列数听起来是换个数组，实际牵一发动全身。\n\n## 改了哪些地方\n\n- 阵列的列中心在代码里写死为五列的中线，全部替换为按列数计算后才重新居中；\n- 每列档案数从固定八份放宽到三至十二份，循环阵列用取模自动补齐；\n- 编号仍按 X-001 起顺序分配，保证收藏与导出文件名稳定；\n- 数据校验、后台表单、导出脚本里的分类常量全部跟着改。\n\n## 教训\n\n改数据结构前先搜一遍魔法数字，比改完再调快得多。这次几乎每一处分栏逻辑都写了「5」或「五」，全文检索一次列成清单，半天就改完了。"
     },
     {
       "id": "X-012",
-      "category": "项目工程",
-      "title": "Markdown 渲染",
-      "en": "MARKDOWN PIPELINE",
-      "department": "工程科",
-      "date": "技术选型",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "正文以 Markdown 存储，渲染管线负责公式、图表与安全过滤。",
+      "title": "字号、比例与协调",
+      "en": "TYPE SCALE NOTES",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10-21",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "界面字号整体调大一号时遇到的排版问题与取舍：不是所有文字都按同一个比例放大。",
       "findings": [
-        "marked 以 GFM 模式解析正文。",
-        "$ 与 $$ 公式交给 KaTeX，```mermaid 代码块渲染为图表。",
-        "sanitize-html 白名单过滤，输出安全 HTML。"
+        "小字号按 1.3 倍放大、大字号只放 1.1 倍，层级反而更清楚。",
+        "放大后详情页的操作行压到了页脚标识，最终用收紧阅读区高度解决。",
+        "「协调」比「大」重要：行距、字间距和留白要跟着一起调。"
       ],
-      "source": "https://marked.js.org"
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "界面字号整体调大一号时遇到的排版问题与取舍：不是所有文字都按同一个比例放大。\n\n## 不是等比放大\n\n小字号按 1.3 倍放大、大字号只放 1.1 倍，层级反而更清楚。等比放大的问题是：原来 11px 的说明文字和 34px 的标题差距太大，全部乘同一个系数后，说明文字变得比正文还抢眼。\n\n## 连锁反应\n\n放大后详情页的操作行压到了页脚标识，最终用收紧阅读区高度解决。还有行距、字间距和留白要跟着一起调——**「协调」比「大」重要**。\n\n## 经验\n\n先定一套比例规则再动手，比逐处微调省时间。规则写在 CSS 变量里，下次再调只需要改几个数。"
     },
     {
       "id": "X-013",
-      "category": "项目工程",
-      "title": "样式与组件",
-      "en": "STYLES & COMPONENTS",
-      "department": "工程科",
-      "date": "技术选型",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "旧版博客使用手写 CSS 与 Astro 组件组织界面，无前端框架。",
+      "title": "为什么博客数据放在 SQLite",
+      "en": "SQLITE AS A BLOG BACKBONE",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "一个文件就是整个数据库：聊聊 SQLite 支撑个人博客的理由，以及它在旧版和现任终端里的角色。",
       "findings": [
-        "布局、排版与配色集中在 src/styles 管理。",
-        "目录、相关文章、分页等以组件形式复用。",
-        "代码块带复制按钮，长文带阅读进度条。"
+        "备份等于复制一个文件，整机迁移只需带上 data 目录。",
+        "WAL 模式下读写并发足够个人站点使用。",
+        "FTS5 三元组索引让全文搜索几乎零成本。",
+        "新终端同样用它存放档案，后台改动即时生效。"
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "一个文件就是整个数据库：聊聊 SQLite 支撑个人博客的理由，以及它在旧版和现任终端里的角色。\n\n## 为什么选它\n\n- 备份等于复制一个文件，整机迁移只需带上 `data` 目录；\n- WAL 模式下读写并发足够个人站点使用；\n- FTS5 三元组索引让全文搜索几乎零成本；\n- 没有独立的数据库进程，部署清单里少一项依赖。\n\n## 在博客里的角色\n\n旧版用它存文章、评论、账号和阅读数；新终端同样用它存放档案，后台改动即时生效。写入路径上还加了一道保险：任何修改都在事务里完成「改动 → 校验 → 写快照」，校验失败整体回滚。\n\n## 适合谁\n\n个人站点、小工具、原型——只要写入量不大，SQLite 都是默认正确答案。"
+    },
+    {
+      "id": "X-014",
+      "title": "Markdown 渲染管线随笔",
+      "en": "THE MARKDOWN PIPELINE",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "旧版博客如何把 Markdown 变成安全可读的页面：解析、数学公式、图表与过滤，每一步只做一件事。",
+      "findings": [
+        "marked 以 GFM 模式解析正文，代码块带复制按钮。",
+        "$ 与 $$ 交给 KaTeX，```mermaid 代码块渲染为图表。",
+        "sanitize-html 白名单过滤，输出前再检查一遍。",
+        "渲染结果是纯展示，原始 Markdown 始终留在数据库里。"
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "旧版博客如何把 Markdown 变成安全可读的页面：解析、数学公式、图表与过滤，每一步只做一件事。\n\n## 管线\n\n1. `marked` 以 GFM 模式解析正文，代码块带复制按钮；\n2. `$` 与 `$$` 交给 KaTeX，```mermaid 代码块渲染为图表；\n3. `sanitize-html` 白名单过滤，输出前再检查一遍。\n\n## 两个原则\n\n第一，渲染结果是纯展示，原始 Markdown 始终留在数据库里，随时可重渲染、可换渲染器。第二，过滤用白名单而不是黑名单——黑名单永远追不上新出现的攻击面。\n\n## 现在的终端\n\n详情页内置了一个极小的 Markdown 子集渲染器：先整体转义，再做标题、列表、代码、加粗、斜体和链接的替换，不产出任何原始 HTML。文章档案在站内就能直接读，不必导出。"
+    },
+    {
+      "id": "X-015",
+      "title": "静态站点与服务端的取舍",
+      "en": "STATIC VS SERVER",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "本站既可以构建成纯静态文件，也可以跑自带的 Node 服务：两条路各自适合什么场景。",
+      "findings": [
+        "纯静态：丢给任意托管即可，PWA 离线可用，但没有后台。",
+        "Node 服务：多一个管理后台和运行时数据，适合想随时改内容的阶段。",
+        "前端用「API 优先、打包快照兜底」兼容两者，离线也能浏览上次构建的内容。",
+        "个人站点的正确答案是：先跑起来，再按需要换形态。"
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "本站既可以构建成纯静态文件，也可以跑自带的 Node 服务：两条路各自适合什么场景。\n\n## 纯静态\n\n丢给任意托管即可，PWA 离线可用，但没有后台。内容更新要走「改文件 → 重新构建 → 重新部署」的完整流程。\n\n## Node 服务\n\n多一个管理后台和运行时数据，适合想随时改内容的阶段。本站目前就是这个形态：后台保存档案，前台通过 API 读取，改动即时生效。\n\n## 两者兼得\n\n前端用「API 优先、打包快照兜底」兼容两者：运行时优先请求 `/api/records`，拿不到就退回构建时打包的 JSON 快照，离线也能浏览上次构建的内容。\n\n个人站点的正确答案是：先跑起来，再按需要换形态。"
+    },
+    {
+      "id": "X-016",
+      "title": "接下来写什么",
+      "en": "WHAT TO WRITE NEXT",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10",
+      "lead": "观众",
+      "clearance": "PUBLIC AREA",
+      "abstract": "写作计划备忘：随笔与技术感悟的持续更新清单，随写随补。",
+      "findings": [
+        "学习经历：记录真实的学习过程，包括卡住的点。",
+        "小项目：做了什么、为什么做、踩了什么坑。",
+        "有趣文章：摘录链接，写自己认同与存疑的部分。",
+        "技术感悟优先写给三个月后的自己看。"
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "body": "写作计划备忘：随笔与技术感悟的持续更新清单，随写随补。\n\n## 备选主题\n\n- **学习经历**：记录真实的学习过程，包括卡住的点；\n- **小项目**：做了什么、为什么做、踩了什么坑；\n- **有趣文章**：摘录链接，写自己认同与存疑的部分。\n\n## 一个标准\n\n技术感悟优先写给三个月后的自己看。当下觉得理所当然的细节，三个月后往往是最想不起来的部分——环境怎么搭的、为什么放弃某个方案、哪个坑花了最久。\n\n写完一篇就在后台直接发布，档案编号会自动排好。"
+    },
+    {
+      "id": "X-017",
+      "title": "RhineLabUI",
+      "en": "RHINELABUI",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026-09",
+      "lead": "LBEILC",
+      "clearance": "REFERENCE AREA",
+      "abstract": "莱茵生命终端界面的非官方复刻项目（TypeScript + Three.js + Vite，MIT 协议）：白底开场、五列循环档案阵列、玻璃解密与 360° 模型查看。本站界面即基于它搭建。",
+      "findings": [
+        "三维档案盒模型由 Blender 生成，支持拆解与重组。",
+        "开场动画逐帧复刻原 PV，支持跳过与重播。",
+        "档案数据独立于代码，JSON 即可定制内容。",
+        "第三方素材（明日方舟相关名称与标志等）不在 MIT 授权内。"
+      ],
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/LBEILC/RhineLabUI"
+        },
+        {
+          "label": "在线演示",
+          "url": "https://rhine.lubeiluchen.cc"
+        }
+      ],
+      "source": "https://github.com/LBEILC/RhineLabUI"
+    },
+    {
+      "id": "X-018",
+      "title": "Astro",
+      "en": "ASTRO",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "withastro",
+      "clearance": "REFERENCE AREA",
+      "abstract": "旧版博客使用的 Web 框架：以内容为中心的岛屿架构，支持 SSR/SSG，Markdown 体验开箱即用。",
+      "findings": [
+        "适合以文章和页面为主、交互较少的站点。",
+        "官方适配器可以把同一套代码输出为 Node 服务。",
+        "本站的上一任形态即由它驱动。"
+      ],
+      "links": [
+        {
+          "label": "官方网站",
+          "url": "https://astro.build"
+        },
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/withastro/astro"
+        }
       ],
       "source": "https://astro.build"
     },
     {
-      "id": "X-014",
-      "category": "项目工程",
-      "title": "Node 运行时",
-      "en": "NODE RUNTIME",
-      "department": "工程科",
-      "date": "技术选型",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "生产环境以 Node 服务运行旧版博客，要求 Node.js 24.15 或更高版本。",
-      "findings": [
-        "@astrojs/node 独立模式输出可启动的服务端入口。",
-        "登录会话通过 cookie 与服务器端 sessions 表维持。",
-        "start.mjs 脚本用于生产启动。"
-      ],
-      "source": "https://nodejs.org"
-    },
-    {
-      "id": "X-015",
-      "category": "项目工程",
-      "title": "测试",
-      "en": "TESTS",
-      "department": "工程科",
-      "date": "工程质量",
-      "lead": "Audience",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客带有单元与集成测试，覆盖数据迁移、文章操作、阅读统计与 SEO。",
-      "findings": [
-        "node --test 运行 migrations、operations、posts、reading、seo、time 等用例。",
-        "tests/integration.mjs 做端到端接口验证。",
-        "astro check 负责 TypeScript 与模板类型检查。"
-      ],
-      "source": "https://nodejs.org"
-    },
-    {
-      "id": "X-016",
-      "category": "项目工程",
-      "title": "静态资源优化",
-      "en": "ASSET PIPELINE",
-      "department": "工程科",
-      "date": "工程质量",
-      "lead": "Audience",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客用 sharp 处理图片资源，并提供一键优化脚本。",
-      "findings": [
-        "optimize-assets.mjs 压缩并生成 WebP 版本。",
-        "站点头图 archive-hero 同时保留 PNG 与 WebP。",
-        "头像与图标集中在 public 目录分发。"
-      ],
-      "source": "https://sharp.pixelplumbing.com"
-    },
-    {
-      "id": "X-017",
-      "category": "站点备忘",
-      "title": "站点宗旨",
-      "en": "SITE MISSION",
-      "department": "站务科",
-      "date": "长期有效",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "观众 · 作品与博客——一个记录作品、想法与学习过程的个人网站。",
-      "findings": [
-        "站点标语：“慢慢写，认真做。”",
-        "把作品和文章放在同一个地方，持续记录做过的事与学到的知识。",
-        "先跑起来，再慢慢补齐；内容比形式重要。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-018",
-      "category": "站点备忘",
-      "title": "站点地图",
-      "en": "SITE MAP",
-      "department": "站务科",
-      "date": "旧版路由",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客的主要页面。本站替换为莱茵终端后，这些内容以档案形式继续保存。",
-      "findings": [
-        "/blog 文章列表，支持排序与关键词搜索。",
-        "/blog/tags/ 与 /blog/series 按标签、系列浏览文章。",
-        "/projects 展示项目作品。",
-        "/guestbook 留言板，RSS 与 sitemap 提供订阅入口。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
       "id": "X-019",
-      "category": "站点备忘",
-      "title": "检索系统",
-      "en": "FULL-TEXT SEARCH",
-      "department": "站务科",
-      "date": "旧版功能",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客在服务端实现全文检索；本站改用终端内置的档案检索（按 / 键打开）。",
+      "title": "Three.js",
+      "en": "THREE.JS",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "mrdoob",
+      "clearance": "REFERENCE AREA",
+      "abstract": "浏览器三维渲染库，本站的档案阵列、模型解密与 360° 查看器都建立在它之上。",
       "findings": [
-        "FTS5 三元组索引覆盖标题、描述、正文与标签。",
-        "索引不可用时自动退回 LIKE 模糊匹配。",
-        "新终端支持按编号、标题、科室与分类筛选档案。"
+        "WebGL 封装友好，示例与文档覆盖面广。",
+        "实例化渲染让数百个档案盒同屏也能流畅运动。",
+        "配 RhineLabUI 这类完整项目学习曲线平缓很多。"
       ],
-      "source": "https://www.sqlite.org"
+      "links": [
+        {
+          "label": "官方网站",
+          "url": "https://threejs.org"
+        },
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/mrdoob/three.js"
+        }
+      ],
+      "source": "https://threejs.org"
     },
     {
       "id": "X-020",
-      "category": "站点备忘",
-      "title": "音乐播放器",
-      "en": "MUSIC PLAYER",
-      "department": "站务科",
-      "date": "旧版功能",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客内置音乐播放器，曲目来自 music/ 目录的扫描结果，不经过数据库。",
+      "title": "Vite",
+      "en": "VITE",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "vitejs",
+      "clearance": "REFERENCE AREA",
+      "abstract": "前端构建工具：秒级冷启动与热更新，本站与 RhineLabUI 都用它开发构建。",
       "findings": [
-        "当前曲库保留测试音轨《01-测试音调》与说明文件。",
-        "曲目通过 /api/music 接口按文件名点播。",
-        "新终端保留三轨循环配乐作为站点声音。"
+        "基于原生 ESM 的开发服务器，改动即时反映。",
+        "生产构建用 Rollup 打包，输出精简。",
+        "插件体系成熟，JSON、CSS 等开箱可用。"
       ],
-      "source": "https://github.com/Audience333"
+      "links": [
+        {
+          "label": "官方网站",
+          "url": "https://vite.dev"
+        },
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/vitejs/vite"
+        }
+      ],
+      "source": "https://vite.dev"
     },
     {
       "id": "X-021",
-      "category": "站点备忘",
-      "title": "留言板",
-      "en": "GUESTBOOK",
-      "department": "站务科",
-      "date": "旧版功能",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客的公开留言板：匿名也可以留言，所有留言经审核后展示。",
+      "title": "better-sqlite3",
+      "en": "BETTER-SQLITE3",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "WiseLibs",
+      "clearance": "REFERENCE AREA",
+      "abstract": "Node.js 的 SQLite 同步驱动：事务与预处理语句性能优秀，本站后台的档案读写都由它完成。",
       "findings": [
-        "未留昵称时显示为“匿名用户”。",
-        "留言状态分待审核、已通过、已拒绝三种。",
-        "新终端不再接收留言，历史留言见互动记录档案。"
+        "同步 API 让服务端代码更直白。",
+        "事务批量写入速度快，适合导入与重建索引。",
+        "与 Node 24 兼容良好，无需额外守护进程。"
       ],
-      "source": "https://github.com/Audience333"
+      "links": [
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/WiseLibs/better-sqlite3"
+        }
+      ],
+      "source": "https://github.com/WiseLibs/better-sqlite3"
     },
     {
       "id": "X-022",
-      "category": "站点备忘",
-      "title": "弹幕系统",
-      "en": "DANMAKU",
-      "department": "站务科",
-      "date": "旧版功能",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "旧版博客在阅读页提供弹幕：评论以浮动文字飘过正文区域。",
+      "title": "Caddy",
+      "en": "CADDY",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "caddyserver",
+      "clearance": "REFERENCE AREA",
+      "abstract": "自带 HTTPS 的 Web 服务器：配置简短，自动申请与续期证书，旧版博客曾由它反向代理。",
       "findings": [
-        "弹幕与文章关联，经审核后飘过阅读页。",
-        "弹幕和评论使用不同的表，互不影响。",
-        "迁移到终端界面后，弹幕功能随之退役。"
+        "一句配置即可获得自动 HTTPS。",
+        "同时胜任静态托管与反向代理。",
+        "个人站点用它替代 Nginx 省心很多。"
       ],
-      "source": "https://github.com/Audience333"
+      "links": [
+        {
+          "label": "官方网站",
+          "url": "https://caddyserver.com"
+        },
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/caddyserver/caddy"
+        }
+      ],
+      "source": "https://caddyserver.com"
     },
     {
       "id": "X-023",
-      "category": "站点备忘",
-      "title": "部署与运维",
-      "en": "DEPLOYMENT",
-      "department": "站务科",
-      "date": "运维记录",
-      "lead": "观众",
-      "clearance": "RESTRICTED",
-      "abstract": "旧版博客的服务端部署方式：systemd 托管、Caddy 反代、脚本备份。",
+      "title": "Node.js",
+      "en": "NODE.JS",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "nodejs",
+      "clearance": "REFERENCE AREA",
+      "abstract": "本站运行时所依赖的 JavaScript 运行时：本终端的服务端、构建脚本与管理后台都跑在它上面。",
       "findings": [
-        "personal-blog.service 以 systemd 常驻运行 Node 服务。",
-        "Caddyfile 提供反向代理与自动 HTTPS。",
-        "backup.mjs 定期备份 SQLite 数据库。"
+        "本站要求 22.12 或更高版本（推荐 24 LTS）。",
+        "内置加密模块即可完成密码哈希，无需额外依赖。",
+        "配合 systemd 常驻即可获得稳定的个人站点服务。"
       ],
-      "source": "https://github.com/Audience333"
+      "links": [
+        {
+          "label": "官方网站",
+          "url": "https://nodejs.org"
+        },
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/nodejs/node"
+        }
+      ],
+      "source": "https://nodejs.org"
     },
     {
       "id": "X-024",
-      "category": "站点备忘",
-      "title": "数据与备份",
-      "en": "DATA & BACKUP",
-      "department": "站务科",
-      "date": "运维记录",
-      "lead": "观众",
-      "clearance": "RESTRICTED",
-      "abstract": "博客数据的存放约定：单一 SQLite 文件 + 本地音乐目录，全部可以整体搬走。",
-      "findings": [
-        "data/blog.sqlite 是唯一的持久化数据文件，开启 WAL。",
-        "music/ 目录保存音乐文件，随仓库一起备份。",
-        "本文档涉及的旧版脚本与配置已归档至 git 历史。"
-      ],
-      "source": "https://www.sqlite.org"
-    },
-    {
-      "id": "X-025",
-      "category": "关于观众",
-      "title": "观众",
-      "en": "AUDIENCE",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "观众",
-      "clearance": "PRIVATE AREA",
-      "abstract": "站长内部档案：网名“观众”，英文署名 AUDIENCE。Writing notes, building projects, and learning in public.",
-      "findings": [
-        "本档案编号沿用终端身份验证名 AUDIENCE。",
-        "本站唯一作者与管理员。",
-        "写作、做项目、公开学习是长期主线。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-026",
-      "category": "关于观众",
-      "title": "来自山东菏泽",
-      "en": "HOMETOWN",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "观众",
-      "clearance": "PRIVATE AREA",
-      "abstract": "出生并成长于山东菏泽。",
-      "findings": [
-        "籍贯：山东菏泽。",
-        "离开家乡后仍经常回去。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-027",
-      "category": "关于观众",
-      "title": "现居四川成都",
-      "en": "CURRENT CITY",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "观众",
-      "clearance": "PRIVATE AREA",
-      "abstract": "目前生活在四川成都。",
-      "findings": [
-        "现居地：四川成都。",
-        "在这座城市的学校里继续读书。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-028",
-      "category": "关于观众",
-      "title": "在读本科生",
-      "en": "UNDERGRADUATE",
-      "department": "人事档案科",
-      "date": "学籍状态",
-      "lead": "观众",
-      "clearance": "PRIVATE AREA",
-      "abstract": "四川师范大学本科生。",
-      "findings": [
-        "身份：四川师范大学本科生。",
-        "课余时间维护本站、写代码和笔记。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-029",
-      "category": "关于观众",
-      "title": "GitHub 主页",
-      "en": "GITHUB PROFILE",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "Audience",
-      "clearance": "PUBLIC AREA",
-      "abstract": "代码与开源活动的主页，本站源码也托管在这里。",
-      "findings": [
-        "账号：Audience333。",
-        "本站仓库与其迭代历史均可在 GitHub 查看。",
-        "欢迎通过 issue 交流建站与编码问题。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-030",
-      "category": "关于观众",
-      "title": "Bilibili 空间",
-      "en": "BILIBILI SPACE",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "Audience",
-      "clearance": "PUBLIC AREA",
-      "abstract": "视频站点空间，偶尔分享与学习、项目相关的内容。",
-      "findings": [
-        "空间编号：2058896001。",
-        "与 GitHub 互补：一个放视频，一个放代码。"
-      ],
-      "source": "https://space.bilibili.com/2058896001"
-    },
-    {
-      "id": "X-031",
-      "category": "关于观众",
-      "title": "联系方式",
-      "en": "CONTACT",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "Audience",
-      "clearance": "PRIVATE AREA",
-      "abstract": "联系站长的渠道，按回复速度从快到慢排列。",
-      "findings": [
-        "邮箱：1742777946@qq.com。",
-        "GitHub issue 适合公开的技术讨论。",
-        "Bilibili 私信也可以找到人。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-032",
-      "category": "关于观众",
-      "title": "开往 · 友链接龙",
-      "en": "TRAVELLING FRIENDS",
-      "department": "人事档案科",
-      "date": "长期有效",
-      "lead": "Audience",
-      "clearance": "PUBLIC AREA",
-      "abstract": "本站加入的友链接龙：点击后随机前往下一个成员的站点，在网络里随便逛逛。",
-      "findings": [
-        "项目：开往 Travelling to next world。",
-        "每次访问都会跳到不同的世界。",
-        "期待以后交换更多友链。"
-      ],
-      "source": "https://www.travellings.cn/go.html"
-    },
-    {
-      "id": "X-033",
-      "category": "互动记录",
-      "title": "留言簿首条留言",
-      "en": "FIRST GUESTBOOK ENTRY",
-      "department": "接待台",
-      "date": "2026-10-17",
-      "lead": "匿名用户",
-      "clearance": "PENDING REVIEW",
-      "abstract": "留言簿目前收到的最新一条留言（待审核），原样收录如下。",
-      "findings": [
-        "匿名用户：原留言内容在旧版数据库中已损坏，无法恢复，仅保留收到记录。",
-        "旧版留言板的审核流程：待审核、已通过、已拒绝。",
-        "迁移至终端后留言功能关闭，本条作为历史记录保留。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-034",
-      "category": "互动记录",
-      "title": "评论机制",
-      "en": "COMMENTS",
-      "department": "接待台",
-      "date": "旧版功能",
-      "lead": "观众",
+      "title": "KaTeX",
+      "en": "KATEX",
+      "department": "资源部",
+      "category": "资源库",
+      "date": "2026",
+      "lead": "KaTeX",
       "clearance": "REFERENCE AREA",
-      "abstract": "旧版博客的文章评论规则：登录后可评，支持一层回复，先审后发。",
+      "abstract": "快速的数学公式排版库：旧版博客用它在浏览器里渲染行内与块级公式，无需服务端转换。",
       "findings": [
-        "评论挂在文章之下，通过 parent_id 支持一层回复。",
-        "状态分待审核、已通过、已拒绝。",
-        "当前所有文章暂无已通过评论。"
+        "渲染速度快，公式无需图片。",
+        "与 Markdown 渲染链配合成熟。",
+        "本资源库及文章中的数学表达式均可由它呈现。"
       ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-035",
-      "category": "互动记录",
-      "title": "点赞机制",
-      "en": "LIKES",
-      "department": "接待台",
-      "date": "旧版功能",
-      "lead": "观众",
-      "clearance": "REFERENCE AREA",
-      "abstract": "旧版博客的点赞规则：登录用户每篇文章可点赞一次，重复点赞由数据库主键拦截。",
-      "findings": [
-        "likes 表以 post_id + user_id 作为联合主键。",
-        "点赞数随文章元数据一起展示。",
-        "当前点赞记录为零，等待第一位读者。"
+      "links": [
+        {
+          "label": "官方网站",
+          "url": "https://katex.org"
+        },
+        {
+          "label": "源代码仓库",
+          "url": "https://github.com/KaTeX/KaTeX"
+        }
       ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-036",
-      "category": "互动记录",
-      "title": "文章阅读数",
-      "en": "POST VIEWS",
-      "department": "接待台",
-      "date": "2026-09-17",
-      "lead": "观众",
-      "clearance": "REFERENCE AREA",
-      "abstract": "首篇文章《网站从这里开始》的累计阅读数，数据来自旧版博客数据库。",
-      "findings": [
-        "当前计数：15 次。",
-        "计数字段随文章保存在 posts.view_count。",
-        "每次公开访问累加一次。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-037",
-      "category": "互动记录",
-      "title": "站点访问日志",
-      "en": "PAGE VIEWS",
-      "department": "接待台",
-      "date": "运行统计",
-      "lead": "观众",
-      "clearance": "RESTRICTED",
-      "abstract": "旧版博客记录的站点页面访问日志，仅站长可见。",
-      "findings": [
-        "日志已记录 161 条页面访问。",
-        "每条包含路径、来源、浏览器标识与时间。",
-        "数据只用于了解访问情况，不对外展示。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-038",
-      "category": "互动记录",
-      "title": "收藏与本机偏好",
-      "en": "SAVED & PREFERENCES",
-      "department": "接待台",
-      "date": "终端功能",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "本终端的收藏与设置保存在当前浏览器中，不随账号同步、不上传到服务器。",
-      "findings": [
-        "SAVE ARCHIVE 收藏当前档案，SAVED 查看收藏列表。",
-        "音效、三轨配乐、画质与明暗配色可在设置中调整。",
-        "清理浏览器数据会同时清空这些偏好。"
-      ],
-      "source": "https://github.com/LBEILC/RhineLabUI"
-    },
-    {
-      "id": "X-039",
-      "category": "互动记录",
-      "title": "更新日志",
-      "en": "CHANGELOG",
-      "department": "接待台",
-      "date": "虚位以待",
-      "lead": "观众",
-      "clearance": "INTERNAL AREA",
-      "abstract": "站点更新记录。旧版博客预留了 site 与 tech 两类更新，尚未写入任何条目。",
-      "findings": [
-        "当前没有更新记录，等待第一条。",
-        "计划记录站点改版与技术升级两类内容。"
-      ],
-      "source": "https://github.com/Audience333"
-    },
-    {
-      "id": "X-040",
-      "category": "互动记录",
-      "title": "终端操作说明",
-      "en": "TERMINAL GUIDE",
-      "department": "接待台",
-      "date": "终端功能",
-      "lead": "Audience",
-      "clearance": "REFERENCE AREA",
-      "abstract": "本终端的操作方式。界面基于开源项目 RhineLabUI（MIT 协议）复刻搭建。",
-      "findings": [
-        "左右方向键切换档案列，上下方向键翻阅同列档案，循环无尽头。",
-        "Enter 或 ACCESS FILE 读取当前档案；/ 打开检索，Esc 返回。",
-        "详情页可切换 360° 模型查看、拆解结构并导出文本。",
-        "收藏与偏好保存在本机浏览器，详见上一条档案。"
-      ],
-      "source": "https://github.com/LBEILC/RhineLabUI"
+      "source": "https://katex.org"
     }
   ]
 }

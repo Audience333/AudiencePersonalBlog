@@ -1,18 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-003 / 写作方向：小项目
-PET PROJECTS
+FILE X-003 / 旧版 Astro 博客系统
+ASTRO BLOG SYSTEM
 
-科室：编辑部
-编目范围：写作计划
+科室：工程科
+编目范围：2026-09
 相关人物：观众
 访问范围：PUBLIC AREA
 
-博客的第一批写作方向之一：从做过的一个小项目开始写。计划出自首篇文章《网站从这里开始》的“接下来写什么”。
+本站的上一任形态：Astro 服务端渲染的全栈博客，含文章、作品、留言板、弹幕、搜索与管理后台，数据全部保存在单个 SQLite 文件中。
 
 研究记录
-1. 写清楚做了什么、为什么做、做到什么程度。
-2. 配上真实截图和踩坑记录，比只写结论更有用。
-3. 项目结束后可以回写一篇总结，补上当时没看到的部分。
+1. Astro 7 + @astrojs/node 独立适配器输出 Node 服务。
+2. FTS5 三元组索引支撑全文搜索，sanitize-html 过滤正文。
+3. 后台支持文章定时发布、评论审核、图片上传与访问统计。
+4. 2026-10 由本终端接替，其数据完整迁移进档案。
 
-设定参考：https://github.com/Audience333
-本文为基于公开设定的档案式改写，非游戏原文。
+相关链接
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+
+设定参考：https://github.com/Audience333/AudiencePersonalBlog
+本文档由站长档案终端生成。
