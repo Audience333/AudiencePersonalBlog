@@ -29,3 +29,8 @@ public/fonts/novecento/
 
 # blog source data (local SQLite, exported into content/archives.json)
 data/
+
+# Local credentials and ad-hoc transfers (never publish)
+audience.pem
+cookies.txt
+blog.zip
