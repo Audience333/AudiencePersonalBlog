@@ -14,19 +14,19 @@ if (!username || !/^[一-龥\p{L}\p{N}_-]{3,24}$/u.test(username)) {
   console.error("用法：npm run admin:create -- <用户名> [密码]（用户名 3-24 位字母/数字/汉字/下划线/连字符）");
   process.exit(1);
 }
-if (passwordArg && (passwordArg.length < 12 || passwordArg.length > 128)) {
-  console.error("密码长度需在 12-128 位之间。");
+if (passwordArg && (passwordArg.length < 8 || passwordArg.length > 128)) {
+  console.error("密码长度需在 8-128 位之间。");
   process.exit(1);
 }
 
 let password = passwordArg;
 if (!password) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  password = await rl.question("输入密码（12-128 位，输入可见）: ");
+  password = await rl.question("输入密码（8-128 位，输入可见）: ");
   rl.close();
 }
-if (!password || password.length < 12 || password.length > 128) {
-  console.error("密码长度需在 12-128 位之间。");
+if (!password || password.length < 8 || password.length > 128) {
+  console.error("密码长度需在 8-128 位之间。");
   process.exit(1);
 }
 
