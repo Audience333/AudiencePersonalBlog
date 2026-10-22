@@ -219,10 +219,11 @@ const server = http.createServer(async (req, res) => {
     if (pathname === "/api/login" && req.method === "POST") {
       if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
       const body = await readBody(req);
-      const username = String(body.username ?? "");
+      const username = String(body.username ?? "").trim();
+      const password = String(body.password ?? "").trim();
       if (!loginThrottle(username))
         return send(res, 429, { error: "尝试次数过多，请 15 分钟后再试" });
-      const user = await authenticate(username, String(body.password ?? ""));
+      const user = await authenticate(username, password);
       if (!user)
         return send(res, 401, { error: "用户名或密码不正确" });
       const token = createSession(user.id);
