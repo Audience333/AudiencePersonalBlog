@@ -252,14 +252,23 @@ const server = http.createServer(async (req, res) => {
         if (errors.length) return send(res, 400, { error: errors.join("；") });
         const columnCount = listRecords().filter((r) => r.category === record.category).length;
         if (columnCount >= 12) return send(res, 400, { error: "该列已满（每列最多 12 份）" });
-        return send(res, 201, { record: createRecord(record) });
+        try {
+          return send(res, 201, { record: createRecord(record) });
+        } catch (error) {
+          return send(res, 400, { error: error.message });
+        }
       }
       if (req.method === "PUT" && recordMatch[1]) {
         if (!requireAdmin(req, res)) return;
         const body = await readBody(req);
         const { record, errors } = validateRecordInput(body);
         if (errors.length) return send(res, 400, { error: errors.join("；") });
-        const updated = updateRecord(recordMatch[1], record);
+        let updated;
+        try {
+          updated = updateRecord(recordMatch[1], record);
+        } catch (error) {
+          return send(res, 400, { error: error.message });
+        }
         if (!updated) return send(res, 404, { error: "档案不存在" });
         return send(res, 200, { record: updated });
       }
@@ -267,8 +276,12 @@ const server = http.createServer(async (req, res) => {
         if (!requireAdmin(req, res)) return;
         if (listRecords().length <= 9)
           return send(res, 400, { error: "档案总数不能少于 9 份" });
-        if (!deleteRecord(recordMatch[1]))
-          return send(res, 404, { error: "档案不存在" });
+        try {
+          if (!deleteRecord(recordMatch[1]))
+            return send(res, 404, { error: "档案不存在" });
+        } catch (error) {
+          return send(res, 400, { error: error.message });
+        }
         return send(res, 200, { ok: true });
       }
     }

@@ -94,7 +94,6 @@ export function validateContent(content) {
     if (record.links !== undefined) {
       if (
         !Array.isArray(record.links) ||
-        record.links.length === 0 ||
         !record.links.every(
           (link) =>
             link &&
@@ -104,7 +103,7 @@ export function validateContent(content) {
         )
       ) {
         errors.push(
-          `${label}.links：必须是非空数组，每项含 label 与合法 url（http/https 或以 / 开头的本站路径）`,
+          `${label}.links：必须是数组，每项含 label 与合法 url（http/https 或以 / 开头的本站路径）`,
         );
       }
     }

@@ -20,19 +20,20 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "本站：基于开源项目 RhineLabUI 复刻的莱茵生命风格三维档案终端，把博客内容整编成可抽取、解密、阅读的档案阵列，并配有管理后台。",
+      "body": "",
       "findings": [
         "三维档案阵列使用 Three.js 实时渲染，开场动画按原 PV 时间轴复刻。",
         "内容层与管理后台分离：后台改数据，前台运行时加载，无需重新构建。",
         "五类档案已重构为作品、文章、资源库三列，每类有适配的预览方式。",
         "整站可静态构建，也可由自带 Node 服务托管并提供 API。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-002",
@@ -44,6 +45,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "把作品和文章放在同一个地方，持续记录做过的事与学到的知识。",
+      "body": "",
       "findings": [
         "这是本站的第一个项目：一个同时展示作品与文章的个人网站。",
         "目标：让来访者快速了解作品与写作主题。",
@@ -51,13 +53,13 @@
         "用 SQLite 保存账号、文章、评论与作品。",
         "后续可以在这里补充设计过程、截图、遇到的问题和最终成果。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-003",
@@ -69,19 +71,20 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "本站的上一任形态：Astro 服务端渲染的全栈博客，含文章、作品、留言板、弹幕、搜索与管理后台，数据全部保存在单个 SQLite 文件中。",
+      "body": "",
       "findings": [
         "Astro 7 + @astrojs/node 独立适配器输出 Node 服务。",
         "FTS5 三元组索引支撑全文搜索，sanitize-html 过滤正文。",
         "后台支持文章定时发布、评论审核、图片上传与访问统计。",
         "2026-10 由本终端接替，其数据完整迁移进档案。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-004",
@@ -93,19 +96,20 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "把旧博客 SQLite 数据整编成莱茵终端档案的导出脚本：读取文章、项目、留言与统计，生成校验过的档案目录与 TXT 下载文件。",
+      "body": "",
       "findings": [
         "输入是 data/blog.sqlite 与 content/site.json，输出 content/archives.json。",
         "Markdown 正文自动整理为纯文本研究记录，损坏数据回退为可读说明。",
         "结构自检与页面校验共用一套规则，失败时不写入任何文件。",
         "本站首批档案即由它生成。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-005",
@@ -117,19 +121,20 @@
       "lead": "观众",
       "clearance": "INTERNAL AREA",
       "abstract": "本站的内容管理后台：登录后可以直接增删改作品、文章与资源库档案，保存后首页立即生效。",
+      "body": "",
       "findings": [
         "复用旧博客的 scrypt 密码哈希与 sessions 表，旧管理员账号直接可用。",
         "会话 Cookie httpOnly + SameSite=Lax，登录接口带限流。",
         "档案写入 SQLite 后同步刷新 JSON 快照与 TXT 导出。",
         "界面沿用终端视觉语言，从首页右下角可进入。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-006",
@@ -141,18 +146,19 @@
       "lead": "观众",
       "clearance": "INTERNAL AREA",
       "abstract": "旧版博客的备份工具：为 SQLite 数据库与上传文件创建带时间戳的备份目录，并生成清单文件， successive 备份互不覆盖。",
+      "body": "",
       "findings": [
         "一条命令导出 blog.sqlite、uploads/ 与 manifest.json。",
         "按日期命名目录，方便回滚到任意一次备份。",
         "建议配合定时任务同步到对象存储。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-007",
@@ -164,18 +170,19 @@
       "lead": "观众",
       "clearance": "INTERNAL AREA",
       "abstract": "旧版博客的图片优化脚本：压缩图片并生成 WebP 版本，站点头图同时保留 PNG 与 WebP 两种格式。",
+      "body": "",
       "findings": [
         "基于 sharp，批量处理 public 目录下的图片资源。",
         "压缩后显著降低首屏加载体积。",
         "新终端的头图与图标延续了这套产出。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-008",
@@ -187,18 +194,19 @@
       "lead": "观众",
       "clearance": "INTERNAL AREA",
       "abstract": "本站的运行时：零依赖 Node HTTP 服务，既托管构建后的静态文件，也提供档案 API、管理接口与 TXT 导出生成。",
+      "body": "",
       "findings": [
         "静态文件带内容类型与安全头，API 与静态路由分离。",
         "同一进程内完成鉴权、档案 CRUD 与快照再导出。",
         "默认监听 4321 端口，可用环境变量覆盖。"
       ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/Audience333/AudiencePersonalBlog"
         }
-      ],
-      "source": "https://github.com/Audience333/AudiencePersonalBlog"
+      ]
     },
     {
       "id": "X-009",
@@ -210,6 +218,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "这是一篇示例文章，展示如何用 Markdown 发布博客内容。",
+      "body": "你好，欢迎来到观众的个人网站。\n\n这篇文章是整个站点的第一块砖，用来确认一件事：内容真的可以顺利发布、顺利展示。\n\n## 这个站点是什么\n\n这里同时放着我的**编程作品**、**随笔与技术感悟**，以及平时用到的**开源资源**。所有内容都整编成「档案」的形式，选中、解密、阅读，像翻一份份实体卷宗。\n\n## 内容怎么更新\n\n- 登录管理后台，直接在线编辑 Markdown 正文；\n- 保存后前台立即生效，不需要重新构建；\n- 每篇档案都可以导出为 TXT，带完整编号与归档信息。\n\n## 接下来\n\n可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。写作的目标很简单：三个月后的自己回来看，还能看懂当时在做什么、为什么这么做。",
       "findings": [
         "你好，欢迎来到观众的个人网站。",
         "这是一篇示例文章。管理员登录后台后，可以直接修改这篇内容。",
@@ -217,7 +226,7 @@
         "可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "你好，欢迎来到观众的个人网站。\n\n这篇文章是整个站点的第一块砖，用来确认一件事：内容真的可以顺利发布、顺利展示。\n\n## 这个站点是什么\n\n这里同时放着我的**编程作品**、**随笔与技术感悟**，以及平时用到的**开源资源**。所有内容都整编成「档案」的形式，选中、解密、阅读，像翻一份份实体卷宗。\n\n## 内容怎么更新\n\n- 登录管理后台，直接在线编辑 Markdown 正文；\n- 保存后前台立即生效，不需要重新构建；\n- 每篇档案都可以导出为 TXT，带完整编号与归档信息。\n\n## 接下来\n\n可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。写作的目标很简单：三个月后的自己回来看，还能看懂当时在做什么、为什么这么做。"
+      "links": []
     },
     {
       "id": "X-010",
@@ -229,6 +238,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "迁移手记：为什么把传统博客界面换成《明日方舟》莱茵生命风格的三维档案终端，以及这次改造保留了什么、放弃了什么。",
+      "body": "把博客从传统的「文章列表」换成莱茵生命风格的三维档案终端，是这次改造最大的决定。\n\n## 为什么换\n\n理由很简单：想要一个让自己愿意常回来看的首页，而不是又一个文章列表。三维阵列、抽取动画、解密阅读——这些仪式感让「打开网站」变成一件有期待的事。\n\n## 保留了什么\n\n数据全部继承：旧数据库的文章、项目、留言和阅读数一件没丢，整编成档案继续展示。内容层面几乎没有损失，变的是容器。\n\n## 放弃了什么\n\n放弃的是动态功能：评论、弹幕、登录阅读随旧版退役。静态内容更适合档案式阅读，维护成本也低了一个数量级。\n\n## 许可说明\n\n界面基于开源项目 [RhineLabUI](https://github.com/Audience333/AudiencePersonalBlog)（MIT），保留版权与署名。",
       "findings": [
         "理由很简单：想要一个让自己愿意常回来看的首页，而不是又一个文章列表。",
         "数据全部继承：旧数据库的文章、项目、留言和阅读数一件没丢，整编成档案继续展示。",
@@ -236,7 +246,7 @@
         "界面基于开源项目 RhineLabUI（MIT），保留版权与署名。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "把博客从传统的「文章列表」换成莱茵生命风格的三维档案终端，是这次改造最大的决定。\n\n## 为什么换\n\n理由很简单：想要一个让自己愿意常回来看的首页，而不是又一个文章列表。三维阵列、抽取动画、解密阅读——这些仪式感让「打开网站」变成一件有期待的事。\n\n## 保留了什么\n\n数据全部继承：旧数据库的文章、项目、留言和阅读数一件没丢，整编成档案继续展示。内容层面几乎没有损失，变的是容器。\n\n## 放弃了什么\n\n放弃的是动态功能：评论、弹幕、登录阅读随旧版退役。静态内容更适合档案式阅读，维护成本也低了一个数量级。\n\n## 许可说明\n\n界面基于开源项目 [RhineLabUI](https://github.com/Audience333/AudiencePersonalBlog)（MIT），保留版权与署名。"
+      "links": []
     },
     {
       "id": "X-011",
@@ -248,6 +258,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "把终端自带的五类档案改成「作品、文章、资源库」三列的过程记录：列数、阵列中心、编号与校验规则都要跟着动。",
+      "body": "终端自带的示例是五类档案，而本站只需要「作品、文章、资源库」三列。改列数听起来是换个数组，实际牵一发动全身。\n\n## 改了哪些地方\n\n- 阵列的列中心在代码里写死为五列的中线，全部替换为按列数计算后才重新居中；\n- 每列档案数从固定八份放宽到三至十二份，循环阵列用取模自动补齐；\n- 编号仍按 X-001 起顺序分配，保证收藏与导出文件名稳定；\n- 数据校验、后台表单、导出脚本里的分类常量全部跟着改。\n\n## 教训\n\n改数据结构前先搜一遍魔法数字，比改完再调快得多。这次几乎每一处分栏逻辑都写了「5」或「五」，全文检索一次列成清单，半天就改完了。",
       "findings": [
         "阵列的列中心在代码里写死为五列的中线，全部替换为按列数计算后才居中。",
         "每列档案数从固定八份放宽到三至十二份，循环阵列用取模自动补齐。",
@@ -255,7 +266,7 @@
         "教训：改数据结构前先搜一遍魔法数字，比改完再调快得多。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "终端自带的示例是五类档案，而本站只需要「作品、文章、资源库」三列。改列数听起来是换个数组，实际牵一发动全身。\n\n## 改了哪些地方\n\n- 阵列的列中心在代码里写死为五列的中线，全部替换为按列数计算后才重新居中；\n- 每列档案数从固定八份放宽到三至十二份，循环阵列用取模自动补齐；\n- 编号仍按 X-001 起顺序分配，保证收藏与导出文件名稳定；\n- 数据校验、后台表单、导出脚本里的分类常量全部跟着改。\n\n## 教训\n\n改数据结构前先搜一遍魔法数字，比改完再调快得多。这次几乎每一处分栏逻辑都写了「5」或「五」，全文检索一次列成清单，半天就改完了。"
+      "links": []
     },
     {
       "id": "X-012",
@@ -267,13 +278,14 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "界面字号整体调大一号时遇到的排版问题与取舍：不是所有文字都按同一个比例放大。",
+      "body": "界面字号整体调大一号时遇到的排版问题与取舍：不是所有文字都按同一个比例放大。\n\n## 不是等比放大\n\n小字号按 1.3 倍放大、大字号只放 1.1 倍，层级反而更清楚。等比放大的问题是：原来 11px 的说明文字和 34px 的标题差距太大，全部乘同一个系数后，说明文字变得比正文还抢眼。\n\n## 连锁反应\n\n放大后详情页的操作行压到了页脚标识，最终用收紧阅读区高度解决。还有行距、字间距和留白要跟着一起调——**「协调」比「大」重要**。\n\n## 经验\n\n先定一套比例规则再动手，比逐处微调省时间。规则写在 CSS 变量里，下次再调只需要改几个数。",
       "findings": [
         "小字号按 1.3 倍放大、大字号只放 1.1 倍，层级反而更清楚。",
         "放大后详情页的操作行压到了页脚标识，最终用收紧阅读区高度解决。",
         "「协调」比「大」重要：行距、字间距和留白要跟着一起调。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "界面字号整体调大一号时遇到的排版问题与取舍：不是所有文字都按同一个比例放大。\n\n## 不是等比放大\n\n小字号按 1.3 倍放大、大字号只放 1.1 倍，层级反而更清楚。等比放大的问题是：原来 11px 的说明文字和 34px 的标题差距太大，全部乘同一个系数后，说明文字变得比正文还抢眼。\n\n## 连锁反应\n\n放大后详情页的操作行压到了页脚标识，最终用收紧阅读区高度解决。还有行距、字间距和留白要跟着一起调——**「协调」比「大」重要**。\n\n## 经验\n\n先定一套比例规则再动手，比逐处微调省时间。规则写在 CSS 变量里，下次再调只需要改几个数。"
+      "links": []
     },
     {
       "id": "X-013",
@@ -285,6 +297,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "一个文件就是整个数据库：聊聊 SQLite 支撑个人博客的理由，以及它在旧版和现任终端里的角色。",
+      "body": "一个文件就是整个数据库：聊聊 SQLite 支撑个人博客的理由，以及它在旧版和现任终端里的角色。\n\n## 为什么选它\n\n- 备份等于复制一个文件，整机迁移只需带上 `data` 目录；\n- WAL 模式下读写并发足够个人站点使用；\n- FTS5 三元组索引让全文搜索几乎零成本；\n- 没有独立的数据库进程，部署清单里少一项依赖。\n\n## 在博客里的角色\n\n旧版用它存文章、评论、账号和阅读数；新终端同样用它存放档案，后台改动即时生效。写入路径上还加了一道保险：任何修改都在事务里完成「改动 → 校验 → 写快照」，校验失败整体回滚。\n\n## 适合谁\n\n个人站点、小工具、原型——只要写入量不大，SQLite 都是默认正确答案。",
       "findings": [
         "备份等于复制一个文件，整机迁移只需带上 data 目录。",
         "WAL 模式下读写并发足够个人站点使用。",
@@ -292,7 +305,7 @@
         "新终端同样用它存放档案，后台改动即时生效。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "一个文件就是整个数据库：聊聊 SQLite 支撑个人博客的理由，以及它在旧版和现任终端里的角色。\n\n## 为什么选它\n\n- 备份等于复制一个文件，整机迁移只需带上 `data` 目录；\n- WAL 模式下读写并发足够个人站点使用；\n- FTS5 三元组索引让全文搜索几乎零成本；\n- 没有独立的数据库进程，部署清单里少一项依赖。\n\n## 在博客里的角色\n\n旧版用它存文章、评论、账号和阅读数；新终端同样用它存放档案，后台改动即时生效。写入路径上还加了一道保险：任何修改都在事务里完成「改动 → 校验 → 写快照」，校验失败整体回滚。\n\n## 适合谁\n\n个人站点、小工具、原型——只要写入量不大，SQLite 都是默认正确答案。"
+      "links": []
     },
     {
       "id": "X-014",
@@ -304,6 +317,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "旧版博客如何把 Markdown 变成安全可读的页面：解析、数学公式、图表与过滤，每一步只做一件事。",
+      "body": "旧版博客如何把 Markdown 变成安全可读的页面：解析、数学公式、图表与过滤，每一步只做一件事。\n\n## 管线\n\n1. `marked` 以 GFM 模式解析正文，代码块带复制按钮；\n2. `$` 与 `$$` 交给 KaTeX，```mermaid 代码块渲染为图表；\n3. `sanitize-html` 白名单过滤，输出前再检查一遍。\n\n## 两个原则\n\n第一，渲染结果是纯展示，原始 Markdown 始终留在数据库里，随时可重渲染、可换渲染器。第二，过滤用白名单而不是黑名单——黑名单永远追不上新出现的攻击面。\n\n## 现在的终端\n\n详情页内置了一个极小的 Markdown 子集渲染器：先整体转义，再做标题、列表、代码、加粗、斜体和链接的替换，不产出任何原始 HTML。文章档案在站内就能直接读，不必导出。",
       "findings": [
         "marked 以 GFM 模式解析正文，代码块带复制按钮。",
         "$ 与 $$ 交给 KaTeX，```mermaid 代码块渲染为图表。",
@@ -311,7 +325,7 @@
         "渲染结果是纯展示，原始 Markdown 始终留在数据库里。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "旧版博客如何把 Markdown 变成安全可读的页面：解析、数学公式、图表与过滤，每一步只做一件事。\n\n## 管线\n\n1. `marked` 以 GFM 模式解析正文，代码块带复制按钮；\n2. `$` 与 `$$` 交给 KaTeX，```mermaid 代码块渲染为图表；\n3. `sanitize-html` 白名单过滤，输出前再检查一遍。\n\n## 两个原则\n\n第一，渲染结果是纯展示，原始 Markdown 始终留在数据库里，随时可重渲染、可换渲染器。第二，过滤用白名单而不是黑名单——黑名单永远追不上新出现的攻击面。\n\n## 现在的终端\n\n详情页内置了一个极小的 Markdown 子集渲染器：先整体转义，再做标题、列表、代码、加粗、斜体和链接的替换，不产出任何原始 HTML。文章档案在站内就能直接读，不必导出。"
+      "links": []
     },
     {
       "id": "X-015",
@@ -323,6 +337,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "本站既可以构建成纯静态文件，也可以跑自带的 Node 服务：两条路各自适合什么场景。",
+      "body": "本站既可以构建成纯静态文件，也可以跑自带的 Node 服务：两条路各自适合什么场景。\n\n## 纯静态\n\n丢给任意托管即可，PWA 离线可用，但没有后台。内容更新要走「改文件 → 重新构建 → 重新部署」的完整流程。\n\n## Node 服务\n\n多一个管理后台和运行时数据，适合想随时改内容的阶段。本站目前就是这个形态：后台保存档案，前台通过 API 读取，改动即时生效。\n\n## 两者兼得\n\n前端用「API 优先、打包快照兜底」兼容两者：运行时优先请求 `/api/records`，拿不到就退回构建时打包的 JSON 快照，离线也能浏览上次构建的内容。\n\n个人站点的正确答案是：先跑起来，再按需要换形态。",
       "findings": [
         "纯静态：丢给任意托管即可，PWA 离线可用，但没有后台。",
         "Node 服务：多一个管理后台和运行时数据，适合想随时改内容的阶段。",
@@ -330,7 +345,7 @@
         "个人站点的正确答案是：先跑起来，再按需要换形态。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "本站既可以构建成纯静态文件，也可以跑自带的 Node 服务：两条路各自适合什么场景。\n\n## 纯静态\n\n丢给任意托管即可，PWA 离线可用，但没有后台。内容更新要走「改文件 → 重新构建 → 重新部署」的完整流程。\n\n## Node 服务\n\n多一个管理后台和运行时数据，适合想随时改内容的阶段。本站目前就是这个形态：后台保存档案，前台通过 API 读取，改动即时生效。\n\n## 两者兼得\n\n前端用「API 优先、打包快照兜底」兼容两者：运行时优先请求 `/api/records`，拿不到就退回构建时打包的 JSON 快照，离线也能浏览上次构建的内容。\n\n个人站点的正确答案是：先跑起来，再按需要换形态。"
+      "links": []
     },
     {
       "id": "X-016",
@@ -342,6 +357,7 @@
       "lead": "观众",
       "clearance": "PUBLIC AREA",
       "abstract": "写作计划备忘：随笔与技术感悟的持续更新清单，随写随补。",
+      "body": "写作计划备忘：随笔与技术感悟的持续更新清单，随写随补。\n\n## 备选主题\n\n- **学习经历**：记录真实的学习过程，包括卡住的点；\n- **小项目**：做了什么、为什么做、踩了什么坑；\n- **有趣文章**：摘录链接，写自己认同与存疑的部分。\n\n## 一个标准\n\n技术感悟优先写给三个月后的自己看。当下觉得理所当然的细节，三个月后往往是最想不起来的部分——环境怎么搭的、为什么放弃某个方案、哪个坑花了最久。\n\n写完一篇就在后台直接发布，档案编号会自动排好。",
       "findings": [
         "学习经历：记录真实的学习过程，包括卡住的点。",
         "小项目：做了什么、为什么做、踩了什么坑。",
@@ -349,10 +365,30 @@
         "技术感悟优先写给三个月后的自己看。"
       ],
       "source": "https://github.com/Audience333/AudiencePersonalBlog",
-      "body": "写作计划备忘：随笔与技术感悟的持续更新清单，随写随补。\n\n## 备选主题\n\n- **学习经历**：记录真实的学习过程，包括卡住的点；\n- **小项目**：做了什么、为什么做、踩了什么坑；\n- **有趣文章**：摘录链接，写自己认同与存疑的部分。\n\n## 一个标准\n\n技术感悟优先写给三个月后的自己看。当下觉得理所当然的细节，三个月后往往是最想不起来的部分——环境怎么搭的、为什么放弃某个方案、哪个坑花了最久。\n\n写完一篇就在后台直接发布，档案编号会自动排好。"
+      "links": []
     },
     {
       "id": "X-017",
+      "title": "快点儿！多给树施肥！他得快点儿长！",
+      "en": "HURRY UP AND GROW",
+      "department": "编辑部",
+      "category": "文章",
+      "date": "2026-10",
+      "lead": "x²y",
+      "clearance": "PUBLIC AREA",
+      "abstract": "一篇树木视角的寓言：被过度施肥、被“快点儿”催促的杨一，与没人管的杨二，在一个月后的评比中走向各自的命运。",
+      "body": "“快点儿！多给树施肥！他得快点儿长！”\n\n最近村公所在分发小树苗，给一个月的喂养时间，想要评比出一个护树员专门负责管理西山的树木生长。\n\n我和杨二是双生树，只是一家只允许分有一棵树，我们就被分开了，我被分给了李叔——村上公认的细致又奋进的人，杨二则被分给了乞丐吴大强，惹得大家一阵唏嘘。\n\n“你说把树苗分给那个姓吴的，不是纯属糟蹋嘛？”\n\n“饭都不见得吃得起，能养好吗？”\n\n“要我说啊，让李大哥养两棵树好了，他人又踏实，他把儿子李怀都养的那么优秀，树肯定养的好啊。”\n\n我不自觉的抖了抖身上的叶子，骄傲地望着杨二，“要不要我跟我主人说一说，让他收养收养你？”\n\n“树各有命，再说这树的分配是政府管的，我们自己都管不了自己，你怎么帮我？”杨二无奈地耸耸肩，而后被吴大强扛在背上背回家了。李叔也把我扛上了三轮车，一想到我未来一定会长成这个村最高的树，就激动得在车里打滚，咣咣咣的几声惹得路人探身来看我。\n\n回来那天我就被李叔连夜刨坑种进了地里，当晚我就吃了一顿饱餐——肥料。一时间竟有点想念我的弟弟杨二，我想他吃的肯定没我这么好，要是他跑来找我哭诉，我可以勉为其难地分给他一些。一连几天我都吃的很饱，但是开始的美味，渐渐让我感到痛苦，我感觉我的舌头——树根疼得快要断裂了，我开始每天哀嚎，整个村的树都能听见我的叫声，离得近的知道我经历了什么，离得远的听信谣言，以为我被劈成了两半。\n\n只是这些只是在我们树木之间流传。李叔好像听不见我的哭泣，我一次次告诉他，我不想生长的这么快，我真的好累。但他好像听不见，依然嘀咕着“快点儿！快点儿！”又喂给我“丰富”的食物。\n\n一开始他说快点，我长得很快，因为我不想让他失望。可是我最近越来越累，身体上和心理上的累，让我无法喘气，我没有精力去长大，甚至开始变得内向，我开始停止生长，树叶开始卷曲，我不想让大家看见我现在的模样。一些好心人来劝李叔“你还是别给杨一太大压力了，劳逸结合才能更好的成长啊。”他却只是“憨厚”地笑着点头，人走后依旧我行我素，还在人背后蛐蛐，“你以为我不知道你想种的比我高！”\n\n我越来越累，我开始怀念以前的自由自在的时光，但也只能怀念罢了。\n\n“给你这么多肥料，你却只长高了一厘米，你对得起我吗？你快点长啊！”李叔开始责骂我，我不知所措，我想要解释，但是他好像听不到一样，或许他听到了，装作没听到吧。\n\n一个月真的很难熬，但是我熬过了，我那么痛苦的努力，最后比杨二还长得矮、长得丑，杨二说它没吃过肥料，因为吴大强确实买不起，但为什么我吃了这么多肥料，连他都没长过？\n\n最后成为护树员的，是村上卖肥料的人。李叔快气疯了，他觉得一定是给这个人故意卖假肥料给他，才导致他没选上。但是这些事情我都不想管了，因为他们都与我无关了。\n\n比赛过后，我被搬到了西山上，我感觉我的树根得到了施展，护树员每天都给我浇大量的水，冲洗我的舌头，他从不催我快点儿，我渐渐恢复了生长速度。\n\n在太阳伴着灰云坠落那天，我看见山的那边有一个黑色的点，从我曾受难的那个山间，纵身一跃。\n\n紧接着传来的是李大哥响彻山间的痛哭，“我唯一的儿啊！你怎么……”\n\n而我只能在云雾环绕的山间，共鸣李怀的遭遇，叹息李怀的陨落。",
+      "findings": [
+        "双生树杨一与杨二被分开领养，一场为期一个月的护树员评比开始了。",
+        "“细致又奋进”的李叔拼命给杨一施肥，快得让树根生疼；乞丐吴大强买不起肥料，杨二反而自由生长。",
+        "被催促到停止生长的杨一，最终长得比杨二又矮又丑；卖肥料的人当上了护树员。",
+        "西山上的水冲掉了肥料，树渐渐恢复；而山那边，李怀纵身一跃。"
+      ],
+      "source": "https://github.com/Audience333/AudiencePersonalBlog",
+      "links": []
+    },
+    {
+      "id": "X-018",
       "title": "RhineLabUI",
       "en": "RHINELABUI",
       "department": "资源部",
@@ -361,12 +397,14 @@
       "lead": "LBEILC",
       "clearance": "REFERENCE AREA",
       "abstract": "莱茵生命终端界面的非官方复刻项目（TypeScript + Three.js + Vite，MIT 协议）：白底开场、五列循环档案阵列、玻璃解密与 360° 模型查看。本站界面即基于它搭建。",
+      "body": "",
       "findings": [
         "三维档案盒模型由 Blender 生成，支持拆解与重组。",
         "开场动画逐帧复刻原 PV，支持跳过与重播。",
         "档案数据独立于代码，JSON 即可定制内容。",
         "第三方素材（明日方舟相关名称与标志等）不在 MIT 授权内。"
       ],
+      "source": "https://github.com/LBEILC/RhineLabUI",
       "links": [
         {
           "label": "源代码仓库",
@@ -376,11 +414,10 @@
           "label": "在线演示",
           "url": "https://rhine.lubeiluchen.cc"
         }
-      ],
-      "source": "https://github.com/LBEILC/RhineLabUI"
+      ]
     },
     {
-      "id": "X-018",
+      "id": "X-019",
       "title": "Astro",
       "en": "ASTRO",
       "department": "资源部",
@@ -389,11 +426,13 @@
       "lead": "withastro",
       "clearance": "REFERENCE AREA",
       "abstract": "旧版博客使用的 Web 框架：以内容为中心的岛屿架构，支持 SSR/SSG，Markdown 体验开箱即用。",
+      "body": "",
       "findings": [
         "适合以文章和页面为主、交互较少的站点。",
         "官方适配器可以把同一套代码输出为 Node 服务。",
         "本站的上一任形态即由它驱动。"
       ],
+      "source": "https://astro.build",
       "links": [
         {
           "label": "官方网站",
@@ -403,11 +442,10 @@
           "label": "源代码仓库",
           "url": "https://github.com/withastro/astro"
         }
-      ],
-      "source": "https://astro.build"
+      ]
     },
     {
-      "id": "X-019",
+      "id": "X-020",
       "title": "Three.js",
       "en": "THREE.JS",
       "department": "资源部",
@@ -416,11 +454,13 @@
       "lead": "mrdoob",
       "clearance": "REFERENCE AREA",
       "abstract": "浏览器三维渲染库，本站的档案阵列、模型解密与 360° 查看器都建立在它之上。",
+      "body": "",
       "findings": [
         "WebGL 封装友好，示例与文档覆盖面广。",
         "实例化渲染让数百个档案盒同屏也能流畅运动。",
         "配 RhineLabUI 这类完整项目学习曲线平缓很多。"
       ],
+      "source": "https://threejs.org",
       "links": [
         {
           "label": "官方网站",
@@ -430,11 +470,10 @@
           "label": "源代码仓库",
           "url": "https://github.com/mrdoob/three.js"
         }
-      ],
-      "source": "https://threejs.org"
+      ]
     },
     {
-      "id": "X-020",
+      "id": "X-021",
       "title": "Vite",
       "en": "VITE",
       "department": "资源部",
@@ -443,11 +482,13 @@
       "lead": "vitejs",
       "clearance": "REFERENCE AREA",
       "abstract": "前端构建工具：秒级冷启动与热更新，本站与 RhineLabUI 都用它开发构建。",
+      "body": "",
       "findings": [
         "基于原生 ESM 的开发服务器，改动即时反映。",
         "生产构建用 Rollup 打包，输出精简。",
         "插件体系成熟，JSON、CSS 等开箱可用。"
       ],
+      "source": "https://vite.dev",
       "links": [
         {
           "label": "官方网站",
@@ -457,11 +498,10 @@
           "label": "源代码仓库",
           "url": "https://github.com/vitejs/vite"
         }
-      ],
-      "source": "https://vite.dev"
+      ]
     },
     {
-      "id": "X-021",
+      "id": "X-022",
       "title": "better-sqlite3",
       "en": "BETTER-SQLITE3",
       "department": "资源部",
@@ -470,21 +510,22 @@
       "lead": "WiseLibs",
       "clearance": "REFERENCE AREA",
       "abstract": "Node.js 的 SQLite 同步驱动：事务与预处理语句性能优秀，本站后台的档案读写都由它完成。",
+      "body": "",
       "findings": [
         "同步 API 让服务端代码更直白。",
         "事务批量写入速度快，适合导入与重建索引。",
         "与 Node 24 兼容良好，无需额外守护进程。"
       ],
+      "source": "https://github.com/WiseLibs/better-sqlite3",
       "links": [
         {
           "label": "源代码仓库",
           "url": "https://github.com/WiseLibs/better-sqlite3"
         }
-      ],
-      "source": "https://github.com/WiseLibs/better-sqlite3"
+      ]
     },
     {
-      "id": "X-022",
+      "id": "X-023",
       "title": "Caddy",
       "en": "CADDY",
       "department": "资源部",
@@ -493,11 +534,13 @@
       "lead": "caddyserver",
       "clearance": "REFERENCE AREA",
       "abstract": "自带 HTTPS 的 Web 服务器：配置简短，自动申请与续期证书，旧版博客曾由它反向代理。",
+      "body": "",
       "findings": [
         "一句配置即可获得自动 HTTPS。",
         "同时胜任静态托管与反向代理。",
         "个人站点用它替代 Nginx 省心很多。"
       ],
+      "source": "https://caddyserver.com",
       "links": [
         {
           "label": "官方网站",
@@ -507,11 +550,10 @@
           "label": "源代码仓库",
           "url": "https://github.com/caddyserver/caddy"
         }
-      ],
-      "source": "https://caddyserver.com"
+      ]
     },
     {
-      "id": "X-023",
+      "id": "X-024",
       "title": "Node.js",
       "en": "NODE.JS",
       "department": "资源部",
@@ -520,11 +562,13 @@
       "lead": "nodejs",
       "clearance": "REFERENCE AREA",
       "abstract": "本站运行时所依赖的 JavaScript 运行时：本终端的服务端、构建脚本与管理后台都跑在它上面。",
+      "body": "",
       "findings": [
         "本站要求 22.12 或更高版本（推荐 24 LTS）。",
         "内置加密模块即可完成密码哈希，无需额外依赖。",
         "配合 systemd 常驻即可获得稳定的个人站点服务。"
       ],
+      "source": "https://nodejs.org",
       "links": [
         {
           "label": "官方网站",
@@ -534,11 +578,10 @@
           "label": "源代码仓库",
           "url": "https://github.com/nodejs/node"
         }
-      ],
-      "source": "https://nodejs.org"
+      ]
     },
     {
-      "id": "X-024",
+      "id": "X-025",
       "title": "KaTeX",
       "en": "KATEX",
       "department": "资源部",
@@ -547,11 +590,13 @@
       "lead": "KaTeX",
       "clearance": "REFERENCE AREA",
       "abstract": "快速的数学公式排版库：旧版博客用它在浏览器里渲染行内与块级公式，无需服务端转换。",
+      "body": "",
       "findings": [
         "渲染速度快，公式无需图片。",
         "与 Markdown 渲染链配合成熟。",
         "本资源库及文章中的数学表达式均可由它呈现。"
       ],
+      "source": "https://katex.org",
       "links": [
         {
           "label": "官方网站",
@@ -561,8 +606,7 @@
           "label": "源代码仓库",
           "url": "https://github.com/KaTeX/KaTeX"
         }
-      ],
-      "source": "https://katex.org"
+      ]
     }
   ]
 }

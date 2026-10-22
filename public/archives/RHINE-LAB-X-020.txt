@@ -1,22 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-020 / Vite
-VITE
+FILE X-020 / Three.js
+THREE.JS
 
 科室：资源部
 编目范围：2026
-相关人物：vitejs
+相关人物：mrdoob
 访问范围：REFERENCE AREA
 
-前端构建工具：秒级冷启动与热更新，本站与 RhineLabUI 都用它开发构建。
+浏览器三维渲染库，本站的档案阵列、模型解密与 360° 查看器都建立在它之上。
 
 研究记录
-1. 基于原生 ESM 的开发服务器，改动即时反映。
-2. 生产构建用 Rollup 打包，输出精简。
-3. 插件体系成熟，JSON、CSS 等开箱可用。
+1. WebGL 封装友好，示例与文档覆盖面广。
+2. 实例化渲染让数百个档案盒同屏也能流畅运动。
+3. 配 RhineLabUI 这类完整项目学习曲线平缓很多。
 
 相关链接
-官方网站：https://vite.dev
-源代码仓库：https://github.com/vitejs/vite
+官方网站：https://threejs.org
+源代码仓库：https://github.com/mrdoob/three.js
 
-设定参考：https://vite.dev
+设定参考：https://threejs.org
 本文档由站长档案终端生成。
