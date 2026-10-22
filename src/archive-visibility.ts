@@ -46,7 +46,7 @@ export class ArchiveVisibility {
     const maxRow=Math.ceil((slab.max.z+.6-trackZ)/ROW_SPACING+15.5)+2;
     const cells: ArchiveCell[]=[];
     for(let lane=minLane;lane<=maxLane;lane++)for(let row=minRow;row<=maxRow;row++) {
-      const x=(lane-2)*COLUMN_SPACING-trackX, z=(row-15.5)*ROW_SPACING+trackZ;
+      const x=(lane-laneCenter)*COLUMN_SPACING-trackX, z=(row-15.5)*ROW_SPACING+trackZ;
       this.box.min.set(x-2.8,bottom,z-1.2);
       this.box.max.set(x+2.8,top,z+1.2);
       if(this.frustum.intersectsBox(this.box))cells.push({lane,row});

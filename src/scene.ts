@@ -1677,6 +1677,10 @@ export class ArchiveScene {
     const fixed = (Boolean(cinematic) || !this.looping) && !responsiveOpening;
     this.cells = fixed ? Array.from({ length: 160 }, (_, i) => poolCell(i))
       : this.visibility.update(this.camera, fog.far, trackX, entryZ + this.rail.value, this.extraCoverage);
+    // 交互阵列只显示当前三列（左右各一列是循环接缝补位），不再铺满
+    // 整个视口；开场与逐帧对照仍走 fixed 的 160 位置全景。
+    const interactive = !fixed && !cinematic;
+    const centerLane = Math.round(trackX / COLUMN_SPACING + laneCenter);
     const hidden = new Set(this.outgoing.map(o => cellKey(o.cell)));
     hidden.add(cellKey(this.selectedCell));
     this.drawnCells = [];
@@ -1687,6 +1691,7 @@ export class ArchiveScene {
     if (this.themeAttribute) this.themeUpdates ??= new InstanceUpdates(this.themeAttribute);
     for (const cell of this.cells) {
       const { row, lane } = cell;
+      if (interactive && Math.abs(lane - centerLane) > 1) continue;
       if (hidden.has(cellKey(cell))) continue;
       const x = (lane - laneCenter) * COLUMN_SPACING - trackX;
       const y = -4.6 + field(row, lane) + hoverLift(cell) - this.presentationDrop(cell);
