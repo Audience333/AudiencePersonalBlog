@@ -1609,7 +1609,24 @@ async function start() {
   } catch (error) {
     console.error(error);
     $("#loading").innerHTML =
-      '<div class="error-state"><strong>CONNECTION INTERRUPTED</strong><p>三维档案资源未能载入。请确认浏览器已启用硬件加速，然后重新连接。</p><button onclick="location.reload()">RECONNECT →</button></div>';
+      '<div class="error-state"><strong>CONNECTION INTERRUPTED</strong><p>三维档案资源未能载入。请确认浏览器已启用硬件加速，然后重新连接。</p><button data-action="reconnect">RECONNECT →</button><button data-action="reset">清除离线缓存并重连 ↻</button></div>';
+    const loading = $("#loading");
+    loading.querySelector('[data-action="reconnect"]')?.addEventListener("click", () => location.reload());
+    loading.querySelector('[data-action="reset"]')?.addEventListener("click", async (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      button.disabled = true;
+      button.textContent = "CLEARING…";
+      try {
+        const registrations = (await navigator.serviceWorker?.getRegistrations?.()) ?? [];
+        await Promise.all(registrations.map((registration) => registration.unregister()));
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((key) => caches.delete(key)));
+        }
+      } finally {
+        location.reload();
+      }
+    });
   }
 }
 function completeStartup(silent: boolean) {
