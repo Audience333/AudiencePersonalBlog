@@ -1706,6 +1706,17 @@ button {
   border-bottom: 1px solid;
   padding-bottom: 8px;
 }
+.error-state .error-detail {
+  display: block;
+  margin-top: 24px;
+  font: 12px/1.6 ui-monospace, monospace;
+  color: #a09a8c;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: left;
+  max-height: 160px;
+  overflow: auto;
+}
 
 /* Reference sequence: each stage uses the same physical scene and DOM. */
 [data-mode="boot"] .system-nav,

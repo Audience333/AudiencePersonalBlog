@@ -330,6 +330,13 @@ let resumeSelection = -1;
 let viewer: ModelViewer | undefined;
 const accessLog: { id: string; time: string }[] = [];
 const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
+// 在线数据替换 records 后，记忆的索引可能失效或指向其他列；用前校验，无效则回到该列首份档案。
+function laneStart(lane: number): number | undefined {
+  const remembered = columnMemory[lane];
+  if (remembered !== undefined && records[remembered] && fileLocation(remembered).lane === lane)
+    return remembered;
+  return columnFiles(lane)[0];
+}
 function recordAccess() {
   accessLog.unshift({
     id: records[selected].id,
@@ -488,9 +495,22 @@ fit();
 $("#file-ticks").innerHTML = columnFiles(fileLocation(selected).lane)
   .map((index) => `<button data-select="${index}"></button>`)
   .join("");
-const fileTicks = [
+let fileTicks = [
   ...$("#file-ticks").querySelectorAll<HTMLButtonElement>("button"),
 ];
+
+// 在线数据替换 records 后，各列档案数可能与初始快照不同；
+// 切换列或刷新内容时按当前列重建刻度，避免越界读取 records。
+function syncFileTicks(lane: number) {
+  const count = columnFiles(lane).length;
+  if (count === fileTicks.length) return;
+  $("#file-ticks").innerHTML = columnFiles(lane)
+    .map((index) => `<button data-select="${index}"></button>`)
+    .join("");
+  fileTicks = [
+    ...$("#file-ticks").querySelectorAll<HTMLButtonElement>("button"),
+  ];
+}
 
 function setMode(next: Mode) {
   if (workbench?.enabled && next === "detail") next = "archive";
@@ -584,7 +604,9 @@ function stepFile(direction: number) {
 function stepColumn(direction: number) {
   const lane = fileLocation(selected).lane;
   const next = wrap(lane + direction, archiveColumns.length);
-  select(columnMemory[next], { axis: "lane", direction });
+  const target = laneStart(next);
+  if (target === undefined) return;
+  select(target, { axis: "lane", direction });
 }
 function updateSelection(navigation?: ArchiveNavigation) {
   const r = records[selected];
@@ -636,9 +658,15 @@ function updateSelection(navigation?: ArchiveNavigation) {
   });
   $<HTMLButtonElement>('[data-action="column-prev"]').disabled = false;
   $<HTMLButtonElement>('[data-action="column-next"]').disabled = false;
+  syncFileTicks(lane);
   fileTicks.forEach((button, slot) => {
     const index = files[slot],
       record = records[index];
+    if (!record) {
+      button.hidden = true;
+      return;
+    }
+    button.hidden = false;
     button.dataset.select = String(index);
     button.setAttribute("aria-label", `选择档案 ${record.id} ${record.title}`);
     button.title = `${record.id} · ${record.title}`;
@@ -1608,8 +1636,9 @@ async function start() {
     }
   } catch (error) {
     console.error(error);
+    const detail = error instanceof Error ? `${error.message}\n${error.stack ?? ""}` : String(error);
     $("#loading").innerHTML =
-      '<div class="error-state"><strong>CONNECTION INTERRUPTED</strong><p>三维档案资源未能载入。请确认浏览器已启用硬件加速，然后重新连接。</p><button data-action="reconnect">RECONNECT →</button><button data-action="reset">清除离线缓存并重连 ↻</button></div>';
+      `<div class="error-state"><strong>CONNECTION INTERRUPTED</strong><p>三维档案资源未能载入。请确认浏览器已启用硬件加速，然后重新连接。</p><button data-action="reconnect">RECONNECT →</button><button data-action="reset">清除离线缓存并重连 ↻</button><small class="error-detail">${escapeHtml(detail.slice(0, 500))}</small></div>`;
     const loading = $("#loading");
     loading.querySelector('[data-action="reconnect"]')?.addEventListener("click", () => location.reload());
     loading.querySelector('[data-action="reset"]')?.addEventListener("click", async (event) => {
@@ -1786,8 +1815,10 @@ if (isWallpaper) {
       if (ready && mode !== "boot") setMode("archive");
     },
     (lane) => {
-      if (ready && !modal && lane < archiveColumns.length)
-        select(columnMemory[lane]);
+      if (ready && !modal && lane < archiveColumns.length) {
+        const target = laneStart(lane);
+        if (target !== undefined) select(target);
+      }
     },
   );
   workbench.setMotion(prefs.motion);
