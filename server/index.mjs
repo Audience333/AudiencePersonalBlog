@@ -167,7 +167,13 @@ function validateRecordInput(body) {
 }
 
 function serveStatic(req, res, pathname) {
-  const clean = path.normalize(decodeURIComponent(pathname)).replace(/^(\.\.[/\\])+/, "");
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return send(res, 400, { error: "bad request" });
+  }
+  const clean = path.normalize(decoded).replace(/^(\.\.[/\\])+/, "");
   let file = path.join(dist, clean === path.sep ? "" : clean);
   if (!file.startsWith(dist)) return send(res, 403, { error: "forbidden" });
   if (fs.existsSync(file) && fs.statSync(file).isDirectory())
