@@ -1,0 +1,30 @@
+{
+  "record": {
+    "id": "X-021",
+    "title": "Vite",
+    "en": "VITE",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026",
+    "lead": "vitejs",
+    "clearance": "REFERENCE AREA",
+    "abstract": "前端构建工具：秒级冷启动与热更新，本站与 RhineLabUI 都用它开发构建。",
+    "body": "",
+    "findings": [
+      "基于原生 ESM 的开发服务器，改动即时反映。",
+      "生产构建用 Rollup 打包，输出精简。",
+      "插件体系成熟，JSON、CSS 等开箱可用。"
+    ],
+    "source": "https://vite.dev",
+    "links": [
+      {
+        "label": "官方网站",
+        "url": "https://vite.dev"
+      },
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/vitejs/vite"
+      }
+    ]
+  }
+}

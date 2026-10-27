@@ -1,0 +1,26 @@
+{
+  "record": {
+    "id": "X-006",
+    "title": "博客备份脚本",
+    "en": "BACKUP UTILITY",
+    "department": "工程科",
+    "category": "作品",
+    "date": "2026-09",
+    "lead": "观众",
+    "clearance": "INTERNAL AREA",
+    "abstract": "旧版博客的备份工具：为 SQLite 数据库与上传文件创建带时间戳的备份目录，并生成清单文件， successive 备份互不覆盖。",
+    "body": "",
+    "findings": [
+      "一条命令导出 blog.sqlite、uploads/ 与 manifest.json。",
+      "按日期命名目录，方便回滚到任意一次备份。",
+      "建议配合定时任务同步到对象存储。"
+    ],
+    "source": "https://github.com/Audience333/AudiencePersonalBlog",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+      }
+    ]
+  }
+}

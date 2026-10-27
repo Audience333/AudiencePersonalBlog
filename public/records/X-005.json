@@ -1,0 +1,27 @@
+{
+  "record": {
+    "id": "X-005",
+    "title": "终端管理后台",
+    "en": "TERMINAL ADMIN",
+    "department": "工程科",
+    "category": "作品",
+    "date": "2026-10",
+    "lead": "观众",
+    "clearance": "INTERNAL AREA",
+    "abstract": "本站的内容管理后台：登录后可以直接增删改作品、文章与资源库档案，保存后首页立即生效。",
+    "body": "",
+    "findings": [
+      "复用旧博客的 scrypt 密码哈希与 sessions 表，旧管理员账号直接可用。",
+      "会话 Cookie httpOnly + SameSite=Lax，登录接口带限流。",
+      "档案写入 SQLite 后同步刷新 JSON 快照与 TXT 导出。",
+      "界面沿用终端视觉语言，从首页右下角可进入。"
+    ],
+    "source": "https://github.com/Audience333/AudiencePersonalBlog",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+      }
+    ]
+  }
+}

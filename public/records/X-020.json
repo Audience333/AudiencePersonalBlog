@@ -1,0 +1,30 @@
+{
+  "record": {
+    "id": "X-020",
+    "title": "Three.js",
+    "en": "THREE.JS",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026",
+    "lead": "mrdoob",
+    "clearance": "REFERENCE AREA",
+    "abstract": "浏览器三维渲染库，本站的档案阵列、模型解密与 360° 查看器都建立在它之上。",
+    "body": "",
+    "findings": [
+      "WebGL 封装友好，示例与文档覆盖面广。",
+      "实例化渲染让数百个档案盒同屏也能流畅运动。",
+      "配 RhineLabUI 这类完整项目学习曲线平缓很多。"
+    ],
+    "source": "https://threejs.org",
+    "links": [
+      {
+        "label": "官方网站",
+        "url": "https://threejs.org"
+      },
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/mrdoob/three.js"
+      }
+    ]
+  }
+}

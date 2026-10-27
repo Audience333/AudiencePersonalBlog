@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   listRecords,
+  listRecordSummaries,
   getRecord,
   createRecord,
   updateRecord,
@@ -138,8 +139,17 @@ function validateRecordInput(body) {
     abstract: String(body.abstract ?? ""),
     source: String(body.source ?? ""),
   };
-  if (!COLUMNS.includes(record.category)) errors.push("category 必须是 作品/文章/资源库");
-  for (const key of ["title", "en", "department", "date", "lead", "abstract", "source"])
+  if (!COLUMNS.includes(record.category))
+    errors.push("category 必须是 作品/文章/资源库");
+  for (const key of [
+    "title",
+    "en",
+    "department",
+    "date",
+    "lead",
+    "abstract",
+    "source",
+  ])
     if (!isText(record[key])) errors.push(`${key} 不能为空`);
   const rawBody = String(body.body ?? "").trim();
   if (rawBody.length > 20000) errors.push("body 正文不能超过 20000 字");
@@ -147,19 +157,29 @@ function validateRecordInput(body) {
   const findings = Array.isArray(body.findings)
     ? body.findings.map((f) => String(f).trim()).filter(Boolean)
     : typeof body.findings === "string"
-      ? body.findings.split("\n").map((f) => f.trim()).filter(Boolean)
+      ? body.findings
+          .split("\n")
+          .map((f) => f.trim())
+          .filter(Boolean)
       : [];
   if (!findings.length) errors.push("findings 至少一条");
   const links = Array.isArray(body.links)
     ? body.links
-        .map((l) => ({ label: String(l.label ?? "").trim(), url: String(l.url ?? "").trim() }))
+        .map((l) => ({
+          label: String(l.label ?? "").trim(),
+          url: String(l.url ?? "").trim(),
+        }))
         .filter((l) => l.label && l.url)
     : [];
   for (const link of links) {
     const ok = link.url.startsWith("/") || /^https?:\/\//.test(link.url);
     if (!ok) errors.push(`链接 ${link.label} 的 url 不合法`);
   }
-  if (body.links !== undefined && !Array.isArray(body.links) && typeof body.links !== "string")
+  if (
+    body.links !== undefined &&
+    !Array.isArray(body.links) &&
+    typeof body.links !== "string"
+  )
     errors.push("links 必须是数组");
   record.findings = findings;
   record.links = links;
@@ -215,12 +235,19 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── API ──
+    const recordMatch = /^\/api\/records(?:\/(X-\d{3}))?$/.exec(pathname);
     if (pathname === "/api/records" && req.method === "GET") {
       return send(res, 200, {
         categories: COLUMNS,
         columns: COLUMNS,
-        records: listRecords(),
+        records: listRecordSummaries(),
       });
+    }
+    if (recordMatch?.[1] && req.method === "GET") {
+      const result = getRecord(recordMatch[1]);
+      if (!result) return send(res, 404, { error: "not found" });
+      const { sort, ...record } = result;
+      return send(res, 200, { record });
     }
     if (pathname === "/api/login" && req.method === "POST") {
       if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
@@ -230,25 +257,33 @@ const server = http.createServer(async (req, res) => {
       if (!loginThrottle(username))
         return send(res, 429, { error: "尝试次数过多，请 15 分钟后再试" });
       const user = await authenticate(username, password);
-      if (!user)
-        return send(res, 401, { error: "用户名或密码不正确" });
+      if (!user) return send(res, 401, { error: "用户名或密码不正确" });
       const token = createSession(user.id);
-      return send(res, 200, { ok: true, username: user.username }, {
-        "Set-Cookie": sessionCookie(token),
-      });
+      return send(
+        res,
+        200,
+        { ok: true, username: user.username },
+        {
+          "Set-Cookie": sessionCookie(token),
+        },
+      );
     }
     if (pathname === "/api/logout" && req.method === "POST") {
       destroySession(readSessionCookie(req.headers.cookie));
-      return send(res, 200, { ok: true }, {
-        "Set-Cookie": sessionCookie("", { clear: true }),
-      });
+      return send(
+        res,
+        200,
+        { ok: true },
+        {
+          "Set-Cookie": sessionCookie("", { clear: true }),
+        },
+      );
     }
     if (pathname === "/api/me" && req.method === "GET") {
       const user = getSessionUser(readSessionCookie(req.headers.cookie));
       return send(res, 200, user ?? null);
     }
 
-    const recordMatch = /^\/api\/records(?:\/(X-\d{3}))?$/.exec(pathname);
     if (recordMatch) {
       if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
       if (req.method === "POST" && !recordMatch[1]) {
@@ -256,8 +291,11 @@ const server = http.createServer(async (req, res) => {
         const body = await readBody(req);
         const { record, errors } = validateRecordInput(body);
         if (errors.length) return send(res, 400, { error: errors.join("；") });
-        const columnCount = listRecords().filter((r) => r.category === record.category).length;
-        if (columnCount >= 12) return send(res, 400, { error: "该列已满（每列最多 12 份）" });
+        const columnCount = listRecords().filter(
+          (r) => r.category === record.category,
+        ).length;
+        if (columnCount >= 12)
+          return send(res, 400, { error: "该列已满（每列最多 12 份）" });
         try {
           return send(res, 201, { record: createRecord(record) });
         } catch (error) {

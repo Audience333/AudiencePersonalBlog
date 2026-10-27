@@ -173,6 +173,7 @@ export class ArchiveScene {
   private shadowState = new RenderState();
   private renderedFrames = 0;
   private reusedFrames = 0;
+  private lastRenderedAt = -Infinity;
   private visibility = new ArchiveVisibility();
   private drawCoverage = new ArchiveDrawCoverage();
   private shadowCoverage?: ArchiveShadowCoverage;
@@ -1763,6 +1764,7 @@ export class ArchiveScene {
       (THREE.MathUtils.lerp(0.0003, 0.0008, detail) *
         this.quality.depthOfField) /
       100;
+    if (idle && time - this.lastRenderedAt < 1 / 30) return;
     this.renderer.info.reset();
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
@@ -1800,6 +1802,7 @@ export class ArchiveScene {
       });
       if (!state.end()) { this.reusedFrames++; return; }
     }
+    this.lastRenderedAt = time;
     this.renderedFrames++;
     const shadow = this.shadowState;
     shadow.begin();

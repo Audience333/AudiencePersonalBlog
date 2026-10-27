@@ -1,7 +1,7 @@
 // 档案数据层：records 表是站点内容的事实来源，由管理后台维护。
 // 首次启动时从 content/archives.json 种子快照导入；任何写操作在
 // 一个事务内完成「修改 → 归一化编号 → 整表校验」，校验通过后
-// 才写快照文件（JSON + TXT 导出 + 首页统计），失败则整体回滚，
+// 才写快照文件（完整/摘要 JSON + 单篇资源 + TXT + 首页统计），失败则整体回滚，
 // 保证数据库与快照永远一致。
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,7 @@ import Database from "better-sqlite3";
 import {
   validateContent,
   archiveText,
+  recordSummary,
 } from "../scripts/archive-content.mjs";
 
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -87,6 +88,10 @@ export function listRecords() {
     .prepare(`SELECT * FROM records ORDER BY sort ASC, id ASC`)
     .all()
     .map(rowToRecord);
+}
+
+export function listRecordSummaries() {
+  return listRecords().map(recordSummary);
 }
 
 export function getRecord(id) {
@@ -182,7 +187,10 @@ function mutateAndSync(mutator) {
       columns: COLUMNS,
       records: listRecords().map(stripMeta),
     });
-    return { content, finalId: marker ? idMap.get(marker) ?? marker : undefined };
+    return {
+      content,
+      finalId: marker ? (idMap.get(marker) ?? marker) : undefined,
+    };
   });
   const { content, finalId } = run();
   writeSnapshot(content);
@@ -217,9 +225,7 @@ function normalize() {
     });
     // 编号可能互换，先全部改名到临时值再落最终值，避免主键冲突。
     const temp = db.prepare(`UPDATE records SET id = ? WHERE id = ?`);
-    changes.forEach(([, , oldId], i) =>
-      temp.run(`REN-${i}-${oldId}`, oldId),
-    );
+    changes.forEach(([, , oldId], i) => temp.run(`REN-${i}-${oldId}`, oldId));
     changes.forEach(([nextId, sort], i) =>
       db
         .prepare(`UPDATE records SET id = ?, sort = ? WHERE id = ?`)
@@ -230,25 +236,26 @@ function normalize() {
   return idMap;
 }
 
-// 把校验过的内容写入 content/ 快照与 public/archives/ 下载文件。
+// 把校验过的内容写入 content/ 快照与 public/ 静态资源。
 function writeSnapshot(content) {
-  fs.writeFileSync(
-    path.join(root, "content", "archives.json"),
-    `${JSON.stringify(content, null, 2)}\n`,
-    "utf8",
-  );
+  const writeJson = (file, value) => {
+    fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  };
+  const summaries = {
+    categories: content.categories,
+    columns: content.columns,
+    records: content.records.map(recordSummary),
+  };
+  writeJson(path.join(root, "content", "archives.json"), content);
+  writeJson(path.join(root, "content", "archive-summaries.json"), summaries);
   const counts = COLUMNS.map(
     (name) => content.records.filter((r) => r.category === name).length,
   );
-  fs.writeFileSync(
-    path.join(root, "content", "stats.json"),
-    `${JSON.stringify(
-      { works: counts[0], articles: counts[1], resources: counts[2] },
-      null,
-      2,
-    )}\n`,
-    "utf8",
-  );
+  writeJson(path.join(root, "content", "stats.json"), {
+    works: counts[0],
+    articles: counts[1],
+    resources: counts[2],
+  });
   const outDir = path.join(root, "public", "archives");
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(outDir, { recursive: true });
@@ -258,6 +265,13 @@ function writeSnapshot(content) {
       archiveText(record),
       "utf8",
     );
+  }
+  const recordsDir = path.join(root, "public", "records");
+  fs.rmSync(recordsDir, { recursive: true, force: true });
+  fs.mkdirSync(recordsDir, { recursive: true });
+  writeJson(path.join(recordsDir, "index.json"), summaries);
+  for (const record of content.records) {
+    writeJson(path.join(recordsDir, `${record.id}.json`), { record });
   }
 }
 
@@ -272,6 +286,8 @@ export function seedIfEmpty() {
       insertRecord({ ...record, sort: index + 1 });
     });
   })();
-  console.log(`已从 content/archives.json 导入 ${seed.records.length} 份档案。`);
+  console.log(
+    `已从 content/archives.json 导入 ${seed.records.length} 份档案。`,
+  );
   return true;
 }

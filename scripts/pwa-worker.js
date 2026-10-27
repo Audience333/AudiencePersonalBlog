@@ -15,7 +15,7 @@ self.addEventListener("install", event => {
       // Keep successful files private until every resource is present; failure
       // still deletes this entire release and leaves the active release intact.
       let next = 0;
-      const workers = Array.from({ length: 6 }, async () => {
+      const workers = Array.from({ length: 2 }, async () => {
         while (next < urls.length) {
           const url = urls[next++];
           const immutable = /\/fonts\/misans-webfont-4\.3\.1\//.test(url) || /\/assets\/archive-(cassette|assembly)\.[a-f0-9]{16}\.glb$/.test(url);
@@ -58,9 +58,25 @@ self.addEventListener("fetch", event => {
   const navigation = event.request.mode === "navigate" &&
     (url.href === self.registration.scope || url.href === index);
   const key = navigation ? index : url.href;
-  if (!allowed.has(key)) return;
+  const basePath = new URL(self.registration.scope).pathname;
+  const path = url.pathname.startsWith(basePath)
+    ? url.pathname.slice(basePath.length)
+    : "";
+  const onDemand = /^(?:api\/records\/X-\d{3}|records\/X-\d{3}\.json|archives\/RHINE-LAB-X-\d{3}\.txt)$/.test(path);
+  if (!allowed.has(key) && !onDemand) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
+    if (onDemand) {
+      try {
+        const response = await fetch(event.request);
+        if (response.ok) await cache.put(key, response.clone());
+        return response;
+      } catch (error) {
+        const cached = await cache.match(key);
+        if (cached) return cached;
+        throw error;
+      }
+    }
     // HTML, hashed bundles and stable model URLs come from the same release.
     // A new release stays waiting until the user chooses to restart or exits.
     const cached = await cache.match(key);

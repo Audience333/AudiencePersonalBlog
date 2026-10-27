@@ -22,6 +22,11 @@ export class InspectionOverlay {
   private point =
     this.root.querySelector<SVGCircleElement>("#inspection-point")!;
   private label = document.querySelector<HTMLElement>("#inspection-text")!;
+  private host = document.querySelector<HTMLElement>("#three-scene")!;
+  private visible = false;
+  private cornersVisible = false;
+  private width = 0;
+  private height = 0;
 
   render(
     frame: DecryptionFrame,
@@ -29,14 +34,30 @@ export class InspectionOverlay {
     showLabel: boolean,
     enabled = true,
   ) {
-    const host = document.querySelector<HTMLElement>("#three-scene")!;
-    this.root.setAttribute("viewBox", `0 0 ${host.clientWidth} ${host.clientHeight}`);
-    this.root.style.opacity =
-      enabled && (frame.intervals.length || frame.markers > 0 || frame.point > 0)
-        ? "1"
-        : "0";
-    this.root.dataset.phase = frame.phase;
-    this.root.dataset.referenceTime = frame.time.toFixed(3);
+    const visible =
+      enabled &&
+      Boolean(frame.intervals.length || frame.markers > 0 || frame.point > 0);
+    if (!visible) {
+      if (this.visible) {
+        this.root.style.opacity = "0";
+        this.label.style.opacity = "0";
+      }
+      this.visible = false;
+      return;
+    }
+    if (!this.visible) this.root.style.opacity = "1";
+    this.visible = true;
+    const { clientWidth: width, clientHeight: height } = this.host;
+    if (width !== this.width || height !== this.height) {
+      this.width = width;
+      this.height = height;
+      this.root.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    }
+    if (this.root.dataset.phase !== frame.phase)
+      this.root.dataset.phase = frame.phase;
+    const referenceTime = frame.time.toFixed(3);
+    if (this.root.dataset.referenceTime !== referenceTime)
+      this.root.dataset.referenceTime = referenceTime;
     this.line.setAttribute(
       "d",
       inspectionSegments(frame)
@@ -44,13 +65,16 @@ export class InspectionOverlay {
         .join(""),
     );
     this.corners.style.opacity = String(frame.markers);
-    this.corners.innerHTML =
-      frame.markers > 0
-        ? SCAN_CORNERS.map(([x, y]) => {
-            const [px, py] = project(x, y);
-            return `<rect x="${px - 4}" y="${py - 4}" width="8" height="8"/>`;
-          }).join("")
-        : "";
+    if (frame.markers > 0) {
+      this.corners.innerHTML = SCAN_CORNERS.map(([x, y]) => {
+        const [px, py] = project(x, y);
+        return `<rect x="${px - 4}" y="${py - 4}" width="8" height="8"/>`;
+      }).join("");
+      this.cornersVisible = true;
+    } else if (this.cornersVisible) {
+      this.corners.replaceChildren();
+      this.cornersVisible = false;
+    }
     const [cx, cy] = project(
       (SCAN_FROM[0] + SCAN_TO[0]) / 2,
       (SCAN_FROM[1] + SCAN_TO[1]) / 2,
@@ -58,7 +82,7 @@ export class InspectionOverlay {
     this.point.setAttribute("cx", String(cx));
     this.point.setAttribute("cy", String(cy));
     this.point.style.opacity = String(frame.point);
-    this.label.style.opacity = String(enabled && showLabel ? frame.label : 0);
+    this.label.style.opacity = String(showLabel ? frame.label : 0);
     this.label.querySelector<HTMLElement>("strong")!.style.opacity = String(
       frame.labelValue,
     );

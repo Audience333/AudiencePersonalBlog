@@ -1,0 +1,30 @@
+{
+  "record": {
+    "id": "X-025",
+    "title": "KaTeX",
+    "en": "KATEX",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026",
+    "lead": "KaTeX",
+    "clearance": "REFERENCE AREA",
+    "abstract": "快速的数学公式排版库：旧版博客用它在浏览器里渲染行内与块级公式，无需服务端转换。",
+    "body": "",
+    "findings": [
+      "渲染速度快，公式无需图片。",
+      "与 Markdown 渲染链配合成熟。",
+      "本资源库及文章中的数学表达式均可由它呈现。"
+    ],
+    "source": "https://katex.org",
+    "links": [
+      {
+        "label": "官方网站",
+        "url": "https://katex.org"
+      },
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/KaTeX/KaTeX"
+      }
+    ]
+  }
+}

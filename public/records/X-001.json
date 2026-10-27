@@ -1,0 +1,27 @@
+{
+  "record": {
+    "id": "X-001",
+    "title": "莱茵档案终端",
+    "en": "RHINE ARCHIVE TERMINAL",
+    "department": "工程科",
+    "category": "作品",
+    "date": "2026-10",
+    "lead": "观众",
+    "clearance": "PUBLIC AREA",
+    "abstract": "本站：基于开源项目 RhineLabUI 复刻的莱茵生命风格三维档案终端，把博客内容整编成可抽取、解密、阅读的档案阵列，并配有管理后台。",
+    "body": "",
+    "findings": [
+      "三维档案阵列使用 Three.js 实时渲染，开场动画按原 PV 时间轴复刻。",
+      "内容层与管理后台分离：后台改数据，前台运行时加载，无需重新构建。",
+      "五类档案已重构为作品、文章、资源库三列，每类有适配的预览方式。",
+      "整站可静态构建，也可由自带 Node 服务托管并提供 API。"
+    ],
+    "source": "https://github.com/Audience333/AudiencePersonalBlog",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+      }
+    ]
+  }
+}

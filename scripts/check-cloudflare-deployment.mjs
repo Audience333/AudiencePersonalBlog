@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const base = new URL(process.argv[2]);
@@ -13,7 +13,10 @@ if (actual.version !== expected.version || JSON.stringify(actual.files) !== JSON
   throw Error(`Release mismatch: expected ${expected.version}, got ${actual.version}`);
 let next = 0;
 let checked = 0;
-const files = [...expected.files, 'sw.js', 'update.html', 'update.js', 'fonts/novecento/RhineLabNovecento.css'];
+const runtimeFiles = (await readdir(directory, { recursive: true }))
+  .map(path => path.replaceAll('\\', '/'))
+  .filter(path => /^(records\/X-\d{3}\.json|records\/index\.json|archives\/RHINE-LAB-X-\d{3}\.txt)$/.test(path));
+const files = [...expected.files, ...runtimeFiles, 'sw.js', 'update.html', 'update.js', 'fonts/novecento/RhineLabNovecento.css'];
 await Promise.all(Array.from({ length: 6 }, async () => {
   while (next < files.length) {
     const path = files[next++];

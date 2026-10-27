@@ -1,0 +1,27 @@
+{
+  "record": {
+    "id": "X-003",
+    "title": "旧版 Astro 博客系统",
+    "en": "ASTRO BLOG SYSTEM",
+    "department": "工程科",
+    "category": "作品",
+    "date": "2026-09",
+    "lead": "观众",
+    "clearance": "PUBLIC AREA",
+    "abstract": "本站的上一任形态：Astro 服务端渲染的全栈博客，含文章、作品、留言板、弹幕、搜索与管理后台，数据全部保存在单个 SQLite 文件中。",
+    "body": "",
+    "findings": [
+      "Astro 7 + @astrojs/node 独立适配器输出 Node 服务。",
+      "FTS5 三元组索引支撑全文搜索，sanitize-html 过滤正文。",
+      "后台支持文章定时发布、评论审核、图片上传与访问统计。",
+      "2026-10 由本终端接替，其数据完整迁移进档案。"
+    ],
+    "source": "https://github.com/Audience333/AudiencePersonalBlog",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+      }
+    ]
+  }
+}

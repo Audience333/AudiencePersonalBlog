@@ -1,0 +1,27 @@
+{
+  "record": {
+    "id": "X-004",
+    "title": "档案迁移工具",
+    "en": "ARCHIVE MIGRATION TOOL",
+    "department": "工程科",
+    "category": "作品",
+    "date": "2026-10",
+    "lead": "观众",
+    "clearance": "PUBLIC AREA",
+    "abstract": "把旧博客 SQLite 数据整编成莱茵终端档案的导出脚本：读取文章、项目、留言与统计，生成校验过的档案目录与 TXT 下载文件。",
+    "body": "",
+    "findings": [
+      "输入是 data/blog.sqlite 与 content/site.json，输出 content/archives.json。",
+      "Markdown 正文自动整理为纯文本研究记录，损坏数据回退为可读说明。",
+      "结构自检与页面校验共用一套规则，失败时不写入任何文件。",
+      "本站首批档案即由它生成。"
+    ],
+    "source": "https://github.com/Audience333/AudiencePersonalBlog",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+      }
+    ]
+  }
+}

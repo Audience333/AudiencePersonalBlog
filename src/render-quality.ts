@@ -12,6 +12,17 @@ export type RenderQuality = {
 };
 
 export const qualityPresets = {
+  balanced: {
+    scale: 100,
+    pixelRatio: 1,
+    antialias: "off",
+    shadows: 1024,
+    aoSamples: 16,
+    aoResolution: 0.5,
+    depthOfField: 100,
+    transmission: 0.5,
+    anisotropy: 4,
+  },
   performance: {
     scale: 80,
     pixelRatio: 1,
@@ -59,6 +70,7 @@ export const qualityPresets = {
 } as const satisfies Record<string, RenderQuality>;
 export type QualityPreset = keyof typeof qualityPresets;
 export const presetLabels: Record<QualityPreset, string> = {
+  balanced: "均衡",
   performance: "性能",
   original: "原始",
   high: "高",
@@ -82,7 +94,7 @@ export function normalizeQuality(
   value: unknown,
   legacyHigh = true,
 ): RenderQuality {
-  const base = qualityPresets.original;
+  const base = qualityPresets.balanced;
   const v =
     value && typeof value === "object"
       ? (value as Record<string, unknown>)

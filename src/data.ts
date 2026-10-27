@@ -1,4 +1,4 @@
-import content from "../content/archives.json" with { type: "json" };
+import content from "../content/archive-summaries.json" with { type: "json" };
 
 export interface ArchiveLink {
   label: string;
@@ -22,7 +22,13 @@ export interface ArchiveRecord {
   links?: ArchiveLink[];
 }
 
-export const records: ArchiveRecord[] = content.records as ArchiveRecord[];
+export type ArchiveSummary = Omit<
+  ArchiveRecord,
+  "body" | "findings" | "links"
+> &
+  Partial<Pick<ArchiveRecord, "body" | "findings" | "links">>;
+
+export const records: ArchiveSummary[] = content.records as ArchiveSummary[];
 export const categories = ["全部档案", ...content.categories];
 export const archiveColumns = content.columns;
 
@@ -45,32 +51,73 @@ export function fileAtSlot(slot: number) {
   return files[Math.max(0, Math.min(files.length - 1, (slot % 32) - 12))];
 }
 
-/**
- * 运行时加载档案：自带服务在线时从 /api/records 取最新内容（后台改动即时生效），
- * 静态托管或离线时使用打包进来的 content/archives.json 快照。
- * 返回是否加载到了在线数据。
- */
-export async function initRecords(): Promise<boolean> {
-  try {
-    const response = await fetch(`${import.meta.env.BASE_URL}api/records`, {
-      cache: "no-store",
-    });
-    if (!response.ok) return false;
-    const data = (await response.json()) as { records?: ArchiveRecord[] };
-    if (!Array.isArray(data.records) || data.records.length === 0) return false;
-    const valid = data.records.every(
-      (record) =>
-        record &&
-        typeof record.id === "string" &&
-        typeof record.title === "string" &&
-        Array.isArray(record.findings) &&
-        typeof record.category === "string" &&
-        archiveColumns.includes(record.category),
-    );
-    if (!valid) return false;
-    records.splice(0, records.length, ...data.records);
-    return true;
-  } catch {
-    return false;
+const validSummary = (record: ArchiveSummary) =>
+  record &&
+  typeof record.id === "string" &&
+  typeof record.title === "string" &&
+  typeof record.category === "string" &&
+  archiveColumns.includes(record.category);
+
+async function fetchJson<T>(paths: string[]): Promise<T | undefined> {
+  for (const path of paths) {
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}${path}`, {
+        cache: "no-store",
+      });
+      if (response.ok) return (await response.json()) as T;
+    } catch {}
   }
+  return undefined;
+}
+
+/** Load only the directory while starting; full records arrive on demand. */
+export async function initRecords(): Promise<boolean> {
+  const data = await fetchJson<{ records?: ArchiveSummary[] }>([
+    "api/records",
+    "records/index.json",
+  ]);
+  if (!Array.isArray(data?.records) || data.records.length === 0) return false;
+  if (!data.records.every(validSummary)) return false;
+  const loaded = new Map(
+    records.filter((record) => Array.isArray(record.findings)).map((record) => [record.id, record]),
+  );
+  records.splice(
+    0,
+    records.length,
+    ...data.records.map((record) => loaded.get(record.id) ?? record),
+  );
+  return true;
+}
+
+const detailRequests = new Map<string, Promise<ArchiveRecord>>();
+
+export function isRecordLoaded(
+  record: ArchiveSummary,
+): record is ArchiveRecord {
+  return Array.isArray(record.findings);
+}
+
+export function loadRecord(id: string): Promise<ArchiveRecord> {
+  const existing = detailRequests.get(id);
+  if (existing) return existing;
+  const request = (async () => {
+    const data = await fetchJson<{ record?: ArchiveRecord }>([
+      `api/records/${id}`,
+      `records/${id}.json`,
+    ]);
+    const record = data?.record;
+    if (
+      !record ||
+      record.id !== id ||
+      !validSummary(record) ||
+      !Array.isArray(record.findings)
+    )
+      throw new Error("档案内容暂时无法读取，请联网后重试。");
+    const summary = records.find((item) => item.id === id);
+    if (summary) Object.assign(summary, record);
+    return record;
+  })();
+  detailRequests.set(id, request);
+  request.catch(() => detailRequests.delete(id));
+  return request;
 }

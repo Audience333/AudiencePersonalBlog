@@ -1,0 +1,30 @@
+{
+  "record": {
+    "id": "X-019",
+    "title": "Astro",
+    "en": "ASTRO",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026",
+    "lead": "withastro",
+    "clearance": "REFERENCE AREA",
+    "abstract": "旧版博客使用的 Web 框架：以内容为中心的岛屿架构，支持 SSR/SSG，Markdown 体验开箱即用。",
+    "body": "",
+    "findings": [
+      "适合以文章和页面为主、交互较少的站点。",
+      "官方适配器可以把同一套代码输出为 Node 服务。",
+      "本站的上一任形态即由它驱动。"
+    ],
+    "source": "https://astro.build",
+    "links": [
+      {
+        "label": "官方网站",
+        "url": "https://astro.build"
+      },
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/withastro/astro"
+      }
+    ]
+  }
+}

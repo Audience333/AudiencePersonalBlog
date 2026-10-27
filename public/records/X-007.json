@@ -1,0 +1,26 @@
+{
+  "record": {
+    "id": "X-007",
+    "title": "静态资源优化管线",
+    "en": "ASSET PIPELINE",
+    "department": "工程科",
+    "category": "作品",
+    "date": "2026-09",
+    "lead": "观众",
+    "clearance": "INTERNAL AREA",
+    "abstract": "旧版博客的图片优化脚本：压缩图片并生成 WebP 版本，站点头图同时保留 PNG 与 WebP 两种格式。",
+    "body": "",
+    "findings": [
+      "基于 sharp，批量处理 public 目录下的图片资源。",
+      "压缩后显著降低首屏加载体积。",
+      "新终端的头图与图标延续了这套产出。"
+    ],
+    "source": "https://github.com/Audience333/AudiencePersonalBlog",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+      }
+    ]
+  }
+}

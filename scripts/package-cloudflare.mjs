@@ -17,7 +17,10 @@ for (const [weight, font] of Object.entries(fonts)) {
   if (createHash('sha256').update(bytes).digest('hex') !== font.sha256)
     throw Error(`Licensed font checksum mismatch: ${weight}`);
 }
-const files = [...new Set([...metadata.files, 'sw.js', 'pwa-build.json', 'update.html', 'update.js',
+const runtimeFiles = (await readdir(source, { recursive: true }))
+  .map(path => path.replaceAll('\\', '/'))
+  .filter(path => /^(records\/X-\d{3}\.json|records\/index\.json|archives\/RHINE-LAB-X-\d{3}\.txt)$/.test(path));
+const files = [...new Set([...metadata.files, ...runtimeFiles, 'sw.js', 'pwa-build.json', 'update.html', 'update.js',
   'fonts/novecento/RhineLabNovecento.css'])].sort();
 const entries = [];
 for (const path of files) {

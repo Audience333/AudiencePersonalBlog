@@ -17,6 +17,7 @@ type ArchiveRecord = {
   source: string;
   links?: RecordLink[];
 };
+type ArchiveRecordSummary = Omit<ArchiveRecord, "body" | "findings" | "links">;
 
 const COLUMNS = ["作品", "文章", "资源库"];
 const CLEARANCES = [
@@ -29,9 +30,10 @@ const CLEARANCES = [
 ];
 
 const root = document.getElementById("admin-root")!;
-let records: ArchiveRecord[] = [];
+let records: ArchiveRecordSummary[] = [];
 let activeColumn = COLUMNS[0];
 let editingId: string | null = null; // null = 未编辑；"new" = 新增
+let editingRecord: ArchiveRecord | undefined;
 let me: { username: string; role: string } | null = null;
 
 const api = async (url: string, options: RequestInit = {}) => {
@@ -44,7 +46,8 @@ const api = async (url: string, options: RequestInit = {}) => {
     ...options,
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error ?? `请求失败（${response.status}）`);
+  if (!response.ok)
+    throw new Error(data.error ?? `请求失败（${response.status}）`);
   return data;
 };
 
@@ -84,22 +87,26 @@ function renderLogin(error = ""): void {
     <button class="admin-primary" type="submit">登录后台</button>
   </form>`);
   document.getElementById("logout")?.addEventListener("click", logout);
-  document.getElementById("login-form")!.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const username = (form.elements.namedItem("username") as HTMLInputElement).value;
-    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
-    try {
-      await api("/api/login", {
-        method: "POST",
-        body: JSON.stringify({ username, password }),
-      });
-      me = { username, role: "admin" };
-      await boot();
-    } catch (error) {
-      renderLogin((error as Error).message);
-    }
-  });
+  document
+    .getElementById("login-form")!
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target as HTMLFormElement;
+      const username = (form.elements.namedItem("username") as HTMLInputElement)
+        .value;
+      const password = (form.elements.namedItem("password") as HTMLInputElement)
+        .value;
+      try {
+        await api("/api/login", {
+          method: "POST",
+          body: JSON.stringify({ username, password }),
+        });
+        me = { username, role: "admin" };
+        await boot();
+      } catch (error) {
+        renderLogin((error as Error).message);
+      }
+    });
 }
 
 async function logout(): Promise<void> {
@@ -182,57 +189,69 @@ function bindForm(): void {
     editingId = null;
     renderManager();
   });
-  document.getElementById("record-form")!.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const value = (name: string) =>
-      String((form.elements.namedItem(name) as HTMLInputElement).value ?? "").trim();
-    const links = [...linksEditor.querySelectorAll<HTMLInputElement>(".admin-links-row")]
-      .map((row) => {
-        const [label, url] = [...row.querySelectorAll("input")].map((i) => i.value.trim());
-        return { label, url };
-      })
-      .filter((link) => link.label && link.url);
-    const payload = {
-      category: value("category"),
-      title: value("title"),
-      en: value("en"),
-      department: value("department"),
-      date: value("date"),
-      lead: value("lead"),
-      clearance: value("clearance"),
-      abstract: value("abstract"),
-      body: value("body"),
-      source: value("source"),
-      findings: value("findings").split("\n").map((line) => line.trim()).filter(Boolean),
-      links,
-    };
-    try {
-      if (editingId === "new") {
-        await api("/api/records", { method: "POST", body: JSON.stringify(payload) });
-      } else {
-        await api(`/api/records/${editingId}`, {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        });
+  document
+    .getElementById("record-form")!
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.target as HTMLFormElement;
+      const value = (name: string) =>
+        String(
+          (form.elements.namedItem(name) as HTMLInputElement).value ?? "",
+        ).trim();
+      const links = [
+        ...linksEditor.querySelectorAll<HTMLInputElement>(".admin-links-row"),
+      ]
+        .map((row) => {
+          const [label, url] = [...row.querySelectorAll("input")].map((i) =>
+            i.value.trim(),
+          );
+          return { label, url };
+        })
+        .filter((link) => link.label && link.url);
+      const payload = {
+        category: value("category"),
+        title: value("title"),
+        en: value("en"),
+        department: value("department"),
+        date: value("date"),
+        lead: value("lead"),
+        clearance: value("clearance"),
+        abstract: value("abstract"),
+        body: value("body"),
+        source: value("source"),
+        findings: value("findings")
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean),
+        links,
+      };
+      try {
+        if (editingId === "new") {
+          await api("/api/records", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+        } else {
+          await api(`/api/records/${editingId}`, {
+            method: "PUT",
+            body: JSON.stringify(payload),
+          });
+        }
+        toast("已保存，首页刷新后生效");
+        editingId = null;
+        await loadRecords();
+        renderManager();
+      } catch (error) {
+        document.getElementById("form-error")!.textContent = (
+          error as Error
+        ).message;
       }
-      toast("已保存，首页刷新后生效");
-      editingId = null;
-      await loadRecords();
-      renderManager();
-    } catch (error) {
-      document.getElementById("form-error")!.textContent = (error as Error).message;
-    }
-  });
+    });
 }
 
 function renderManager(): void {
   const columnRecords = records.filter((r) => r.category === activeColumn);
-  const editing = editingId
-    ? editingId === "new"
-      ? undefined
-      : records.find((r) => r.id === editingId)
-    : undefined;
+  const editing = editingId === "new" ? undefined : editingRecord;
   const listHtml = editingId
     ? ""
     : `<ul class="admin-list">
@@ -241,7 +260,7 @@ function renderManager(): void {
           (r) => `<li>
           <span class="rid">${r.id}</span>
           <span class="rtitle">${escapeHtml(r.title)}</span>
-          <span class="rmeta">${r.links?.length ? `${r.links.length} 个链接` : escapeHtml(r.en)}</span>
+          <span class="rmeta">${escapeHtml(r.en)}</span>
           <span class="actions">
             <button data-edit="${r.id}">编辑</button>
             <button class="danger" data-delete="${r.id}">删除</button>
@@ -253,7 +272,8 @@ function renderManager(): void {
   root.innerHTML = shell(`
     <div class="admin-tabs">
       ${COLUMNS.map(
-        (c) => `<button data-column="${c}" class="${c === activeColumn ? "active" : ""}">${c}（${records.filter((r) => r.category === c).length}）</button>`,
+        (c) =>
+          `<button data-column="${c}" class="${c === activeColumn ? "active" : ""}">${c}（${records.filter((r) => r.category === c).length}）</button>`,
       ).join("")}
     </div>
     ${editingId ? recordForm(editing) : `<button class="admin-add" id="new-record">＋ 新增「${activeColumn}」档案</button>`}
@@ -275,9 +295,20 @@ function renderManager(): void {
       renderManager();
     });
     document.querySelectorAll("[data-edit]").forEach((button) =>
-      button.addEventListener("click", () => {
-        editingId = (button as HTMLElement).dataset.edit!;
-        renderManager();
+      button.addEventListener("click", async () => {
+        const editButton = button as HTMLButtonElement;
+        const id = editButton.dataset.edit!;
+        editButton.disabled = true;
+        try {
+          const data = await api(`/api/records/${id}`);
+          editingRecord = data.record;
+          editingId = id;
+          renderManager();
+        } catch (error) {
+          toast(`加载档案失败：${(error as Error).message}`);
+        } finally {
+          editButton.disabled = false;
+        }
       }),
     );
     document.querySelectorAll("[data-delete]").forEach((button) =>

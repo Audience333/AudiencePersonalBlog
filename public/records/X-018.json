@@ -1,0 +1,31 @@
+{
+  "record": {
+    "id": "X-018",
+    "title": "RhineLabUI",
+    "en": "RHINELABUI",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026-09",
+    "lead": "LBEILC",
+    "clearance": "REFERENCE AREA",
+    "abstract": "莱茵生命终端界面的非官方复刻项目（TypeScript + Three.js + Vite，MIT 协议）：白底开场、五列循环档案阵列、玻璃解密与 360° 模型查看。本站界面即基于它搭建。",
+    "body": "",
+    "findings": [
+      "三维档案盒模型由 Blender 生成，支持拆解与重组。",
+      "开场动画逐帧复刻原 PV，支持跳过与重播。",
+      "档案数据独立于代码，JSON 即可定制内容。",
+      "第三方素材（明日方舟相关名称与标志等）不在 MIT 授权内。"
+    ],
+    "source": "https://github.com/LBEILC/RhineLabUI",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/LBEILC/RhineLabUI"
+      },
+      {
+        "label": "在线演示",
+        "url": "https://rhine.lubeiluchen.cc"
+      }
+    ]
+  }
+}

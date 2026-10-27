@@ -33,9 +33,16 @@ export function validateContent(content) {
   }
   for (const key of ["categories", "columns"]) {
     const names = content[key];
-    if (!Array.isArray(names) || names.length !== COLUMN_COUNT || !names.every(isText)) {
+    if (
+      !Array.isArray(names) ||
+      names.length !== COLUMN_COUNT ||
+      !names.every(isText)
+    ) {
       errors.push(`${key}：必须包含 ${COLUMN_COUNT} 个非空分类名称`);
-    } else if (new Set(names).size !== COLUMN_COUNT || names.includes("全部档案")) {
+    } else if (
+      new Set(names).size !== COLUMN_COUNT ||
+      names.includes("全部档案")
+    ) {
       errors.push(`${key}：分类名称不能重复，也不能使用“全部档案”`);
     }
   }
@@ -130,6 +137,21 @@ export async function loadContent() {
       ),
     ),
   );
+}
+
+export function recordSummary(record) {
+  return {
+    id: record.id,
+    title: record.title,
+    en: record.en,
+    department: record.department,
+    category: record.category,
+    date: record.date,
+    lead: record.lead,
+    clearance: record.clearance,
+    abstract: record.abstract,
+    source: record.source,
+  };
 }
 
 export function archiveText(r) {

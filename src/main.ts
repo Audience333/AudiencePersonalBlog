@@ -37,6 +37,8 @@ import {
   fileLocation,
   laneCenter,
   initRecords,
+  isRecordLoaded,
+  loadRecord,
   type ArchiveRecord,
 } from "./data";
 import { renderMarkdown } from "./markdown";
@@ -579,7 +581,9 @@ function setMode(next: Mode) {
     }
   }
 }
+let detailRequest = 0;
 function select(index: number, navigation?: ArchiveNavigation) {
+  detailRequest++;
   selected = (index + records.length) % records.length;
   columnMemory[fileLocation(selected).lane] = selected;
   if (mode === "detail") setMode("archive");
@@ -690,11 +694,38 @@ function replayBootAfterModal(forcePreview: boolean) {
   updateSelection();
   if (!forcePreview) audio.play("ui-tick");
 }
+async function loadOpenRecord(id: string, request: number) {
+  try {
+    await loadRecord(id);
+    if (
+      request !== detailRequest ||
+      mode !== "detail" ||
+      records[selected].id !== id
+    )
+      return;
+    renderDetail();
+  } catch (error) {
+    if (
+      request !== detailRequest ||
+      mode !== "detail" ||
+      records[selected].id !== id
+    )
+      return;
+    const panel = document.querySelector<HTMLElement>("#tab-panel");
+    if (panel)
+      panel.innerHTML = `<p role="alert">${escapeHtml((error as Error).message)}</p><button class="solid-button" data-action="retry-record">重试读取</button>`;
+  }
+}
 function openFile() {
   if (!ready) return;
+  const id = records[selected].id;
+  const request = ++detailRequest;
   closeModal(() => {
+    if (request !== detailRequest) return;
     setMode("detail");
     audio.play("open");
+    if (!isRecordLoaded(records[selected]))
+      void loadOpenRecord(id, request);
   });
 }
 function toggleSaved() {
@@ -752,6 +783,14 @@ function renderDetail() {
   tabTransition.cancel();
   const r = records[selected];
   $("#object-id").textContent = "NO." + String(selected + 1).padStart(3, "0");
+  if (!isRecordLoaded(r)) {
+    $("#detail-content").innerHTML = `
+      <div class="detail-kicker"><span>FILE ${r.id}</span><span>${escapeHtml(r.clearance)}</span></div>
+      <h2>${escapeHtml(r.en)}</h2><div class="detail-title-cn">${escapeHtml(r.title)}<span>${escapeHtml(r.category)}</span></div>
+      <div class="detail-rule"></div><div id="tab-panel" class="tab-panel"><p role="status">正在读取档案内容…</p></div>`;
+    $("#detail-content").setAttribute("tabindex", "-1");
+    return;
+  }
   const tabs = detailTabs(r);
   if (!tabs.some((tab) => tab.id === activeTab)) activeTab = "overview";
   // 资源库的链接统一在「获取资源」页签展示；文章提供直达正文入口。
@@ -800,7 +839,8 @@ function overview() {
   return `<div class="panel-label">ABSTRACT / 摘要</div><p>${escapeHtml(records[selected].abstract)}</p>`;
 }
 function setTab(tab: string, sound = true) {
-  if (sound && tab === activeTab) return;
+  const r = records[selected];
+  if (!isRecordLoaded(r) || (sound && tab === activeTab)) return;
   activeTab = tab;
   document.querySelectorAll("[data-tab]").forEach((b) => {
     const active = (b as HTMLElement).dataset.tab === tab;
@@ -808,7 +848,6 @@ function setTab(tab: string, sound = true) {
     b.setAttribute("aria-selected", String(active));
     b.setAttribute("tabindex", active ? "0" : "-1");
   });
-  const r = records[selected];
   const tabButton = $<HTMLButtonElement>(`[data-tab="${tab}"]`);
   const indicator = $(".tab-indicator");
   indicator.style.transition =
@@ -1130,6 +1169,12 @@ document.addEventListener("click", (e) => {
   if (action === "next") stepFile(1);
   if (action === "column-prev") stepColumn(-1);
   if (action === "column-next") stepColumn(1);
+  if (action === "retry-record") {
+    const id = records[selected].id;
+    const request = ++detailRequest;
+    renderDetail();
+    void loadOpenRecord(id, request);
+  }
   if (action === "open") openFile();
   if (action === "model-viewer" && mode === "detail" && scene) {
     const activeScene = scene;
@@ -1400,7 +1445,7 @@ function frame(ms: number) {
     motionActive("pointerParallax"),
   );
   // The calibrated 2D opening fully covers the scene until array entry.
-  if (!viewer?.isOpen && (!cinema || cinema.time >= 21.9))
+  if (!modal && !viewer?.isOpen && (!cinema || cinema.time >= 21.9))
     scene?.update(time, cinema);
   viewer?.update(time);
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
@@ -1703,9 +1748,12 @@ function completeStartup(silent: boolean) {
     }
   }, fade);
   requestAnimationFrame(frame);
-  // Do not compete with entry audio/font downloads. Full offline installation
-  // begins after startup is complete and remains atomic.
-  setTimeout(() => void initPwa(notify), 1500);
+  setTimeout(() => {
+    const install = () => void initPwa(notify);
+    if ("requestIdleCallback" in window)
+      window.requestIdleCallback(install, { timeout: 10_000 });
+    else setTimeout(install, 1);
+  }, 8000);
 }
 updateSelection();
 const customBackground = isWallpaper
