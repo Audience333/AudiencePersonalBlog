@@ -880,7 +880,7 @@ export class ArchiveScene {
     )
       return;
     this.hoverCell = cell ? { ...cell } : null;
-    this.onHover?.(cell ? fileAtCell(cell) : null);
+    this.onHover?.(cell ? (fileAtCell(cell) ?? null) : null);
   }
   private pickCell(x: number, y: number) {
     const r = this.renderer.domElement.getBoundingClientRect();
@@ -952,7 +952,10 @@ export class ArchiveScene {
           lane: Math.round(from.lane + (goal.lane - from.lane) * i / steps),
           row: Math.round(from.row + (goal.row - from.row) * i / steps),
         };
-        if (!sameCell(cell, this.selectedCell)) this.onSelect?.(fileAtCell(cell), cell);
+        if (!sameCell(cell, this.selectedCell)) {
+          const file = fileAtCell(cell);
+          if (file !== undefined) this.onSelect?.(file, cell);
+        }
       }
     } finally {
       this.navigatingDrag = false;
@@ -1125,7 +1128,8 @@ export class ArchiveScene {
           }
         } else if (!moved) {
           const cell = this.pickCell(e.clientX, e.clientY);
-          if (cell) this.onSelect?.(fileAtCell(cell), cell);
+          const file = cell ? fileAtCell(cell) : undefined;
+          if (file !== undefined && cell) this.onSelect?.(file, cell);
         }
       }
       reset();

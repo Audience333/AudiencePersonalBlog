@@ -9,6 +9,20 @@
     "文章",
     "资源库"
   ],
+  "columnMeta": [
+    {
+      "name": "作品",
+      "kind": "works"
+    },
+    {
+      "name": "文章",
+      "kind": "article"
+    },
+    {
+      "name": "资源库",
+      "kind": "resource"
+    }
+  ],
   "records": [
     {
       "id": "X-001",

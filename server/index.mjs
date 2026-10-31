@@ -1,6 +1,7 @@
 // 观众档案终端 · 运行时服务
 // 零依赖 Node HTTP 服务：托管 dist/ 静态文件，提供档案 API、
-// 管理后台接口与 TXT 导出生成。默认监听 0.0.0.0:4321。
+// 管理后台接口（档案、栏目、访问范围、上限）与 TXT 导出生成。
+// 默认监听 0.0.0.0:4321。
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,8 +14,19 @@ import {
   updateRecord,
   deleteRecord,
   seedIfEmpty,
+  getColumns,
+  getColumnNames,
+  getClearances,
+  setClearances,
+  getLimits,
+  setLimits,
+  applyColumns,
 } from "./records-db.mjs";
-import { archiveText } from "../scripts/archive-content.mjs";
+import {
+  archiveText,
+  COLUMN_KINDS,
+  MAX_COLUMNS,
+} from "../scripts/archive-content.mjs";
 import {
   authenticate,
   createSession,
@@ -31,13 +43,12 @@ const PORT = Number(process.env.PORT || 4321);
 // :: 为双栈监听，localhost 解析到 IPv6(::1) 或 IPv4(127.0.0.1) 都能命中，
 // 避免 ::1 被其他进程抢占后浏览器拿到旧服务。
 const HOST = process.env.HOST || "::";
-const COLUMNS = ["作品", "文章", "资源库"];
 
 seedIfEmpty();
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
+  ".js": "text/javascript",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".webmanifest": "application/manifest+json; charset=utf-8",
@@ -128,6 +139,8 @@ function sameOrigin(req) {
 const isText = (v) => typeof v === "string" && v.trim().length > 0;
 function validateRecordInput(body) {
   const errors = [];
+  const limits = getLimits();
+  const columns = getColumnNames();
   const record = {
     category: String(body.category ?? ""),
     title: String(body.title ?? ""),
@@ -135,12 +148,12 @@ function validateRecordInput(body) {
     department: String(body.department ?? ""),
     date: String(body.date ?? ""),
     lead: String(body.lead ?? ""),
-    clearance: String(body.clearance ?? "PUBLIC AREA"),
+    clearance: String(body.clearance ?? "PUBLIC AREA").trim(),
     abstract: String(body.abstract ?? ""),
     source: String(body.source ?? ""),
   };
-  if (!COLUMNS.includes(record.category))
-    errors.push("category 必须是 作品/文章/资源库");
+  if (!columns.includes(record.category))
+    errors.push(`category 必须是现有栏目之一（${columns.join(" / ")}）`);
   for (const key of [
     "title",
     "en",
@@ -151,8 +164,12 @@ function validateRecordInput(body) {
     "source",
   ])
     if (!isText(record[key])) errors.push(`${key} 不能为空`);
+  if (!isText(record.clearance)) errors.push("clearance 不能为空");
+  else if (record.clearance.length > 50)
+    errors.push("clearance 不能超过 50 字");
   const rawBody = String(body.body ?? "").trim();
-  if (rawBody.length > 20000) errors.push("body 正文不能超过 20000 字");
+  if (rawBody.length > limits.bodyMax)
+    errors.push(`body 正文不能超过 ${limits.bodyMax} 字`);
   record.body = rawBody;
   const findings = Array.isArray(body.findings)
     ? body.findings.map((f) => String(f).trim()).filter(Boolean)
@@ -162,7 +179,7 @@ function validateRecordInput(body) {
           .map((f) => f.trim())
           .filter(Boolean)
       : [];
-  if (!findings.length) errors.push("findings 至少一条");
+  record.findings = findings;
   const links = Array.isArray(body.links)
     ? body.links
         .map((l) => ({
@@ -181,9 +198,93 @@ function validateRecordInput(body) {
     typeof body.links !== "string"
   )
     errors.push("links 必须是数组");
-  record.findings = findings;
   record.links = links;
+  // 自定义属性：键值对对象，属性名 30 字以内、值 500 字以内、最多 24 项。
+  const extra = {};
+  if (body.extra !== undefined) {
+    if (
+      typeof body.extra !== "object" ||
+      body.extra === null ||
+      Array.isArray(body.extra)
+    ) {
+      errors.push("extra 必须是对象（属性名 → 属性值）");
+    } else {
+      const entries = Object.entries(body.extra);
+      if (entries.length > 24) errors.push("自定义属性最多 24 项");
+      for (const [key, value] of entries) {
+        const name = key.trim();
+        const text = String(value ?? "").trim();
+        if (!name) continue;
+        if (name.length > 30)
+          errors.push(`属性名 ${name.slice(0, 12)}… 超过 30 字`);
+        else if (text.length > 500)
+          errors.push(`属性 ${name} 的值超过 500 字`);
+        else extra[name] = text;
+      }
+    }
+  }
+  record.extra = extra;
   return { record, errors };
+}
+
+// 栏目变更入参校验：名称唯一、类型合法、改名来源真实存在、
+// 被删除且有档案的栏目必须提供迁移目标。
+function validateColumnsInput(body) {
+  const errors = [];
+  const previous = getColumnNames();
+  const raw = Array.isArray(body.columns) ? body.columns : [];
+  if (raw.length < 1 || raw.length > MAX_COLUMNS)
+    errors.push(`栏目数量必须在 1 至 ${MAX_COLUMNS} 之间`);
+  const columns = raw.map((item) => ({
+    name: String(item?.name ?? "").trim(),
+    kind: String(item?.kind ?? "generic"),
+    previousName: item?.previousName
+      ? String(item.previousName).trim()
+      : undefined,
+  }));
+  const names = columns.map((column) => column.name);
+  if (names.some((name) => !name)) errors.push("栏目名称不能为空");
+  if (names.includes("全部档案")) errors.push("栏目名称不能使用「全部档案」");
+  if (new Set(names).size !== names.length) errors.push("栏目名称不能重复");
+  for (const column of columns) {
+    if (!COLUMN_KINDS.includes(column.kind))
+      errors.push(
+        `栏目「${column.name}」的类型只能是 ${COLUMN_KINDS.join("/")}`,
+      );
+    if (column.previousName && !previous.includes(column.previousName))
+      errors.push(
+        `栏目「${column.name}」的改名来源 ${column.previousName} 不存在`,
+      );
+  }
+  const moves = (Array.isArray(body.moves) ? body.moves : []).map((move) => ({
+    from: String(move?.from ?? "").trim(),
+    to: String(move?.to ?? "").trim(),
+  }));
+  for (const move of moves) {
+    if (!previous.includes(move.from))
+      errors.push(`迁移来源 ${move.from} 不是现有栏目`);
+    if (!names.includes(move.to))
+      errors.push(`迁移目标 ${move.to} 不在新栏目列表中`);
+  }
+  // 模拟改名与迁移后，仍落在新列表之外的档案必须为空。
+  const renamed = new Map(
+    columns
+      .filter((column) => column.previousName)
+      .map((column) => [column.previousName, column.name]),
+  );
+  const moved = new Map(moves.map((move) => [move.from, move.to]));
+  const resolve = (category) =>
+    moved.get(category) ?? renamed.get(category) ?? category;
+  const orphans = new Map();
+  for (const record of listRecords()) {
+    if (names.includes(resolve(record.category))) continue;
+    orphans.set(record.category, (orphans.get(record.category) ?? 0) + 1);
+  }
+  for (const [category, count] of orphans)
+    errors.push(
+      `栏目「${category}」还有 ${count} 份档案，请为它们选择迁移目标`,
+    );
+  return { columns, moves, errors };
 }
 
 function serveStatic(req, res, pathname) {
@@ -237,10 +338,19 @@ const server = http.createServer(async (req, res) => {
     // ── API ──
     const recordMatch = /^\/api\/records(?:\/(X-\d{3}))?$/.exec(pathname);
     if (pathname === "/api/records" && req.method === "GET") {
+      const names = getColumnNames();
       return send(res, 200, {
-        categories: COLUMNS,
-        columns: COLUMNS,
+        categories: names,
+        columns: names,
+        columnMeta: getColumns(),
         records: listRecordSummaries(),
+      });
+    }
+    if (pathname === "/api/meta" && req.method === "GET") {
+      return send(res, 200, {
+        columns: getColumns(),
+        clearances: getClearances(),
+        limits: getLimits(),
       });
     }
     if (recordMatch?.[1] && req.method === "GET") {
@@ -284,6 +394,44 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, user ?? null);
     }
 
+    // ── 站点结构设置（管理员）──
+    if (pathname === "/api/columns" && req.method === "PUT") {
+      if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
+      if (!requireAdmin(req, res)) return;
+      const body = await readBody(req);
+      const { columns, moves, errors } = validateColumnsInput(body);
+      if (errors.length) return send(res, 400, { error: errors.join("；") });
+      try {
+        return send(res, 200, { columns: applyColumns(columns, moves) });
+      } catch (error) {
+        return send(res, 400, { error: error.message });
+      }
+    }
+    if (pathname === "/api/clearances" && req.method === "PUT") {
+      if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
+      if (!requireAdmin(req, res)) return;
+      const body = await readBody(req);
+      const raw = Array.isArray(body.clearances) ? body.clearances : [];
+      const clearances = [
+        ...new Set(raw.map((v) => String(v).trim())),
+      ].filter(Boolean);
+      if (!clearances.length || clearances.length > 24)
+        return send(res, 400, { error: "访问范围选项需要 1 至 24 项" });
+      if (clearances.some((v) => v.length > 30))
+        return send(res, 400, { error: "访问范围选项每项不超过 30 字" });
+      return send(res, 200, { clearances: setClearances(clearances) });
+    }
+    if (pathname === "/api/limits" && req.method === "PUT") {
+      if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
+      if (!requireAdmin(req, res)) return;
+      const body = await readBody(req);
+      try {
+        return send(res, 200, { limits: setLimits(body) });
+      } catch (error) {
+        return send(res, 400, { error: error.message });
+      }
+    }
+
     if (recordMatch) {
       if (!sameOrigin(req)) return send(res, 403, { error: "非法来源" });
       if (req.method === "POST" && !recordMatch[1]) {
@@ -291,11 +439,14 @@ const server = http.createServer(async (req, res) => {
         const body = await readBody(req);
         const { record, errors } = validateRecordInput(body);
         if (errors.length) return send(res, 400, { error: errors.join("；") });
+        const limits = getLimits();
         const columnCount = listRecords().filter(
           (r) => r.category === record.category,
         ).length;
-        if (columnCount >= 12)
-          return send(res, 400, { error: "该列已满（每列最多 12 份）" });
+        if (columnCount >= limits.maxPerColumn)
+          return send(res, 400, {
+            error: `该栏目已满（每列最多 ${limits.maxPerColumn} 份，可在「栏目与规则」调整）`,
+          });
         try {
           return send(res, 201, { record: createRecord(record) });
         } catch (error) {
@@ -318,8 +469,13 @@ const server = http.createServer(async (req, res) => {
       }
       if (req.method === "DELETE" && recordMatch[1]) {
         if (!requireAdmin(req, res)) return;
-        if (listRecords().length <= 9)
-          return send(res, 400, { error: "档案总数不能少于 9 份" });
+        const limits = getLimits();
+        const minTotal = Math.max(
+          1,
+          limits.minPerColumn * getColumnNames().length,
+        );
+        if (listRecords().length <= minTotal)
+          return send(res, 400, { error: `档案总数不能少于 ${minTotal} 份` });
         try {
           if (!deleteRecord(recordMatch[1]))
             return send(res, 404, { error: "档案不存在" });

@@ -1,12 +1,19 @@
 import fs from "node:fs/promises";
-import { loadContent, archiveText, recordSummary } from "./archive-content.mjs";
+import {
+  loadContent,
+  archiveText,
+  recordSummary,
+  normalizeColumnMeta,
+} from "./archive-content.mjs";
 
 // Validate the entire input before writing any downloads.
 const content = await loadContent();
 const { categories, columns, records } = content;
+const columnMeta = normalizeColumnMeta(columns, content.columnMeta);
 const summaries = {
   categories,
   columns,
+  columnMeta,
   records: records.map(recordSummary),
 };
 const writeJson = (url, value) =>
@@ -16,6 +23,12 @@ await writeJson(
   new URL("../content/archive-summaries.json", import.meta.url),
   summaries,
 );
+await writeJson(new URL("../content/stats.json", import.meta.url), {
+  columns: columns.map((name) => ({
+    name,
+    count: records.filter((record) => record.category === name).length,
+  })),
+});
 
 const output = new URL("../public/archives/", import.meta.url);
 await fs.mkdir(output, { recursive: true });

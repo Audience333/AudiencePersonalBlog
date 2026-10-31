@@ -67,3 +67,11 @@
 [data-dark-surface="true"] .archive-atmosphere::before {
   background: linear-gradient(180deg, rgba(var(--theme-paper-rgb), .82), transparent 36%), linear-gradient(0deg, rgba(var(--theme-paper-rgb), .84), transparent 25%), radial-gradient(ellipse at 48% 48%, transparent 42%, rgba(var(--theme-paper-rgb), .48) 90%);
 }
+/* 全屏阅读层的暗色适配 */
+[data-dark-surface="true"] .reader-backdrop { background: rgba(var(--theme-paper-rgb), .85); }
+[data-dark-surface="true"] .reader-modal { color: var(--theme-ink); }
+[data-dark-surface="true"] .reader-modal > .modal-top { background: rgba(var(--theme-paper-rgb), .92); }
+[data-dark-surface="true"] :is(.reader-body, .reader-foot) { color: var(--theme-muted); }
+[data-dark-surface="true"] :is(.reader-head h2, .reader-body h3, .reader-body h4, .reader-body h5, .reader-body strong) { color: var(--theme-ink); }
+[data-dark-surface="true"] .reader-body code { background: var(--theme-field); }
+[data-dark-surface="true"] .reader-foot { border-color: var(--theme-line); }

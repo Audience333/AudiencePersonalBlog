@@ -34,6 +34,7 @@ import {
   categories,
   archiveColumns,
   columnFiles,
+  columnKind,
   fileLocation,
   laneCenter,
   initRecords,
@@ -117,7 +118,7 @@ $("#stage").innerHTML = `
   <div class="powered">POWERED BY <b>RHINE LAB</b><i></i></div>
   <footer class="system-footer"><span><i class="status-light"></i> SESSION AUTHORIZED${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="卸载三维模型，保留 2D 界面">3D 开启</button>' : ""}</span><span>AUDIENCE <i>／</i> <span id="clock">00:00:00</span></span><button data-action="replay" title="重播启动流程">REINITIALIZE ↗</button></footer>
   <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>新版本已就绪</span><button data-pwa-action="update">更新并重启 ↻</button></div>
-  <div id="modal-root"></div><div id="toast" class="toast" role="status"></div>
+  <div id="reader-root"></div><div id="modal-root"></div><div id="toast" class="toast" role="status"></div>
   <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>CONNECTING TO INTERNAL DATABASE</span><i></i></div>
 `;
 
@@ -173,6 +174,12 @@ const tabTransition = new ContentTransition();
 let modalTransition: SurfaceTransition | undefined;
 let modalClosing = false;
 let modalSiblings: { node: HTMLElement; inert: boolean }[] = [];
+// 全屏阅读层：正文页签展开为覆盖整个舞台的阅读视图。
+let readerOpen = false;
+let readerClosing = false;
+let readerTransition: SurfaceTransition | undefined;
+let readerReturnFocus: HTMLElement | null = null;
+let readerSiblings: { node: HTMLElement; inert: boolean }[] = [];
 let pendingDetailFocus = false;
 let bookmarkFeedback: Animation | undefined;
 function readLocal<T>(key: string, fallback: T): T {
@@ -331,7 +338,8 @@ let resumeCell: { lane: number; row: number } | undefined;
 let resumeSelection = -1;
 let viewer: ModelViewer | undefined;
 const accessLog: { id: string; time: string }[] = [];
-const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
+// 在线数据可能带来不同的栏目列表，initRecords 后会重建这份记忆。
+let columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
 // 在线数据替换 records 后，记忆的索引可能失效或指向其他列；用前校验，无效则回到该列首份档案。
 function laneStart(lane: number): number | undefined {
   const remembered = columnMemory[lane];
@@ -760,18 +768,22 @@ function previewUrl(r: ArchiveRecord) {
   return r.links?.find((link) => isLocalUrl(link.url))?.url;
 }
 
-/** 按列特性组装详情页签：文章读正文、资源库取链接、作品可直接打开或内嵌预览。 */
+/** 按栏目类型与内容组装详情页签：正文、资源、预览、研究记录按需提供。 */
 function detailTabs(r: ArchiveRecord) {
+  const kind = columnKind(r.category);
   const tabs: { id: string; label: string }[] = [
     { id: "overview", label: "概述" },
   ];
-  if (r.category === "文章" && r.body?.trim())
-    tabs.push({ id: "article", label: "正文" });
-  if (r.category === "资源库" && r.links?.length)
+  if (r.body?.trim()) tabs.push({ id: "article", label: "正文" });
+  if (kind === "resource" && r.links?.length)
     tabs.push({ id: "resources", label: "获取资源" });
-  if (r.category === "作品" && r.links?.some((link) => isLocalUrl(link.url)))
+  if (kind === "works" && r.links?.some((link) => isLocalUrl(link.url)))
     tabs.push({ id: "preview", label: "在线预览" });
-  tabs.push({ id: "notes", label: r.category === "作品" ? "项目要点" : "研究记录" });
+  if (r.findings.length)
+    tabs.push({
+      id: "notes",
+      label: kind === "works" ? "项目要点" : "研究记录",
+    });
   tabs.push({ id: "history", label: "访问日志" });
   return tabs.map((tab, index) => ({
     ...tab,
@@ -793,16 +805,17 @@ function renderDetail() {
   }
   const tabs = detailTabs(r);
   if (!tabs.some((tab) => tab.id === activeTab)) activeTab = "overview";
-  // 资源库的链接统一在「获取资源」页签展示；文章提供直达正文入口。
+  const kind = columnKind(r.category);
+  // 资源获取类栏目的链接统一在「获取资源」页签展示；有正文的档案提供直达入口。
   const typeLinks =
-    r.category !== "资源库" && r.links?.length
+    kind !== "resource" && r.links?.length
       ? `<div class="detail-links">${r.links
           .map(
             (link) =>
               `<a class="detail-link" href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.label)} <span>↗</span></a>`,
           )
           .join("")}${
-          r.category === "文章" && r.body?.trim()
+          r.body?.trim()
             ? `<button class="detail-link" data-tab="article">READ ARTICLE <span>→</span></button>`
             : ""
         }</div>`
@@ -811,7 +824,12 @@ function renderDetail() {
   <div class="detail-kicker"><span>FILE ${r.id}</span><span>${escapeHtml(r.clearance)}</span></div>
   <h2>${escapeHtml(r.en)}</h2><div class="detail-title-cn">${escapeHtml(r.title)}<span>${escapeHtml(r.category)}</span></div>
   <div class="detail-rule"></div>
-  <dl class="metadata"><div><dt>DEPARTMENT / 科室</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>COLLECTION / 编目范围</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>RELATED / 相关人物</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS / 状态</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "目录访问" : "已归档 · 可读取"}</dd></div></dl>
+  <dl class="metadata"><div><dt>DEPARTMENT / 科室</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>COLLECTION / 编目范围</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>RELATED / 相关人物</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS / 状态</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "目录访问" : "已归档 · 可读取"}</dd></div>${Object.entries(r.extra ?? {})
+    .map(
+      ([key, value]) =>
+        `<div><dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd></div>`,
+    )
+    .join("")}</dl>
   ${typeLinks}
   <div class="detail-tabs" role="tablist">${tabs
     .map(
@@ -840,7 +858,9 @@ function overview() {
 }
 function setTab(tab: string, sound = true) {
   const r = records[selected];
-  if (!isRecordLoaded(r) || (sound && tab === activeTab)) return;
+  // 正文页签允许重复点击：再次点击重新打开全屏阅读层。
+  if (!isRecordLoaded(r) || (sound && tab === activeTab && tab !== "article"))
+    return;
   activeTab = tab;
   document.querySelectorAll("[data-tab]").forEach((b) => {
     const active = (b as HTMLElement).dataset.tab === tab;
@@ -874,7 +894,7 @@ function setTab(tab: string, sound = true) {
           : tab === "preview"
             ? `<div class="panel-label">LIVE PREVIEW / 在线预览</div><iframe class="preview-frame" src="${escapeHtml(previewUrl(r) ?? "")}" sandbox="allow-scripts allow-same-origin allow-forms" title="${escapeHtml(r.title)} 在线预览"></iframe><p class="preview-note">内嵌预览仅对本站页面可用；外部仓库请使用上方链接在新标签页打开。</p>`
             : tab === "notes"
-              ? `<div class="panel-label">${r.category === "作品" ? "PROJECT NOTES" : "RESEARCH NOTES"} / ${r.category === "作品" ? "项目要点" : "研究记录"}</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
+              ? `<div class="panel-label">${columnKind(r.category) === "works" ? "PROJECT NOTES" : "RESEARCH NOTES"} / ${columnKind(r.category) === "works" ? "项目要点" : "研究记录"}</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
               : `<div class="panel-label">ACCESS LOG / 本次访问</div>${accessLog
                   .filter((entry) => entry.id === r.id)
                   .slice(0, 4)
@@ -890,6 +910,8 @@ function setTab(tab: string, sound = true) {
   if (sound) {
     tabTransition.reveal($("#tab-panel"), !motionActive("surfaceTransitions"));
     audio.play("ui-tick");
+    // 主动进入正文页签时展开全屏阅读；程序化恢复页签（sound=false）不展开。
+    if (tab === "article") openReader();
   }
 }
 function notify(message: string) {
@@ -939,6 +961,53 @@ function closeModal(afterClose?: () => void) {
     afterClose?.();
   });
 }
+/** 全屏阅读：点击「正文」页签后把文章展开为覆盖整个舞台的阅读层。 */
+function openReader() {
+  const r = records[selected];
+  if (readerOpen || !isRecordLoaded(r) || !r.body?.trim()) return;
+  readerReturnFocus = document.activeElement as HTMLElement | null;
+  readerSiblings = [...$("#stage").children]
+    .filter(
+      (node): node is HTMLElement =>
+        node instanceof HTMLElement && node.id !== "reader-root",
+    )
+    .map((node) => ({ node, inert: node.inert }));
+  readerSiblings.forEach(({ node }) => (node.inert = true));
+  readerOpen = true;
+  readerClosing = false;
+  $("#reader-root").innerHTML = `<div class="reader-backdrop"><section class="reader-modal" role="dialog" aria-modal="true" aria-label="全文阅读：${escapeHtml(r.title)}"><div class="modal-top"><span>RHINE LAB / FULL TEXT</span><button data-action="close-reader" aria-label="退出全屏阅读">CLOSE <span>×</span></button></div><div class="reader-head"><div class="detail-kicker"><span>FILE ${r.id}</span><span>${escapeHtml(r.clearance)}</span></div><h2>${escapeHtml(r.en)}</h2><div class="detail-title-cn">${escapeHtml(r.title)}<span>${escapeHtml(r.category)}</span></div><div class="detail-rule"></div></div><div class="article-body reader-body">${renderMarkdown(r.body)}</div><div class="reader-foot"><span>ESC 退出全屏阅读</span><span>${escapeHtml(r.department)} ／ ${escapeHtml(r.date)}</span></div></section></div>`;
+  const backdrop = $(".reader-backdrop");
+  // 与弹窗一致：先隐藏再交给过渡，从透明度 0 与位移 12px 进入。
+  backdrop.hidden = true;
+  readerTransition = new SurfaceTransition(backdrop, $(".reader-modal"));
+  readerTransition.show(!motionActive("surfaceTransitions"));
+  audio.play("page-open");
+  backdrop.addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) closeReader();
+  });
+  requestAnimationFrame(() => {
+    if (backdrop.isConnected && !readerClosing)
+      $<HTMLButtonElement>('[data-action="close-reader"]').focus();
+  });
+}
+function closeReader() {
+  if (!readerOpen || readerClosing) return;
+  readerClosing = true;
+  audio.play("page-close");
+  const finish = () => {
+    readerOpen = false;
+    readerClosing = false;
+    $("#reader-root").replaceChildren();
+    readerTransition = undefined;
+    readerSiblings.forEach(({ node, inert }) => (node.inert = inert));
+    readerSiblings = [];
+    readerReturnFocus?.focus({ preventScroll: true });
+    readerReturnFocus = null;
+  };
+  if (readerTransition)
+    readerTransition.hide(!motionActive("surfaceTransitions"), finish);
+  else finish();
+}
 function renderModal() {
   if (!modal) return;
   modalTransition?.dispose();
@@ -948,8 +1017,7 @@ function renderModal() {
   backdrop.hidden = true;
   modalTransition = new SurfaceTransition(backdrop, $(".terminal-modal"));
   modalTransition.show(!motionActive("surfaceTransitions"));
-  if (modal === "settings") updateQualitySummary();
-  if (modal !== "settings") {
+  if (modal === "settings") updateQualitySummary();  if (modal !== "settings") {
     renderResults();
     requestAnimationFrame(() => {
       if (backdrop.isConnected && !modalClosing) $("#archive-search").focus();
@@ -1211,6 +1279,7 @@ document.addEventListener("click", (e) => {
     openModal(action);
   }
   if (action === "close-modal") closeModal();
+  if (action === "close-reader") closeReader();
   if (action === "bookmark") toggleSaved();
   if (action === "reset-search") {
     modal = "search";
@@ -1238,6 +1307,31 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (!started) return;
   if (viewer?.isOpen) return;
+  if (readerOpen) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeReader();
+    } else if (e.key === "Tab") {
+      // 焦点锁在阅读层内，与弹窗一致。
+      const focusables = [
+        ...$("#reader-root").querySelectorAll<HTMLElement>(
+          'a[href],button:not(:disabled),[tabindex="0"]',
+        ),
+      ].filter((el) => el.tabIndex >= 0 && el.getClientRects().length > 0);
+      const first = focusables[0],
+        last = focusables.at(-1);
+      if (first) {
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+    return;
+  }
   if (playground?.active && !modal) {
     if (e.key === "Escape") {
       e.preventDefault();
@@ -1299,9 +1393,16 @@ document.addEventListener("keydown", (e) => {
     ["ArrowLeft", "ArrowRight"].includes(e.key)
   ) {
     e.preventDefault();
-    const tabs = ["overview", "notes", "history"];
+    // 页签按内容动态生成（研究记录可缺省），从实际按钮推导顺序。
+    const tabs = [
+      ...document.querySelectorAll<HTMLElement>(".detail-tabs [data-tab]"),
+    ].map((b) => b.dataset.tab!);
+    if (!tabs.includes(activeTab)) return;
     setTab(
-      tabs[(tabs.indexOf(activeTab) + (e.key === "ArrowRight" ? 1 : 2)) % 3],
+      tabs[
+        (tabs.indexOf(activeTab) + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) %
+          tabs.length
+      ],
     );
     $<HTMLButtonElement>(`[data-tab="${activeTab}"]`).focus();
     return;
@@ -1629,6 +1730,12 @@ async function start() {
     if (isWallpaper) await window.rhineWallpaperPropertiesReady;
     // 自带服务在线时用最新档案（后台改动即时生效），否则用打包快照。
     if (!isWallpaper) await initRecords();
+    // 在线数据的栏目列表可能与构建快照不同：同步列数显示与每列记忆。
+    $("#column-total").textContent = String(archiveColumns.length).padStart(
+      2,
+      "0",
+    );
+    columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
     if (
       !isWallpaper ||
       wallpaperHost()?.properties.load3donstartup?.value !== false

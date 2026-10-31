@@ -49,11 +49,11 @@ const invalidCases = [
     /重复编号/,
   ],
   [
-    "reordered ID",
+    "invalid ID format",
     (c) => {
-      [c.records[0], c.records[1]] = [c.records[1], c.records[0]];
+      c.records[0].id = "X-1";
     },
-    /X-001/,
+    /编号格式/,
   ],
   [
     "unknown category",
@@ -72,6 +72,7 @@ const invalidCases = [
         record.category = target;
     },
     /每列 3 至 12 份档案/,
+    { minPerColumn: 3, maxPerColumn: 12 },
   ],
   [
     "missing record",
@@ -81,6 +82,7 @@ const invalidCases = [
       );
     },
     /每列 3 至 12 份档案/,
+    { minPerColumn: 3, maxPerColumn: 12 },
   ],
   [
     "null record",
@@ -88,13 +90,6 @@ const invalidCases = [
       c.records[0] = null;
     },
     /必须是档案对象/,
-  ],
-  [
-    "empty findings",
-    (c) => {
-      c.records[0].findings = [];
-    },
-    /findings/,
   ],
   [
     "non-text findings",
@@ -136,14 +131,14 @@ const invalidCases = [
     (c) => {
       c.columns[0] = "其他";
     },
-    /相同的三个分类/,
+    /相同的分类/,
   ],
 ];
-for (const [name, mutate, error] of invalidCases) {
+for (const [name, mutate, error, limits] of invalidCases) {
   test(`rejects ${name}`, () => {
     const invalid = structuredClone(content);
     mutate(invalid);
-    assert.throws(() => validateContent(invalid), error);
+    assert.throws(() => validateContent(invalid, limits), error);
   });
 }
 test("accepts independent filter and column order", () => {

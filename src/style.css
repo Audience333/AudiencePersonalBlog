@@ -959,6 +959,84 @@ button {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+/* 全屏阅读层：覆盖整个舞台的正文阅读视图 */
+.reader-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  background: rgba(232, 229, 225, 0.88);
+  backdrop-filter: blur(24px);
+  display: flex;
+  justify-content: center;
+}
+.reader-backdrop[data-transition="closing"] .reader-modal {
+  pointer-events: none;
+}
+.reader-modal {
+  position: relative;
+  width: min(1080px, 100%);
+  height: 100%;
+  padding: 0 60px 48px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  color: #1c1e1a;
+  outline: none;
+}
+/* 顶栏保持不透明：滚动正文不能从栏下透出。 */
+.reader-modal > .modal-top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(232, 229, 225, 0.94);
+  backdrop-filter: blur(8px);
+  padding-top: 30px;
+}
+.reader-head {
+  max-width: 780px;
+  margin: 34px auto 0;
+}
+.reader-head h2 {
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin: 22px 0 10px;
+}
+.reader-body {
+  max-width: 780px;
+  margin: 30px auto 0;
+  font-size: 19.5px;
+  line-height: 2;
+  color: #44433a;
+}
+.reader-body p {
+  margin: 18px 0 0;
+  text-align: justify;
+}
+.reader-body h3 {
+  font-size: 26px;
+  margin: 40px 0 0;
+}
+.reader-body h4,
+.reader-body h5 {
+  font-size: 21px;
+  margin: 30px 0 0;
+}
+.reader-body img {
+  max-width: 100%;
+}
+.reader-foot {
+  max-width: 780px;
+  margin: 56px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid #bdb8ad;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #888074;
+}
 .resource-row {
   display: flex;
   align-items: center;

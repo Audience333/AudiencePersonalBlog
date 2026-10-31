@@ -1,6 +1,9 @@
 // 档案数据层：records 表是站点内容的事实来源，由管理后台维护。
+// 栏目（分类）、访问范围选项与数量上限都保存在 settings 表，可在后台
+// 自由调整。档案编号一经分配永久不变（单调递增、删后不复用），
+// 调整顺序或栏目只改 sort，不改编号，外链与 TXT 地址因此稳定。
 // 首次启动时从 content/archives.json 种子快照导入；任何写操作在
-// 一个事务内完成「修改 → 归一化编号 → 整表校验」，校验通过后
+// 一个事务内完成「修改 → 归一化排序 → 整表校验」，校验通过后
 // 才写快照文件（完整/摘要 JSON + 单篇资源 + TXT + 首页统计），失败则整体回滚，
 // 保证数据库与快照永远一致。
 import fs from "node:fs";
@@ -11,6 +14,10 @@ import {
   validateContent,
   archiveText,
   recordSummary,
+  normalizeColumnMeta,
+  DEFAULT_LIMITS,
+  MAX_PER_COLUMN_LAYOUT,
+  MAX_TOTAL_LAYOUT,
 } from "../scripts/archive-content.mjs";
 
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -54,15 +61,143 @@ db.exec(`
   );
 `);
 
-// 旧库迁移：body 列保存 Markdown 正文（文章列在详情页直接阅读）。
+// 站点结构设置：栏目、访问范围选项、数量与字数上限，全部由后台维护。
+db.exec(`
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+`);
+
+// 旧库迁移：body 列保存 Markdown 正文（文章列在详情页直接阅读）；
+// extra_json 保存档案的自定义属性（键值对，详情页元信息区展示）。
 {
   const columns = db.prepare(`PRAGMA table_info(records)`).all();
   if (!columns.some((column) => column.name === "body")) {
     db.exec(`ALTER TABLE records ADD COLUMN body TEXT NOT NULL DEFAULT ''`);
   }
+  if (!columns.some((column) => column.name === "extra_json")) {
+    db.exec(
+      `ALTER TABLE records ADD COLUMN extra_json TEXT NOT NULL DEFAULT '{}'`,
+    );
+  }
 }
 
-const COLUMNS = ["作品", "文章", "资源库"];
+const DEFAULT_COLUMNS = [
+  { name: "作品", kind: "works" },
+  { name: "文章", kind: "article" },
+  { name: "资源库", kind: "resource" },
+];
+const DEFAULT_CLEARANCES = [
+  "PUBLIC AREA",
+  "INTERNAL AREA",
+  "REFERENCE AREA",
+  "PRIVATE AREA",
+  "RESTRICTED",
+  "PENDING REVIEW",
+];
+
+function getSetting(key, fallback) {
+  const row = db.prepare(`SELECT value FROM settings WHERE key = ?`).get(key);
+  if (!row) return fallback;
+  try {
+    return JSON.parse(row.value);
+  } catch {
+    return fallback;
+  }
+}
+function setSetting(key, value) {
+  db.prepare(
+    `INSERT INTO settings (key, value) VALUES (?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+  ).run(key, JSON.stringify(value));
+}
+
+/**
+ * 分配下一个档案编号：单调递增、绝不复用。
+ * nextId 未初始化时（旧库迁移、种子导入后）从现有最大编号顺延。
+ */
+function allocateId() {
+  const stored = getSetting("nextId", 0);
+  let next = Number.isInteger(stored) ? stored : 0;
+  if (next < 1) {
+    next =
+      Math.max(
+        0,
+        ...db
+          .prepare(`SELECT id FROM records`)
+          .all()
+          .map((row) => {
+            const match = /^X-(\d+)$/.exec(row.id);
+            return match ? Number(match[1]) : 0;
+          }),
+      ) + 1;
+  }
+  setSetting("nextId", next + 1);
+  return `X-${String(next).padStart(3, "0")}`;
+}
+
+/** 栏目列表：[{ name, kind }]，顺序即阵列从左到右的顺序。 */
+export function getColumns() {
+  const stored = getSetting("columns", DEFAULT_COLUMNS);
+  const valid = (Array.isArray(stored) ? stored : []).filter(
+    (column) => column && typeof column.name === "string" && column.name,
+  );
+  return valid.length ? valid : DEFAULT_COLUMNS;
+}
+export function getColumnNames() {
+  return getColumns().map((column) => column.name);
+}
+export function getClearances() {
+  const stored = getSetting("clearances", DEFAULT_CLEARANCES);
+  return Array.isArray(stored) && stored.length ? stored : DEFAULT_CLEARANCES;
+}
+export function getLimits() {
+  return { ...DEFAULT_LIMITS, ...getSetting("limits", {}) };
+}
+
+const clampInt = (value, min, max, fallback) => {
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+};
+
+/** 调整数量与字数上限；先用新上限试校验现有数据，不合法则拒绝。 */
+export function setLimits(partial) {
+  const current = getLimits();
+  const next = {
+    minPerColumn: clampInt(
+      partial?.minPerColumn,
+      0,
+      MAX_PER_COLUMN_LAYOUT,
+      current.minPerColumn,
+    ),
+    maxPerColumn: clampInt(
+      partial?.maxPerColumn,
+      1,
+      MAX_PER_COLUMN_LAYOUT,
+      current.maxPerColumn,
+    ),
+    maxTotal: clampInt(
+      partial?.maxTotal,
+      1,
+      MAX_TOTAL_LAYOUT,
+      current.maxTotal,
+    ),
+    bodyMax: clampInt(partial?.bodyMax, 500, 200000, current.bodyMax),
+  };
+  if (next.maxPerColumn < next.minPerColumn)
+    next.maxPerColumn = next.minPerColumn;
+  // 新上限必须容得下现有档案，否则整体拒绝。
+  validateContent(currentContent(), next);
+  setSetting("limits", next);
+  return next;
+}
+
+export function setClearances(clearances) {
+  setSetting("clearances", clearances);
+  return getClearances();
+}
 
 const rowToRecord = (row) => ({
   id: row.id,
@@ -78,6 +213,7 @@ const rowToRecord = (row) => ({
   findings: JSON.parse(row.findings_json),
   source: row.source,
   links: JSON.parse(row.links_json),
+  extra: JSON.parse(row.extra_json ?? "{}"),
   sort: row.sort,
 });
 
@@ -101,8 +237,8 @@ export function getRecord(id) {
 
 function insertRecord(record) {
   db.prepare(
-    `INSERT INTO records (id, category, title, en, department, date, lead, clearance, abstract, body, findings_json, links_json, source, sort)
-     VALUES (@id, @category, @title, @en, @department, @date, @lead, @clearance, @abstract, @body, @findings_json, @links_json, @source, @sort)`,
+    `INSERT INTO records (id, category, title, en, department, date, lead, clearance, abstract, body, findings_json, links_json, source, extra_json, sort)
+     VALUES (@id, @category, @title, @en, @department, @date, @lead, @clearance, @abstract, @body, @findings_json, @links_json, @source, @extra_json, @sort)`,
   ).run({
     id: record.id,
     category: record.category,
@@ -117,6 +253,7 @@ function insertRecord(record) {
     findings_json: JSON.stringify(record.findings ?? []),
     links_json: JSON.stringify(record.links ?? []),
     source: record.source,
+    extra_json: JSON.stringify(record.extra ?? {}),
     sort: record.sort ?? 0,
   });
 }
@@ -127,12 +264,10 @@ export function createRecord(input) {
       `SELECT COALESCE(MAX(sort), 0) AS n FROM records WHERE category = ?`,
     )
     .get(input.category).n;
-  const tempId = `TMP-${Date.now().toString(36)}${Math.random()
-    .toString(36)
-    .slice(2, 6)}`;
   const finalId = mutateAndSync(() => {
-    insertRecord({ ...input, id: tempId, sort: maxSort + 1 });
-    return tempId;
+    const id = allocateId();
+    insertRecord({ ...input, id, sort: maxSort + 1 });
+    return id;
   });
   return getRecord(finalId);
 }
@@ -145,7 +280,8 @@ export function updateRecord(id, input) {
          category = @category, title = @title, en = @en, department = @department,
          date = @date, lead = @lead, clearance = @clearance, abstract = @abstract,
          body = @body,
-         findings_json = @findings_json, links_json = @links_json, source = @source
+         findings_json = @findings_json, links_json = @links_json, source = @source,
+         extra_json = @extra_json
        WHERE id = @id`,
     ).run({
       id,
@@ -161,6 +297,7 @@ export function updateRecord(id, input) {
       findings_json: JSON.stringify(input.findings ?? []),
       links_json: JSON.stringify(input.links ?? []),
       source: input.source,
+      extra_json: JSON.stringify(input.extra ?? {}),
     });
     return id;
   });
@@ -176,31 +313,65 @@ export function deleteRecord(id) {
   return true;
 }
 
-// 写操作公共流程：mutator 返回临时标记（新增记录的临时 id），
-// 事务内归一化并整表校验，返回标记对应的最终 id。
+/** 站点内容当前形态：供设置变更前做试校验。 */
+function currentContent() {
+  const names = getColumnNames();
+  return {
+    categories: names,
+    columns: names,
+    columnMeta: getColumns(),
+    records: listRecords().map(stripMeta),
+  };
+}
+
+/**
+ * 应用新的栏目列表：先按 previousName 改名，再把被删除栏目的档案
+ * 迁移到 moves 指定的目标，最后落新配置并归一化编号。
+ * 任何一步不合法都会让事务整体回滚。
+ */
+export function applyColumns(nextColumns, moves = []) {
+  const previous = getColumnNames();
+  mutateAndSync(() => {
+    const rename = db.prepare(
+      `UPDATE records SET category = ? WHERE category = ?`,
+    );
+    for (const column of nextColumns) {
+      if (
+        column.previousName &&
+        column.previousName !== column.name &&
+        previous.includes(column.previousName)
+      )
+        rename.run(column.name, column.previousName);
+    }
+    for (const move of moves) rename.run(move.to, move.from);
+    setSetting(
+      "columns",
+      nextColumns.map(({ name, kind }) => ({ name, kind })),
+    );
+    return undefined;
+  });
+  return getColumns();
+}
+
+// 写操作公共流程：mutator 返回新记录的 id（如有），
+// 事务内归一化排序并整表校验；编号在事务内一经分配即固定。
 function mutateAndSync(mutator) {
   const run = db.transaction(() => {
     const marker = mutator();
-    const idMap = normalize();
-    const content = validateContent({
-      categories: COLUMNS,
-      columns: COLUMNS,
-      records: listRecords().map(stripMeta),
-    });
-    return {
-      content,
-      finalId: marker ? (idMap.get(marker) ?? marker) : undefined,
-    };
+    normalizeSort();
+    const content = validateContent(currentContent(), getLimits());
+    return { content, finalId: marker };
   });
   const { content, finalId } = run();
   writeSnapshot(content);
   return finalId;
 }
 
-// 按列顺序重排、重新分配连续编号，返回 旧id → 新id 的映射。
-function normalize() {
+// 按列顺序重排显示顺序（sort）；编号永久稳定，此处绝不做改动。
+function normalizeSort() {
+  const names = getColumnNames();
   const ordered = [
-    ...COLUMNS.flatMap((category) =>
+    ...names.flatMap((category) =>
       db
         .prepare(
           `SELECT * FROM records WHERE category = ? ORDER BY sort ASC, id ASC`,
@@ -208,32 +379,20 @@ function normalize() {
         .all(category)
         .map(rowToRecord),
     ),
-    // 兜底：不属于三列的历史数据排在最后，避免静默丢失。
+    // 兜底：不属于任何栏目的历史数据排在最后，避免静默丢失。
     ...db
-      .prepare(`SELECT * FROM records WHERE category NOT IN (?, ?, ?)`)
-      .all(...COLUMNS)
+      .prepare(
+        `SELECT * FROM records WHERE category NOT IN (${names.map(() => "?").join(",")})`,
+      )
+      .all(...names)
       .map(rowToRecord),
   ];
-  const idMap = new Map();
-  const rename = db.transaction(() => {
-    const changes = [];
+  const update = db.prepare(`UPDATE records SET sort = ? WHERE id = ?`);
+  db.transaction(() => {
     ordered.forEach((record, index) => {
-      const nextId = `X-${String(index + 1).padStart(3, "0")}`;
-      idMap.set(record.id, nextId);
-      if (nextId !== record.id || record.sort !== index + 1)
-        changes.push([nextId, index + 1, record.id]);
+      if (record.sort !== index + 1) update.run(index + 1, record.id);
     });
-    // 编号可能互换，先全部改名到临时值再落最终值，避免主键冲突。
-    const temp = db.prepare(`UPDATE records SET id = ? WHERE id = ?`);
-    changes.forEach(([, , oldId], i) => temp.run(`REN-${i}-${oldId}`, oldId));
-    changes.forEach(([nextId, sort], i) =>
-      db
-        .prepare(`UPDATE records SET id = ?, sort = ? WHERE id = ?`)
-        .run(nextId, sort, `REN-${i}-${changes[i][2]}`),
-    );
-  });
-  rename();
-  return idMap;
+  })();
 }
 
 // 把校验过的内容写入 content/ 快照与 public/ 静态资源。
@@ -244,17 +403,16 @@ function writeSnapshot(content) {
   const summaries = {
     categories: content.categories,
     columns: content.columns,
+    columnMeta: content.columnMeta,
     records: content.records.map(recordSummary),
   };
   writeJson(path.join(root, "content", "archives.json"), content);
   writeJson(path.join(root, "content", "archive-summaries.json"), summaries);
-  const counts = COLUMNS.map(
-    (name) => content.records.filter((r) => r.category === name).length,
-  );
   writeJson(path.join(root, "content", "stats.json"), {
-    works: counts[0],
-    articles: counts[1],
-    resources: counts[2],
+    columns: content.columns.map((name) => ({
+      name,
+      count: content.records.filter((r) => r.category === name).length,
+    })),
   });
   const outDir = path.join(root, "public", "archives");
   fs.rmSync(outDir, { recursive: true, force: true });
@@ -275,7 +433,8 @@ function writeSnapshot(content) {
   }
 }
 
-// 首次启动：records 表为空时从 content/archives.json 导入种子数据。
+// 首次启动：records 表为空时从 content/archives.json 导入种子数据，
+// 同时沿用快照里的栏目配置（含栏目类型）。
 export function seedIfEmpty() {
   const count = db.prepare(`SELECT COUNT(*) AS n FROM records`).get().n;
   if (count > 0) return false;
@@ -286,6 +445,7 @@ export function seedIfEmpty() {
       insertRecord({ ...record, sort: index + 1 });
     });
   })();
+  setSetting("columns", normalizeColumnMeta(seed.columns, seed.columnMeta));
   console.log(
     `已从 content/archives.json 导入 ${seed.records.length} 份档案。`,
   );

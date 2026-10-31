@@ -269,6 +269,48 @@
 .admin-toast.visible {
   opacity: 1;
 }
+.admin-top nav button.active {
+  color: #1c1e1a;
+  font-weight: 600;
+}
+.admin-note {
+  margin: -8px 0 20px;
+  font-size: 13px;
+  color: #777468;
+  line-height: 1.7;
+}
+.admin-editor + .admin-editor {
+  margin-top: 28px;
+}
+.admin-row-deleted input {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.admin-row-deleted select {
+  max-width: 200px;
+}
+.admin-move-label {
+  font-size: 13px;
+  color: #8a3b2e;
+  white-space: nowrap;
+  align-self: center;
+}
+.admin-links-row select {
+  border: 1px solid #a29a8b;
+  background: #f6f4ef;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1c1e1a;
+  max-width: 220px;
+}
+.admin-links-row button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.admin-links-row button.danger {
+  color: #8a3b2e;
+}
 @media (max-width: 720px) {
   .admin-grid {
     grid-template-columns: 1fr;

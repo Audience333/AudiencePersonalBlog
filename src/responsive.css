@@ -99,6 +99,10 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .solid-button { font-size: 11.7px; padding: 0 12px; gap: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .export-button { width: 88px; font-size: 13px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .detail-footnote { gap: 12px; line-height: 1.8; flex-wrap: wrap; }
+:is([data-layout="compact"], [data-layout="portrait"]) .reader-modal { padding: 0 22px 40px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .reader-head { margin-top: 20px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .reader-head h2 { font-size: 30px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .reader-body { font-size: 17.5px; line-height: 1.9; margin-top: 22px; }
 
 /* Portrait keeps the specimen above an independently scrollable document. */
 [data-layout="portrait"] .brand { transform: scale(.42) !important; }

@@ -1,5 +1,16 @@
 {
-  "works": 8,
-  "articles": 9,
-  "resources": 8
+  "columns": [
+    {
+      "name": "作品",
+      "count": 8
+    },
+    {
+      "name": "文章",
+      "count": 9
+    },
+    {
+      "name": "资源库",
+      "count": 8
+    }
+  ]
 }

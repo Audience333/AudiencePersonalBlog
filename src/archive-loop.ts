@@ -26,6 +26,8 @@ export function nearestOccurrence(
 
 export function fileAtCell({ lane, row }: ArchiveCell) {
   const files = columnFiles(wrap(lane, archiveColumns.length));
+  // 栏目允许为空（后台可把每列最少设为 0）：空列没有可选档案。
+  if (!files.length) return undefined;
   return files[wrap(row - 12, files.length)];
 }
 

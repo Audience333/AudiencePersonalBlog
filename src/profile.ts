@@ -9,11 +9,10 @@ type FriendLink = { label: string; labelEn?: string; url: string; note?: string 
 const links = site.links as SiteLink[];
 const friendLinks = site.friendLinks as FriendLink[];
 
-const statItems = [
-  { value: stats.works, label: "Works" },
-  { value: stats.articles, label: "Articles" },
-  { value: stats.resources, label: "Resources" },
-];
+// 统计跟随后台栏目配置：栏目增删改后首页数据同步变化。
+const statItems = (
+  stats.columns as { name: string; count: number }[]
+).map((column) => ({ value: column.count, label: column.name }));
 
 /** 首页进入前的站长档案面板：访客第一眼看到的个人信息。 */
 export function buildProfile(): HTMLElement {
