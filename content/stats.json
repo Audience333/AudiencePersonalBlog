@@ -2,15 +2,15 @@
   "columns": [
     {
       "name": "作品",
-      "count": 8
+      "count": 3
     },
     {
       "name": "文章",
-      "count": 9
+      "count": 3
     },
     {
       "name": "资源库",
-      "count": 8
+      "count": 3
     }
   ]
 }

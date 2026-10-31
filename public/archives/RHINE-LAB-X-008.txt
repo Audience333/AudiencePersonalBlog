@@ -1,21 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-008 / 终端静态服务
-STATIC SERVER
+FILE X-008 / 洛谷
+LUOGU
 
 科室：工程科
-编目范围：2026-10
+编目范围：2026.10.24
 相关人物：观众
-访问范围：INTERNAL AREA
+访问范围：PUBLIC AREA
 
-本站的运行时：零依赖 Node HTTP 服务，既托管构建后的静态文件，也提供档案 API、管理接口与 TXT 导出生成。
+https://www.luogu.com.cn/
 
 研究记录
-1. 静态文件带内容类型与安全头，API 与静态路由分离。
-2. 同一进程内完成鉴权、档案 CRUD 与快照再导出。
-3. 默认监听 4321 端口，可用环境变量覆盖。
+1. https://www.luogu.com.cn/
+
+正文
+https://www.luogu.com.cn/
 
 相关链接
-源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+洛谷：https://www.luogu.com.cn/
 
 设定参考：https://github.com/Audience333/AudiencePersonalBlog
 本文档由站长档案终端生成。

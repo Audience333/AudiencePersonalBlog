@@ -1,22 +1,22 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-003 / 旧版 Astro 博客系统
-ASTRO BLOG SYSTEM
+FILE X-003 / 展演作品
+performanceworks
 
 科室：工程科
-编目范围：2026-09
+编目范围：2026.10.24
 相关人物：观众
 访问范围：PUBLIC AREA
 
-本站的上一任形态：Astro 服务端渲染的全栈博客，含文章、作品、留言板、弹幕、搜索与管理后台，数据全部保存在单个 SQLite 文件中。
+https://audience.ink/performancework/#home
 
 研究记录
-1. Astro 7 + @astrojs/node 独立适配器输出 Node 服务。
-2. FTS5 三元组索引支撑全文搜索，sanitize-html 过滤正文。
-3. 后台支持文章定时发布、评论审核、图片上传与访问统计。
-4. 2026-10 由本终端接替，其数据完整迁移进档案。
+1. https://audience.ink/performancework/#home
+
+正文
+https://audience.ink/performancework/#home
 
 相关链接
-源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
+展演作品：https://audience.ink/performancework/#home
 
 设定参考：https://github.com/Audience333/AudiencePersonalBlog
 本文档由站长档案终端生成。
