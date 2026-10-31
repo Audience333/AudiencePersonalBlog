@@ -1,26 +1,25 @@
 {
   "record": {
     "id": "X-008",
-    "title": "终端静态服务",
-    "en": "STATIC SERVER",
+    "title": "洛谷",
+    "en": "LUOGU",
     "department": "工程科",
-    "category": "作品",
-    "date": "2026-10",
+    "category": "资源库",
+    "date": "2026.10.24",
     "lead": "观众",
-    "clearance": "INTERNAL AREA",
-    "abstract": "本站的运行时：零依赖 Node HTTP 服务，既托管构建后的静态文件，也提供档案 API、管理接口与 TXT 导出生成。",
-    "body": "",
+    "clearance": "PUBLIC AREA",
+    "abstract": "https://www.luogu.com.cn/",
+    "body": "https://www.luogu.com.cn/",
     "findings": [
-      "静态文件带内容类型与安全头，API 与静态路由分离。",
-      "同一进程内完成鉴权、档案 CRUD 与快照再导出。",
-      "默认监听 4321 端口，可用环境变量覆盖。"
+      "https://www.luogu.com.cn/"
     ],
     "source": "https://github.com/Audience333/AudiencePersonalBlog",
     "links": [
       {
-        "label": "源代码仓库",
-        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        "label": "洛谷",
+        "url": "https://www.luogu.com.cn/"
       }
-    ]
+    ],
+    "extra": {}
   }
 }

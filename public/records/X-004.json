@@ -1,27 +1,23 @@
 {
   "record": {
     "id": "X-004",
-    "title": "档案迁移工具",
-    "en": "ARCHIVE MIGRATION TOOL",
-    "department": "工程科",
-    "category": "作品",
-    "date": "2026-10",
+    "title": "网站从这里开始",
+    "en": "THE SITE BEGINS HERE",
+    "department": "编辑部",
+    "category": "文章",
+    "date": "2026-09-17",
     "lead": "观众",
     "clearance": "PUBLIC AREA",
-    "abstract": "把旧博客 SQLite 数据整编成莱茵终端档案的导出脚本：读取文章、项目、留言与统计，生成校验过的档案目录与 TXT 下载文件。",
-    "body": "",
+    "abstract": "这是一篇示例文章，展示如何用 Markdown 发布博客内容。",
+    "body": "你好，欢迎来到观众的个人网站。\n\n这篇文章是整个站点的第一块砖，用来确认一件事：内容真的可以顺利发布、顺利展示。\n\n## 这个站点是什么\n\n这里同时放着我的**编程作品**、**随笔与技术感悟**，以及平时用到的**开源资源**。所有内容都整编成「档案」的形式，选中、解密、阅读，像翻一份份实体卷宗。\n\n## 内容怎么更新\n\n- 登录管理后台，直接在线编辑 Markdown 正文；\n- 保存后前台立即生效，不需要重新构建；\n- 每篇档案都可以导出为 TXT，带完整编号与归档信息。\n\n## 接下来\n\n可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。写作的目标很简单：三个月后的自己回来看，还能看懂当时在做什么、为什么这么做。",
     "findings": [
-      "输入是 data/blog.sqlite 与 content/site.json，输出 content/archives.json。",
-      "Markdown 正文自动整理为纯文本研究记录，损坏数据回退为可读说明。",
-      "结构自检与页面校验共用一套规则，失败时不写入任何文件。",
-      "本站首批档案即由它生成。"
+      "你好，欢迎来到观众的个人网站。",
+      "这是一篇示例文章。管理员登录后台后，可以直接修改这篇内容。",
+      "接下来写什么？",
+      "可以从一次学习经历、一个小项目，或最近读到的有趣文章开始。"
     ],
     "source": "https://github.com/Audience333/AudiencePersonalBlog",
-    "links": [
-      {
-        "label": "源代码仓库",
-        "url": "https://github.com/Audience333/AudiencePersonalBlog"
-      }
-    ]
+    "links": [],
+    "extra": {}
   }
 }

@@ -1,26 +1,25 @@
 {
   "record": {
     "id": "X-007",
-    "title": "静态资源优化管线",
-    "en": "ASSET PIPELINE",
+    "title": "廖雪峰的官方网站",
+    "en": "LIAOXUEFENG",
     "department": "工程科",
-    "category": "作品",
-    "date": "2026-09",
+    "category": "资源库",
+    "date": "2026.10.24",
     "lead": "观众",
-    "clearance": "INTERNAL AREA",
-    "abstract": "旧版博客的图片优化脚本：压缩图片并生成 WebP 版本，站点头图同时保留 PNG 与 WebP 两种格式。",
-    "body": "",
+    "clearance": "PUBLIC AREA",
+    "abstract": "廖雪峰的官方网站",
+    "body": "https://liaoxuefeng.com/index.html",
     "findings": [
-      "基于 sharp，批量处理 public 目录下的图片资源。",
-      "压缩后显著降低首屏加载体积。",
-      "新终端的头图与图标延续了这套产出。"
+      "https://liaoxuefeng.com/index.html"
     ],
     "source": "https://github.com/Audience333/AudiencePersonalBlog",
     "links": [
       {
-        "label": "源代码仓库",
-        "url": "https://github.com/Audience333/AudiencePersonalBlog"
+        "label": "廖雪峰的官方网站",
+        "url": "https://liaoxuefeng.com/index.html"
       }
-    ]
+    ],
+    "extra": {}
   }
 }

@@ -1,26 +1,20 @@
 {
   "record": {
     "id": "X-006",
-    "title": "博客备份脚本",
-    "en": "BACKUP UTILITY",
-    "department": "工程科",
-    "category": "作品",
-    "date": "2026-09",
+    "title": "雨砸吧嘴",
+    "en": "Rain",
+    "department": "文艺部",
+    "category": "文章",
+    "date": "2026.10.23",
     "lead": "观众",
-    "clearance": "INTERNAL AREA",
-    "abstract": "旧版博客的备份工具：为 SQLite 数据库与上传文件创建带时间戳的备份目录，并生成清单文件， successive 备份互不覆盖。",
-    "body": "",
+    "clearance": "PUBLIC AREA",
+    "abstract": "雨砸吧嘴",
+    "body": "雨砸吧嘴，\n教室里只有翻书、写字声\n和“美玉”（同桌）把笔扔起来，\n而后砸向桌面的动静。\n\n右面的窗外是无尽的黑暗，\n窗上有灯杠的倒影，\n好像外婆的眼睛。\n亮亮的眼白带我回到了那天下午，\n再见到了那张头戴黑花的照片。\n\n思绪四处飘荡，\n突然想到今天吃完晚饭，\n我问“湘咏哥”（每天和我一起吃饭的朋友），\n“那个黑云后边是啥子哦？月亮吗？”\n她没回答。\n我低头寻找台阶，\n自言自语似的，\n“现在的月亮出来的真早。”\n现在想来，\n云后面应该是\n外婆探寻而又躲闪的眼睛。\n\n是怕我怪你没有信守承诺、\n早早离去？\n\n不用担心，我不生气了，\n你可以光明正大来看我。\n\n一定是想我了吧？\n真矫情，还没我拎的清……\n\n骗你的，我很想你\n做的醋溜白菜。",
     "findings": [
-      "一条命令导出 blog.sqlite、uploads/ 与 manifest.json。",
-      "按日期命名目录，方便回滚到任意一次备份。",
-      "建议配合定时任务同步到对象存储。"
+      "无"
     ],
     "source": "https://github.com/Audience333/AudiencePersonalBlog",
-    "links": [
-      {
-        "label": "源代码仓库",
-        "url": "https://github.com/Audience333/AudiencePersonalBlog"
-      }
-    ]
+    "links": [],
+    "extra": {}
   }
 }
