@@ -1,22 +1,21 @@
 ﻿RHINE LAB · INTERNAL DATABASE
-FILE X-007 / 廖雪峰的官方网站
-LIAOXUEFENG
+FILE X-007 / 静态资源优化管线
+ASSET PIPELINE
 
 科室：工程科
-编目范围：2026.10.24
+编目范围：2026-09
 相关人物：观众
-访问范围：PUBLIC AREA
+访问范围：INTERNAL AREA
 
-廖雪峰的官方网站
+旧版博客的图片优化脚本：压缩图片并生成 WebP 版本，站点头图同时保留 PNG 与 WebP 两种格式。
 
 研究记录
-1. https://liaoxuefeng.com/index.html
-
-正文
-https://liaoxuefeng.com/index.html
+1. 基于 sharp，批量处理 public 目录下的图片资源。
+2. 压缩后显著降低首屏加载体积。
+3. 新终端的头图与图标延续了这套产出。
 
 相关链接
-廖雪峰的官方网站：https://liaoxuefeng.com/index.html
+源代码仓库：https://github.com/Audience333/AudiencePersonalBlog
 
 设定参考：https://github.com/Audience333/AudiencePersonalBlog
 本文档由站长档案终端生成。

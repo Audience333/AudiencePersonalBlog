@@ -1,0 +1,27 @@
+{
+  "record": {
+    "id": "X-022",
+    "title": "better-sqlite3",
+    "en": "BETTER-SQLITE3",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026",
+    "lead": "WiseLibs",
+    "clearance": "REFERENCE AREA",
+    "abstract": "Node.js 的 SQLite 同步驱动：事务与预处理语句性能优秀，本站后台的档案读写都由它完成。",
+    "body": "",
+    "findings": [
+      "同步 API 让服务端代码更直白。",
+      "事务批量写入速度快，适合导入与重建索引。",
+      "与 Node 24 兼容良好，无需额外守护进程。"
+    ],
+    "source": "https://github.com/WiseLibs/better-sqlite3",
+    "links": [
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/WiseLibs/better-sqlite3"
+      }
+    ],
+    "extra": {}
+  }
+}

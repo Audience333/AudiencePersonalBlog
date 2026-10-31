@@ -1,0 +1,23 @@
+﻿RHINE LAB · INTERNAL DATABASE
+FILE X-018 / RhineLabUI
+RHINELABUI
+
+科室：资源部
+编目范围：2026-09
+相关人物：LBEILC
+访问范围：REFERENCE AREA
+
+莱茵生命终端界面的非官方复刻项目（TypeScript + Three.js + Vite，MIT 协议）：白底开场、五列循环档案阵列、玻璃解密与 360° 模型查看。本站界面即基于它搭建。
+
+研究记录
+1. 三维档案盒模型由 Blender 生成，支持拆解与重组。
+2. 开场动画逐帧复刻原 PV，支持跳过与重播。
+3. 档案数据独立于代码，JSON 即可定制内容。
+4. 第三方素材（明日方舟相关名称与标志等）不在 MIT 授权内。
+
+相关链接
+源代码仓库：https://github.com/LBEILC/RhineLabUI
+在线演示：https://rhine.lubeiluchen.cc
+
+设定参考：https://github.com/LBEILC/RhineLabUI
+本文档由站长档案终端生成。

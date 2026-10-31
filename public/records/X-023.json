@@ -1,0 +1,31 @@
+{
+  "record": {
+    "id": "X-023",
+    "title": "Caddy",
+    "en": "CADDY",
+    "department": "资源部",
+    "category": "资源库",
+    "date": "2026",
+    "lead": "caddyserver",
+    "clearance": "REFERENCE AREA",
+    "abstract": "自带 HTTPS 的 Web 服务器：配置简短，自动申请与续期证书，旧版博客曾由它反向代理。",
+    "body": "",
+    "findings": [
+      "一句配置即可获得自动 HTTPS。",
+      "同时胜任静态托管与反向代理。",
+      "个人站点用它替代 Nginx 省心很多。"
+    ],
+    "source": "https://caddyserver.com",
+    "links": [
+      {
+        "label": "官方网站",
+        "url": "https://caddyserver.com"
+      },
+      {
+        "label": "源代码仓库",
+        "url": "https://github.com/caddyserver/caddy"
+      }
+    ],
+    "extra": {}
+  }
+}
