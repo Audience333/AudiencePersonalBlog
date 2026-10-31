@@ -15,8 +15,10 @@ const requiredFields = [
 
 // 栏目类型决定详情页的呈现方式：
 // works 可在线预览，article 渲染 Markdown 正文，resource 汇总下载链接，
-// generic 只按内容有无展示页签。
+// generic 只按内容有无展示页签。四种是预设；也允许自由输入自定义类型
+// （1–20 字），自定义类型在前台一律按 generic 方式呈现。
 export const COLUMN_KINDS = ["works", "article", "resource", "generic"];
+export const MAX_COLUMN_KIND_LENGTH = 20;
 // 阵列物理上是 9 条通道、每列编号行 12–31，因此栏目数与每列档案数
 // 仍有布局上限，但默认值已放开到上限本身，可在后台继续调低。
 export const MAX_COLUMNS = 9;
@@ -64,7 +66,8 @@ export function normalizeColumnMeta(columns, meta) {
             (item) =>
               item &&
               isText(item.name) &&
-              COLUMN_KINDS.includes(item.kind),
+              isText(item.kind) &&
+              item.kind.length <= MAX_COLUMN_KIND_LENGTH,
           )
           .map((item) => [item.name, item.kind])
       : [],
@@ -116,12 +119,13 @@ export function validateContent(content, limits = DEFAULT_LIMITS) {
           item &&
           typeof item === "object" &&
           columns.includes(item.name) &&
-          COLUMN_KINDS.includes(item.kind),
+          isText(item.kind) &&
+          item.kind.length <= MAX_COLUMN_KIND_LENGTH,
       ) ||
       new Set(meta.map((item) => item?.name)).size !== meta.length
     ) {
       errors.push(
-        `columnMeta：必须为每个分类各提供一项，kind 只能是 ${COLUMN_KINDS.join("/")}`,
+        `columnMeta：必须为每个分类各提供一项，kind 为 1 至 ${MAX_COLUMN_KIND_LENGTH} 字（预设 ${COLUMN_KINDS.join("/")}，可自定义）`,
       );
     }
   }

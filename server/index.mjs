@@ -24,7 +24,7 @@ import {
 } from "./records-db.mjs";
 import {
   archiveText,
-  COLUMN_KINDS,
+  MAX_COLUMN_KIND_LENGTH,
   MAX_COLUMNS,
 } from "../scripts/archive-content.mjs";
 import {
@@ -247,9 +247,9 @@ function validateColumnsInput(body) {
   if (names.includes("全部档案")) errors.push("栏目名称不能使用「全部档案」");
   if (new Set(names).size !== names.length) errors.push("栏目名称不能重复");
   for (const column of columns) {
-    if (!COLUMN_KINDS.includes(column.kind))
+    if (!column.kind || column.kind.length > MAX_COLUMN_KIND_LENGTH)
       errors.push(
-        `栏目「${column.name}」的类型只能是 ${COLUMN_KINDS.join("/")}`,
+        `栏目「${column.name}」的类型需要 1 至 ${MAX_COLUMN_KIND_LENGTH} 个字符（预设 works/article/resource/generic，可自由输入）`,
       );
     if (column.previousName && !previous.includes(column.previousName))
       errors.push(
@@ -407,6 +407,23 @@ const server = http.createServer(async (req, res) => {
       try {
         return send(res, 200, { columns: applyColumns(columns, moves) });
       } catch (error) {
+        // 新增的栏目暂时为空、被「每列最少」拦截时，自动放开空栏目限制
+        // 并重试一次，让「新增栏目」永远可以直接保存。
+        const addedNew = columns.some(
+          (column) =>
+            !getColumnNames().includes(column.previousName ?? column.name),
+        );
+        if (addedNew && /每列 \d+ 至 \d+ 份档案，实际 0/.test(error.message)) {
+          try {
+            setLimits({ minPerColumn: 0 });
+            return send(res, 200, {
+              columns: applyColumns(columns, moves),
+              note: "已自动允许空栏目（每列最少调整为 0，可在上限面板改回）",
+            });
+          } catch (retryError) {
+            return send(res, 400, { error: retryError.message });
+          }
+        }
         return send(res, 400, { error: error.message });
       }
     }

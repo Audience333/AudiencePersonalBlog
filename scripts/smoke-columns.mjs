@@ -23,10 +23,11 @@ console.log("初始栏目:", beforeNames.join(" / "), "档案:", beforeIds.lengt
 // 0. 允许空栏目
 setLimits({ minPerColumn: 0 });
 
-// 1. 新增第 4 列（通用类型，允许暂为空列）
-applyColumns([...getColumns(), { name: "随笔", kind: "generic" }]);
+// 1. 新增第 4 列（自由输入的自定义类型，允许暂为空列）
+applyColumns([...getColumns(), { name: "随笔", kind: "自定义类型" }]);
 assert.deepEqual(getColumnNames(), [...beforeNames, "随笔"]);
-console.log("✔ 新增空栏目「随笔」");
+assert.equal(getColumns().at(-1).kind, "自定义类型");
+console.log("✔ 新增空栏目「随笔」（自定义类型）");
 
 // 2. 在新栏目里新增一份临时档案
 const temp = createRecord({

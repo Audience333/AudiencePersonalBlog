@@ -441,13 +441,15 @@ function collectColumnDrafts(): void {
       const index = Number(row.dataset.index);
       const draft = columnDrafts[index];
       if (!draft) return;
-      const [nameInput, kindSelect, moveSelect] = [
-        ...row.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
-          "input, select",
-        ),
-      ];
-      draft.name = nameInput.value;
-      draft.kind = kindSelect.value;
+      const nameInput = row.querySelector<HTMLInputElement>("input");
+      const kindInput = row.querySelector<HTMLInputElement>(
+        'input[list="kind-presets"]',
+      );
+      const moveSelect = row.querySelector<HTMLSelectElement>(
+        "select[data-move]",
+      );
+      if (nameInput) draft.name = nameInput.value;
+      if (kindInput) draft.kind = kindInput.value;
       if (moveSelect) draft.moveTo = moveSelect.value;
     });
 }
@@ -457,7 +459,13 @@ function renderSettings(): void {
   root.innerHTML = shell(`
     <section class="admin-editor">
       <h3>栏目（阵列列）</h3>
-      <p class="admin-note">栏目即首页档案阵列的列，可自由增删、改名、排序；1 至 9 列。改名与删除会自动迁移或重排档案，保存后首页刷新生效。</p>
+      <p class="admin-note">栏目即首页档案阵列的列，可自由增删、改名、排序；1 至 9 列。类型可从预设中选，也可以自由输入（自定义类型按「通用」呈现）。新增的空栏目可直接保存，系统会自动允许空列。改名与删除会自动迁移或重排档案，保存后首页刷新生效。</p>
+      <datalist id="kind-presets">
+        ${KIND_OPTIONS.map(
+          (option) =>
+            `<option value="${option.value}">${option.label}</option>`,
+        ).join("")}
+      </datalist>
       <div id="columns-editor">
         ${columnDrafts
           .map((draft, index) => {
@@ -479,10 +487,7 @@ function renderSettings(): void {
             }
             return `<div class="admin-links-row" data-index="${index}">
               <input placeholder="栏目名称" value="${escapeHtml(draft.name)}" />
-              <select>${KIND_OPTIONS.map(
-                (option) =>
-                  `<option value="${option.value}" ${option.value === draft.kind ? "selected" : ""}>${option.label}</option>`,
-              ).join("")}</select>
+              <input list="kind-presets" placeholder="类型（可自由输入）" title="预设：works 作品 / article 文章 / resource 资源库 / generic 通用；自定义类型按通用呈现" value="${escapeHtml(draft.kind)}" />
               <button type="button" data-move-up="${index}" ${index === 0 ? "disabled" : ""} title="上移">↑</button>
               <button type="button" data-move-down="${index}" ${index === moveTargets.length - 1 ? "disabled" : ""} title="下移">↓</button>
               <button type="button" class="danger" data-delete-column="${index}" ${columnDrafts.filter((d) => !d.deleted).length <= 1 ? "disabled" : ""} title="删除栏目">删除</button>
@@ -618,7 +623,7 @@ function renderSettings(): void {
         body: JSON.stringify(payload),
       });
       meta.columns = data.columns;
-      toast("栏目已保存，首页刷新后生效");
+      toast(data.note ? `${data.note}；栏目已保存` : "栏目已保存，首页刷新后生效");
       await loadRecords();
       resetSettingsDrafts();
       renderSettings();
