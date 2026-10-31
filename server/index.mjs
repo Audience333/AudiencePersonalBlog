@@ -307,8 +307,11 @@ function serveStatic(req, res, pathname) {
   if (!fs.existsSync(file) || !fs.statSync(file).isFile())
     return send(res, 404, { error: "not found" });
   const ext = path.extname(file).toLowerCase();
+  // Service Worker 必须 no-cache：浏览器每次导航都重新校验，
+  // 否则长缓存会让旧 SW 卡死，新部署迟迟不生效。
+  const isServiceWorker = path.basename(file) === "sw.js";
   const cache =
-    ext === ".html"
+    ext === ".html" || isServiceWorker
       ? "no-cache"
       : /\.(js|css|woff2|glb|png|jpg|webp|svg|ico)$/.test(ext)
         ? "public, max-age=31536000, immutable"
