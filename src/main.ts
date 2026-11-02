@@ -66,7 +66,7 @@ import {
 } from "./wallpaper";
 import "./startup.css";
 import "./wallpaper.css";
-import { buildProfile } from "./profile";
+import { buildProfile, syncProfileStats } from "./profile";
 import { Workbench } from "./workbench";
 let workbench: Workbench | undefined;
 import { ArchivePlayground } from "./archive-playground";
@@ -1736,6 +1736,8 @@ async function start() {
       "0",
     );
     columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
+    // 栏目档案数可能与构建快照不同：首页统计跟实际内容走。
+    syncProfileStats();
     if (
       !isWallpaper ||
       wallpaperHost()?.properties.load3donstartup?.value !== false

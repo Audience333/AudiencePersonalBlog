@@ -1,7 +1,7 @@
 import site from "../content/site.json" with { type: "json" };
-import stats from "../content/stats.json" with { type: "json" };
 import { escapeHtml } from "./html";
 import { assetUrl } from "./asset-url";
+import { records, archiveColumns } from "./data";
 import "./profile.css";
 
 type SiteLink = { label: string; url: string };
@@ -9,10 +9,27 @@ type FriendLink = { label: string; labelEn?: string; url: string; note?: string 
 const links = site.links as SiteLink[];
 const friendLinks = site.friendLinks as FriendLink[];
 
-// 统计跟随后台栏目配置：栏目增删改后首页数据同步变化。
-const statItems = (
-  stats.columns as { name: string; count: number }[]
-).map((column) => ({ value: column.count, label: column.name }));
+// 统计直接按运行时档案数组统计：构建快照先渲染一版，initRecords()
+// 从在线 API 拉到最新数据后再调用 syncProfileStats() 刷新，
+// 后台增删档案后首页数字随之更新，无需重新构建。
+function statItems() {
+  return archiveColumns.map((name) => ({
+    value: records.filter((record) => record.category === name).length,
+    label: name,
+  }));
+}
+
+/** 按当前 records / archiveColumns 刷新首页栏目标统计。 */
+export function syncProfileStats(): void {
+  const container = document.getElementById("profile-stats");
+  if (!container) return;
+  container.innerHTML = statItems()
+    .map(
+      (item) =>
+        `<div><b>${item.value}</b><span>${escapeHtml(item.label)}</span></div>`,
+    )
+    .join("");
+}
 
 /** 首页进入前的站长档案面板：访客第一眼看到的个人信息。 */
 export function buildProfile(): HTMLElement {
@@ -47,11 +64,11 @@ export function buildProfile(): HTMLElement {
         )
         .join("")}
     </div>
-    <div class="profile-stats">
-      ${statItems
+    <div class="profile-stats" id="profile-stats">
+      ${statItems()
         .map(
           (item) =>
-            `<div><b>${item.value}</b><span>${item.label}</span></div>`,
+            `<div><b>${item.value}</b><span>${escapeHtml(item.label)}</span></div>`,
         )
         .join("")}
     </div>`;
